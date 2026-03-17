@@ -1,0 +1,8 @@
+//
+// Created by SyperOlao on 17.03.2026.
+//
+
+#ifndef PINGPONG_MATHHELPERS_H
+#define PINGPONG_MATHHELPERS_H
+
+#endif //PINGPONG_MATHHELPERS_H
