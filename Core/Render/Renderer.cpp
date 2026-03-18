@@ -11,7 +11,7 @@
 #include <vector>
 #include <format>
 
-#include "Vertex.h"
+#include "../Graphics/Vertex.h"
 
 namespace {
     void ThrowIfFailed(const HRESULT hr, const char *message) {

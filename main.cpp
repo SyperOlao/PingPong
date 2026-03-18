@@ -3,23 +3,28 @@
 
 #include <Windows.h>
 #include <exception>
+#include "Core/App/Application.h"
+#include "Game/Pong/PongGame.h"
 
 int main()
 {
     try
     {
-        std::cout << "[LOG] main started\n";
+        HINSTANCE__ *const hInstance = GetModuleHandleW(nullptr);
 
-        HINSTANCE hInstance = GetModuleHandleW(nullptr);
-        std::cout << "[LOG] got module handle\n";
+        Application app(
+            hInstance,
+            std::make_unique<PongGame>(),
+            ApplicationDesc{
+                .Title = L"Pong DX11",
+                .ClientWidth = 1280,
+                .ClientHeight = 720,
+                .VSync = true,
+                .ClearColor = Color(0.05f, 0.05f, 0.08f, 1.0f)
+            }
+        );
 
-        Application app(hInstance);
-        std::cout << "[LOG] Application constructed\n";
-
-        const int result = app.Run();
-        std::cout << "[LOG] app.Run() finished with code: " << result << "\n";
-
-        return result;
+        return app.Run();
     }
     catch (const std::exception& exception)
     {

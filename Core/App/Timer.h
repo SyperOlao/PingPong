@@ -5,24 +5,25 @@
 #ifndef PINGPONG_TIMER_H
 #define PINGPONG_TIMER_H
 
-class Timer
-{
+class Timer {
 public:
     Timer();
 
     void Reset();
+
     void Tick();
 
     [[nodiscard]] float GetDeltaTime() const noexcept;
+
     [[nodiscard]] double GetTotalTime() const noexcept;
 
 private:
-    long long m_frequency {};
-    long long m_startCounter {};
-    long long m_previousCounter {};
-    long long m_currentCounter {};
+    long long m_frequency{0};
+    long long m_startCounter{0};
+    long long m_previousCounter{0};
+    long long m_currentCounter{0};
 
-    float m_deltaTime {0.0f};
+    float m_deltaTime{0.0f};
 };
 
 

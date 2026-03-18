@@ -4,22 +4,69 @@
 
 #include "Application.h"
 
-#include "Core/Common/Constants.h"
+#include "AppContext.h"
+#include "Core/Graphics/GraphicsDevice.h"
+#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include <stdexcept>
+#include <utility>
 
-Application::Application(HINSTANCE__ *const hInstance)
+Application::Application(
+    HINSTANCE__ *const hInstance,
+    std::unique_ptr<IGame> game,
+    ApplicationDesc desc
+)
     : m_hInstance(hInstance)
+    , m_desc(std::move(desc))
+    , m_game(std::move(game))
 {
+    if (m_hInstance == nullptr)
+    {
+        throw std::invalid_argument("Application requires a valid HINSTANCE.");
+    }
+
+    if (!m_game)
+    {
+        throw std::invalid_argument("Application requires a valid IGame instance.");
+    }
+
     Initialize();
 }
 
 void Application::Initialize()
 {
-    constexpr int windowWidth = Constants::WindowWidth;
-    constexpr int windowHeight = Constants::WindowHeight;
+    if (m_desc.ClientWidth <= 0 || m_desc.ClientHeight <= 0)
+    {
+        throw std::invalid_argument("ApplicationDesc must contain positive client dimensions.");
+    }
 
-    m_window.Initialize(m_hInstance, windowWidth, windowHeight, L"Pong DX11");
-    m_renderer.Initialize(m_window.GetHandle(), m_window.GetWidth(), m_window.GetHeight());
-    m_game.Initialize(m_window.GetWidth(), m_window.GetHeight());
+    m_window.Initialize(
+        m_hInstance,
+        m_desc.ClientWidth,
+        m_desc.ClientHeight,
+        m_desc.Title
+    );
+
+    InputSystem::Initialize(m_window.GetHandle());
+
+    m_graphics.Initialize(
+        m_window.GetHandle(),
+        m_window.GetWidth(),
+        m_window.GetHeight()
+    );
+
+    m_shapeRenderer2D.Initialize(m_graphics);
+
+    m_context.MainWindow = &m_window;
+    m_context.Input = &m_input;
+    m_context.Graphics = &m_graphics;
+    m_context.Shape2D = &m_shapeRenderer2D;
+
+    if (!m_context.IsValid())
+    {
+        throw std::runtime_error("Application failed to build a valid AppContext.");
+    }
+
+    m_game->Initialize(m_context);
     m_timer.Reset();
 }
 
@@ -34,23 +81,24 @@ int Application::Run()
         }
 
         m_timer.Tick();
-        Update();
+
+        Update(m_timer.GetDeltaTime());
         Render();
     }
 
+    m_game->Shutdown(m_context);
     return 0;
 }
 
-void Application::Update()
+void Application::Update(const float deltaTime)
 {
     m_input.Update();
-    m_game.Update(m_timer.GetDeltaTime());
+    m_game->Update(m_context, deltaTime);
 }
 
-void Application::Render() const {
-    constexpr Color clearColor {0.05f, 0.05f, 0.08f, 1.0f};
-
-    m_renderer.BeginFrame(clearColor);
-    m_game.Render(m_renderer);
-    m_renderer.EndFrame();
+void Application::Render()
+{
+    m_graphics.BeginFrame(m_desc.ClearColor);
+    m_game->Render(m_context);
+    m_graphics.EndFrame(m_desc.VSync);
 }

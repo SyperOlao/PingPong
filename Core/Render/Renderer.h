@@ -8,7 +8,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <string_view>
-#include "Color.h"
+#include "../Graphics/Color.h"
 
 class Renderer {
 public:

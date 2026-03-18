@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 18.03.2026.
+//
+
+#ifndef MYPROJECT_RENDERRECTCOMPONENT_H
+#define MYPROJECT_RENDERRECTCOMPONENT_H
+
+
+class RenderRectComponent {
+};
+
+
+#endif //MYPROJECT_RENDERRECTCOMPONENT_H

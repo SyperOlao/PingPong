@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 18.03.2026.
+//
+
+#ifndef MYPROJECT_PONGCOLLISIONSYSTEM_H
+#define MYPROJECT_PONGCOLLISIONSYSTEM_H
+
+
+class PongCollisionSystem {
+};
+
+
+#endif //MYPROJECT_PONGCOLLISIONSYSTEM_H
