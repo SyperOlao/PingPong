@@ -72,6 +72,9 @@ target_include_directories(PingPong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+file(COPY ${CMAKE_SOURCE_DIR}/Core/Shaders
+        DESTINATION ${CMAKE_BINARY_DIR}/Core)
+
 target_link_libraries(PingPong PRIVATE
         d3d11
         dxgi
