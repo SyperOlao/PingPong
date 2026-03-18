@@ -1,6 +1,13 @@
 //
 // Created by SyperOlao on 17.03.2026.
 //
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
 #include "CollisionSystem.h"
 #include <cmath>
@@ -32,13 +39,13 @@ CollisionManifold CollisionSystem::FindCollision(const AABB &a, const AABB &b) n
 
     if (overlapX < overlapY) {
         manifold.Penetration = overlapX;
-        manifold.Normal = Vector2(
+        manifold.Normal = DirectX::SimpleMath::Vector2(
             deltaX < 0.0f ? -1.0f : 1.0f,
             0.0f
         );
     } else {
         manifold.Penetration = overlapY;
-        manifold.Normal = Vector2(
+        manifold.Normal = DirectX::SimpleMath::Vector2(
             0.0f,
             deltaY < 0.0f ? -1.0f : 1.0f
         );
@@ -48,13 +55,13 @@ CollisionManifold CollisionSystem::FindCollision(const AABB &a, const AABB &b) n
 }
 
 void CollisionSystem::ReflectAgainstNormal(
-    Vector2 &velocity,
-    const Vector2 &normal
+    DirectX::SimpleMath::Vector2 &velocity,
+    const DirectX::SimpleMath::Vector2 &normal
 ) noexcept {
     velocity = MathHelpers::Reflect(velocity, normal);
 }
 
-Vector2 CollisionSystem::BuildPaddleBounceVelocity(
+DirectX::SimpleMath::Vector2 CollisionSystem::BuildPaddleBounceVelocity(
     const AABB &ball,
     const AABB &paddle,
     const float speed,
@@ -74,7 +81,7 @@ Vector2 CollisionSystem::BuildPaddleBounceVelocity(
     const float bounceAngle = normalizedOffset * maxBounceAngleRadians;
     const float horizontalDirection = bounceToRight ? 1.0f : -1.0f;
 
-    Vector2 direction
+    DirectX::SimpleMath::Vector2 direction
     {
         std::cos(bounceAngle) * horizontalDirection,
         std::sin(bounceAngle)

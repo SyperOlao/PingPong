@@ -3,7 +3,6 @@
 
 #include <Windows.h>
 #include <exception>
-#include "Core/App/Application.h"
 #include "Game/Pong/PongGame.h"
 
 int main()

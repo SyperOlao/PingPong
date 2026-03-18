@@ -21,3 +21,7 @@ Then add to Clion this settings
 ``-DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows``
 
 ![img.png](Images/img.png)
+
+and switch to Visual Studio in toolchain
+
+![img.png](Images/img2.png)

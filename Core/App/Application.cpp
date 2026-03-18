@@ -11,7 +11,7 @@
 #include <utility>
 
 Application::Application(
-    HINSTANCE__ *const hInstance,
+    HINSTANCE__* const hInstance,
     std::unique_ptr<IGame> game,
     ApplicationDesc desc
 )
@@ -60,6 +60,7 @@ void Application::Initialize()
     m_context.Input = &m_input;
     m_context.Graphics = &m_graphics;
     m_context.Shape2D = &m_shapeRenderer2D;
+    m_context.Font = &m_bitmapFont;
 
     if (!m_context.IsValid())
     {

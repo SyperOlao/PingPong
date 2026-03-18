@@ -18,6 +18,7 @@
 #include "IGame.h"
 #include "Timer.h"
 #include "../Common/Constants.h"
+#include "Core/UI/BitmapFont.h"
 
 
 struct ApplicationDesc final {
@@ -32,6 +33,7 @@ class Window;
 class InputSystem;
 class GraphicsDevice;
 class ShapeRenderer2D;
+class BitmapFont;
 class IGame;
 
 class Application final {
@@ -40,21 +42,17 @@ public:
 
     ~Application() = default;
 
-    Application(const Application &) = delete;
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
 
-    Application &operator=(const Application &) = delete;
-
-    Application(Application &&) = delete;
-
-    Application &operator=(Application &&) = delete;
+    Application(Application&&) = delete;
+    Application& operator=(Application&&) = delete;
 
     int Run();
 
 private:
     void Initialize();
-
     void Update(float deltaTime);
-
     void Render();
 
 private:
@@ -66,6 +64,7 @@ private:
     InputSystem m_input;
     GraphicsDevice m_graphics;
     ShapeRenderer2D m_shapeRenderer2D;
+    BitmapFont m_bitmapFont;
     Timer m_timer;
     AppContext m_context{};
 

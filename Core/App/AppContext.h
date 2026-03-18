@@ -10,12 +10,14 @@ class Window;
 class InputSystem;
 class GraphicsDevice;
 class ShapeRenderer2D;
+class BitmapFont;
 
 struct AppContext {
     Window *MainWindow{nullptr};
     InputSystem *Input{nullptr};
     GraphicsDevice *Graphics{nullptr};
     ShapeRenderer2D *Shape2D{nullptr};
+    BitmapFont* Font{nullptr};
 
     [[nodiscard]] bool IsValid() const noexcept {
         return MainWindow != nullptr

@@ -5,13 +5,10 @@
 #ifndef PINGPONG_MATHHELPERS_H
 #define PINGPONG_MATHHELPERS_H
 #include <algorithm>
-#include <cmath>
 #include <concepts>
 #include <random>
-#include <DirectXMath.h>
-#include <DirectXCollision.h>
 
-using namespace DirectX::SimpleMath;
+
 
 class MathHelpers final
 {

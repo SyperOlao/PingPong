@@ -90,8 +90,7 @@ void GraphicsDevice::BeginFrame(const Color& clearColor)
     m_context->ClearRenderTargetView(m_renderTargetView.Get(), clear.data());
 }
 
-void GraphicsDevice::EndFrame(const bool vSync)
-{
+void GraphicsDevice::EndFrame(const bool vSync) const {
     if (m_swapChain == nullptr)
     {
         throw std::logic_error("GraphicsDevice::EndFrame called before Initialize.");

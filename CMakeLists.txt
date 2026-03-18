@@ -37,13 +37,20 @@ add_executable(PingPong
 
         Core/Graphics2D/ShapeRenderer2D.cpp
         Core/Graphics2D/ShapeRenderer2D.h
+        Core/Physics/AABB.h
+        Core/UI/BitmapFont.cpp
+        Core/UI/BitmapFont.h
+        Core/UI/Button.cpp
+        Core/UI/Button.h
+        Core/Physics/CollisionSystem.cpp
 )
-
+find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(PingPong PRIVATE
+        Microsoft::DirectXTK
         d3d11
         dxgi
         d3dcompiler
@@ -51,6 +58,7 @@ target_link_libraries(PingPong PRIVATE
         user32
         gdi32
 )
+
 
 file(COPY
         ${CMAKE_SOURCE_DIR}/Core/Shaders

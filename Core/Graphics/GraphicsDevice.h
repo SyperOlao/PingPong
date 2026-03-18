@@ -26,7 +26,7 @@ public:
     void Resize(int width, int height);
 
     void BeginFrame(const Color& clearColor);
-    void EndFrame(bool vSync = true);
+    void EndFrame(bool vSync = true) const;
 
     [[nodiscard]] int GetWidth() const noexcept;
     [[nodiscard]] int GetHeight() const noexcept;
