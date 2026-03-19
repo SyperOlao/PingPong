@@ -1,6 +1,11 @@
 {
   "dependencies": [
     "directxmath",
-    "directxtk"
+    {
+      "name": "directxtk",
+      "features": [
+        "xaudio2-9"
+      ]
+    }
   ]
 }

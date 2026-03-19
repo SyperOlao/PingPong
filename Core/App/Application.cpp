@@ -11,31 +11,26 @@
 #include <utility>
 
 Application::Application(
-    HINSTANCE__* const hInstance,
+    HINSTANCE__ *const hInstance,
     std::unique_ptr<IGame> game,
     ApplicationDesc desc
 )
     : m_hInstance(hInstance)
-    , m_desc(std::move(desc))
-    , m_game(std::move(game))
-{
-    if (m_hInstance == nullptr)
-    {
+      , m_desc(std::move(desc))
+      , m_game(std::move(game)) {
+    if (m_hInstance == nullptr) {
         throw std::invalid_argument("Application requires a valid HINSTANCE.");
     }
 
-    if (!m_game)
-    {
+    if (!m_game) {
         throw std::invalid_argument("Application requires a valid IGame instance.");
     }
 
     Initialize();
 }
 
-void Application::Initialize()
-{
-    if (m_desc.ClientWidth <= 0 || m_desc.ClientHeight <= 0)
-    {
+void Application::Initialize() {
+    if (m_desc.ClientWidth <= 0 || m_desc.ClientHeight <= 0) {
         throw std::invalid_argument("ApplicationDesc must contain positive client dimensions.");
     }
 
@@ -61,9 +56,9 @@ void Application::Initialize()
     m_context.Graphics = &m_graphics;
     m_context.Shape2D = &m_shapeRenderer2D;
     m_context.Font = &m_bitmapFont;
+    m_context.Audio = &m_audio;
 
-    if (!m_context.IsValid())
-    {
+    if (!m_context.IsValid()) {
         throw std::runtime_error("Application failed to build a valid AppContext.");
     }
 
@@ -71,12 +66,9 @@ void Application::Initialize()
     m_timer.Reset();
 }
 
-int Application::Run()
-{
-    while (m_isRunning)
-    {
-        if (!Window::ProcessMessages())
-        {
+int Application::Run() {
+    while (m_isRunning) {
+        if (!Window::ProcessMessages()) {
             m_isRunning = false;
             break;
         }
@@ -88,17 +80,17 @@ int Application::Run()
     }
 
     m_game->Shutdown(m_context);
+    m_audio.Shutdown();
     return 0;
 }
 
-void Application::Update(const float deltaTime)
-{
+void Application::Update(const float deltaTime) {
     m_input.Update();
+    m_audio.Update();
     m_game->Update(m_context, deltaTime);
 }
 
-void Application::Render()
-{
+void Application::Render() {
     m_graphics.BeginFrame(m_desc.ClearColor);
     m_game->Render(m_context);
     m_graphics.EndFrame(m_desc.VSync);

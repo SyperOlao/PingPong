@@ -12,8 +12,8 @@ class Paddle;
 
 namespace PongCollisionSystem
 {
-    void HandleWallCollision(Ball& ball, float playableTop, float playableBottom) noexcept;
-    void HandlePaddleCollision(Ball& ball, const Paddle& leftPaddle, const Paddle& rightPaddle);
+    [[nodiscard]] bool HandleWallCollision(Ball& ball, float playableTop, float playableBottom) noexcept;
+    [[nodiscard]] bool HandlePaddleCollision(Ball& ball, const Paddle& leftPaddle, const Paddle& rightPaddle);
     [[nodiscard]] CourtSide CheckScoring(const Ball& ball) noexcept;
 }
 

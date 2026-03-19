@@ -1,0 +1,39 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: d45745cb1fe0d5d54cf413253094e9af7dc7598b5b440c12d60e75787db7b5d5
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 2a2e1cabcfd0339e8765c2e3f8ef1be26de5582c5dff09a9f9a992fd7e61b148
+Status: install ok installed
+
+Package: directxmath
+Version: 2026-03-12
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 22fa8ff0950348c5ec16ffb938ecb5fe7d2a168da9d4b844d5c5f86c9ab2f3eb
+Description: DirectXMath SIMD C++ math library
+Status: install ok installed
+
+Package: directxtk
+Version: 2025-10-27
+Depends: directxmath, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 9fc04c529a535a80fc10f88229189a302b787ef484beb3d655322fa6d922f30e
+Description: A collection of helper classes for writing DirectX 11.x code in C++.
+Status: install ok installed
+
+Package: directxtk
+Feature: xaudio2-9
+Architecture: x64-windows
+Multi-Arch: same
+Description: Build with XAudio 2.9 support for Windows 10/11
+Status: install ok installed
+

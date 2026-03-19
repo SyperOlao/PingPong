@@ -53,19 +53,33 @@ namespace {
 }
 
 namespace PongCollisionSystem {
-    void HandleWallCollision(Ball &ball, const float playableTop, const float playableBottom) noexcept {
+    bool PongCollisionSystem::HandleWallCollision(
+        Ball &ball,
+        const float playableTop,
+        const float playableBottom
+    ) noexcept {
         const AABB ballAABB = ball.GetAABB();
 
         if (ballAABB.Min.y <= playableTop) {
             ball.Transform.Position.y = playableTop;
             ball.Movement.Velocity.y = std::abs(ball.Movement.Velocity.y);
-        } else if (ballAABB.Max.y >= playableBottom) {
+            return true;
+        }
+
+        if (ballAABB.Max.y >= playableBottom) {
             ball.Transform.Position.y = playableBottom - ball.Size();
             ball.Movement.Velocity.y = -std::abs(ball.Movement.Velocity.y);
+            return true;
         }
+
+        return false;
     }
 
-    void HandlePaddleCollision(Ball &ball, const Paddle &leftPaddle, const Paddle &rightPaddle) {
+    bool PongCollisionSystem::HandlePaddleCollision(
+        Ball &ball,
+        const Paddle &leftPaddle,
+        const Paddle &rightPaddle
+    ) {
         const AABB ballAABB = ball.GetAABB();
         const AABB leftPaddleAABB = leftPaddle.GetAABB();
         const AABB rightPaddleAABB = rightPaddle.GetAABB();
@@ -85,7 +99,7 @@ namespace PongCollisionSystem {
                 true
             );
 
-            return;
+            return true;
         }
 
         if (CollisionSystem::CheckCollision(ballAABB, rightPaddleAABB) && ball.Movement.Velocity.x > 0.0f) {
@@ -102,7 +116,11 @@ namespace PongCollisionSystem {
                 nextSpeed,
                 false
             );
+
+            return true;
         }
+
+        return false;
     }
 
     CourtSide CheckScoring(const Ball &ball) noexcept {

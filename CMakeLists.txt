@@ -56,6 +56,9 @@ add_executable(PingPong
         Game/Pong/Entities/CenterLine.cpp
         Core/UI/Switcher.cpp
         Core/UI/Switcher.h
+        Core/Audio/AudioSystem.cpp
+        Core/Audio/AudioSystem.h
+        Core/Audio/AudioSystem.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE

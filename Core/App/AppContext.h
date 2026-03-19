@@ -11,19 +11,22 @@ class InputSystem;
 class GraphicsDevice;
 class ShapeRenderer2D;
 class BitmapFont;
+class AudioSystem;
 
 struct AppContext {
     Window *MainWindow{nullptr};
     InputSystem *Input{nullptr};
     GraphicsDevice *Graphics{nullptr};
     ShapeRenderer2D *Shape2D{nullptr};
-    BitmapFont* Font{nullptr};
+    BitmapFont *Font{nullptr};
+    AudioSystem *Audio{nullptr};
 
     [[nodiscard]] bool IsValid() const noexcept {
         return MainWindow != nullptr
                && Input != nullptr
                && Graphics != nullptr
-               && Shape2D != nullptr;
+               && Shape2D != nullptr
+               && Audio != nullptr;
     }
 };
 

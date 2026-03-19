@@ -19,7 +19,7 @@
 #include "Timer.h"
 #include "../Common/Constants.h"
 #include "Core/UI/BitmapFont.h"
-
+#include "Core/Audio/AudioSystem.h"
 
 struct ApplicationDesc final {
     std::wstring Title{L"DX11 Application"};
@@ -67,7 +67,7 @@ private:
     BitmapFont m_bitmapFont;
     Timer m_timer;
     AppContext m_context{};
-
+    AudioSystem m_audio;
     bool m_isRunning{true};
 };
 
