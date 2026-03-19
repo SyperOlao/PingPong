@@ -106,3 +106,32 @@ CourtSide CollisionSystem::CheckOutOfBounds(
 
     return CourtSide::None;
 }
+DirectX::SimpleMath::Vector2 BuildSharperPaddleBounceVelocity(
+       const AABB& ballAABB,
+       const AABB& paddleAABB,
+       const float speed,
+       const bool isLeftPaddle
+   )
+{
+    const float paddleCenterY = (paddleAABB.Min.y + paddleAABB.Max.y) * 0.5f;
+    const float ballCenterY = (ballAABB.Min.y + ballAABB.Max.y) * 0.5f;
+
+    float offset = (ballCenterY - paddleCenterY) / ((paddleAABB.Max.y - paddleAABB.Min.y) * 0.5f);
+    offset = MathHelpers::Clamp(offset, -1.0f, 1.0f);
+
+    constexpr float kVerticalInfluence = 1.25f;
+
+    const float directionX = isLeftPaddle ? 1.0f : -1.0f;
+
+    DirectX::SimpleMath::Vector2 direction{
+        directionX,
+        offset * kVerticalInfluence
+    };
+
+    direction = MathHelpers::SafeNormalize(
+        direction,
+        DirectX::SimpleMath::Vector2{directionX, 0.0f}
+    );
+
+    return direction * speed;
+}

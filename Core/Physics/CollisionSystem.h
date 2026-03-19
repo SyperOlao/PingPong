@@ -22,6 +22,7 @@ public:
     [[nodiscard]] static bool CheckCollision(const AABB& a, const AABB& b) noexcept;
     [[nodiscard]] static CollisionManifold FindCollision(const AABB& a, const AABB& b) noexcept;
 
+
     static void ReflectAgainstNormal(
         DirectX::SimpleMath::Vector2& velocity,
         const DirectX::SimpleMath::Vector2& normal
@@ -48,6 +49,7 @@ public:
         float leftBoundary,
         float rightBoundary
     ) noexcept;
+
 };
 
 

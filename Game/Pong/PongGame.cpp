@@ -585,41 +585,36 @@ void PongGame::RenderGameplay(const AppContext &context) const {
     );
 }
 
-void PongGame::RenderGameOver(const AppContext &context) const {
-    auto &renderer = *context.Shape2D;
+void PongGame::RenderGameOver(const AppContext& context) const
+{
+    auto& renderer = *context.Shape2D;
 
     RenderGameplay(context);
+
+    constexpr float centerY = static_cast<float>(Constants::WindowHeight) * 0.5f;
 
     DrawCenteredText(
         renderer,
         m_resultText,
-        170.0f,
+        centerY - 70.0f,
         kWhite,
-        1.45f
-    );
-
-    DrawCenteredText(
-        renderer,
-        "EXIT TO MAIN MENU",
-        225.0f,
-        kMuted,
-        0.72f
+        2.35f
     );
 
     DrawCenteredText(
         renderer,
         "ENTER  RESTART",
-        270.0f,
+        centerY + 20.0f,
         kAccent,
-        0.80f
+        0.88f
     );
 
     DrawCenteredText(
         renderer,
         "ESC  MAIN MENU",
-        305.0f,
+        centerY + 58.0f,
         kMuted,
-        0.72f
+        0.76f
     );
 }
 

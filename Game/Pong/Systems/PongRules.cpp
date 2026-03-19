@@ -46,14 +46,14 @@ const DifficultyTuning& PongRules::GetDifficultyTuning(const Difficulty difficul
         },
         DifficultyTuning{
             "HARD",
-            650.0f,
-            96.0f,
-            760.0f,
-            0.30f,
-            0.12f,
-            0.30f,
-            14.0f,
-            0.86f
+            920.0f,
+            88.0f,
+            1020.0f,
+            0.08f,
+            0.06f,
+            0.16f,
+            6.0f,
+            0.94f
         }
     };
 
