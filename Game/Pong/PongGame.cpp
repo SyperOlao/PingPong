@@ -35,6 +35,15 @@ namespace {
     constexpr float kMenuTitleY = 60.0f;
     constexpr float kMenuSubtitleY = 145.0f;
 
+    constexpr ScoreType kWinningScore = 10;
+
+    struct MenuItemLayout {
+        float X{0.0f};
+        float Y{0.0f};
+        float Width{0.0f};
+        float Height{0.0f};
+    };
+
     bool WasMenuUpPressed(const InputSystem &input) {
         return input.GetKeyboard().WasKeyPressed(Key::W)
                || input.GetKeyboard().WasKeyPressed(Key::Up);
@@ -45,8 +54,10 @@ namespace {
                || input.GetKeyboard().WasKeyPressed(Key::Down);
     }
 
-    RectF BuildCenteredButtonRect(const int index) {
-        const float totalHeight = 4.0f * kMenuButtonHeight + 3.0f * kMenuButtonGap;
+    MenuItemLayout BuildCenteredMenuItemLayout(const int index, const int itemCount = 4) {
+        const float totalHeight =
+                static_cast<float>(itemCount) * kMenuButtonHeight
+                + static_cast<float>(itemCount - 1) * kMenuButtonGap;
 
         constexpr float reservedTop = 230.0f;
         constexpr float reservedBottom = 110.0f;
@@ -63,7 +74,12 @@ namespace {
         const float y =
                 startY + static_cast<float>(index) * (kMenuButtonHeight + kMenuButtonGap);
 
-        return RectF{x, y, kMenuButtonWidth, kMenuButtonHeight};
+        return MenuItemLayout{x, y, kMenuButtonWidth, kMenuButtonHeight};
+    }
+
+    RectF BuildCenteredButtonRect(const int index, const int itemCount = 4) {
+        const auto layout = BuildCenteredMenuItemLayout(index, itemCount);
+        return RectF{layout.X, layout.Y, layout.Width, layout.Height};
     }
 
     void DrawCenteredText(
@@ -91,20 +107,72 @@ namespace {
         const float width = BitmapFont::MeasureTextWidth(value, scale);
         BitmapFont::DrawString(renderer, rightX - width, y, value, color, scale);
     }
+
+    void RenderSwitcherRow(
+        ShapeRenderer2D &renderer,
+        const Switcher &switcher,
+        const bool selected
+    ) {
+        const float textY = switcher.Y() + 18.0f;
+
+        BitmapFont::DrawString(
+            renderer,
+            switcher.X() + 18.0f,
+            textY,
+            switcher.Label(),
+            selected ? kAccent : kMuted,
+            0.72f
+        );
+
+        const std::string value = std::string{"< "} + switcher.SelectedText() + " >";
+
+        DrawRightAlignedText(
+            renderer,
+            value,
+            switcher.Right() - 18.0f,
+            textY,
+            selected ? kWhite : kMuted,
+            0.72f
+        );
+    }
 }
 
 void PongGame::Initialize(AppContext &context) {
     (void) context;
 
-    m_mainMenuButtons[0] = Button{BuildCenteredButtonRect(0), "START VS PLAYER", true};
-    m_mainMenuButtons[1] = Button{BuildCenteredButtonRect(1), "START VS BOT", true};
-    m_mainMenuButtons[2] = Button{BuildCenteredButtonRect(2), "SETTINGS", true};
-    m_mainMenuButtons[3] = Button{BuildCenteredButtonRect(3), "EXIT", true};
+    m_mainMenuButtons[0] = Button{BuildCenteredButtonRect(0, 4), "START VS PLAYER", true};
+    m_mainMenuButtons[1] = Button{BuildCenteredButtonRect(1, 4), "START VS BOT", true};
+    m_mainMenuButtons[2] = Button{BuildCenteredButtonRect(2, 4), "SETTINGS", true};
+    m_mainMenuButtons[3] = Button{BuildCenteredButtonRect(3, 4), "EXIT", true};
 
-    m_settingsButtons[0] = Button{BuildCenteredButtonRect(0), "EASY", true};
-    m_settingsButtons[1] = Button{BuildCenteredButtonRect(1), "MEDIUM", true};
-    m_settingsButtons[2] = Button{BuildCenteredButtonRect(2), "HARD", true};
-    m_settingsButtons[3] = Button{BuildCenteredButtonRect(3), "BACK", true};
+    {
+        const auto layout = BuildCenteredMenuItemLayout(0, 3);
+        m_difficultySwitcher = Switcher{
+            layout.X,
+            layout.Y,
+            layout.Width,
+            layout.Height,
+            "DIFFICULTY",
+            {"EASY", "MEDIUM", "HARD"}
+        };
+    }
+
+    {
+        const auto [X, Y, Width, Height] = BuildCenteredMenuItemLayout(1, 3);
+        m_matchRuleSwitcher = Switcher{
+            X,
+            Y,
+            Width,
+            Height,
+            "MODE",
+            {"FIRST TO 10", "ENDLESS"}
+        };
+    }
+
+    m_settingsBackButton = Button{BuildCenteredButtonRect(2, 3), "BACK", true};
+
+    m_difficultySwitcher.SetSelectedIndex(static_cast<int>(m_difficulty));
+    m_matchRuleSwitcher.SetSelectedIndex(static_cast<int>(m_matchRule));
 
     m_leftPaddle.SetDimensions(Constants::PaddleWidth, Constants::PaddleHeight);
     m_rightPaddle.SetDimensions(Constants::PaddleWidth, Constants::PaddleHeight);
@@ -141,6 +209,10 @@ void PongGame::Update(AppContext &context, const float deltaTime) {
             UpdateGameplay(context, deltaTime);
             break;
 
+        case ScreenState::GameOver:
+            UpdateGameOver(context);
+            break;
+
         default:
             break;
     }
@@ -158,6 +230,10 @@ void PongGame::Render(AppContext &context) {
 
         case ScreenState::Playing:
             RenderGameplay(context);
+            break;
+
+        case ScreenState::GameOver:
+            RenderGameOver(context);
             break;
 
         default:
@@ -190,6 +266,7 @@ void PongGame::ApplyDifficulty() {
 void PongGame::StartGame(const GameMode mode) {
     m_gameMode = mode;
     m_screenState = ScreenState::Playing;
+    m_resultText.clear();
     ResetMatch();
 }
 
@@ -236,7 +313,9 @@ void PongGame::UpdateMainMenu(AppContext &context) {
             break;
 
         case 2:
-            m_selectedSettingsIndex = static_cast<int>(m_difficulty);
+            m_difficultySwitcher.SetSelectedIndex(static_cast<int>(m_difficulty));
+            m_matchRuleSwitcher.SetSelectedIndex(static_cast<int>(m_matchRule));
+            m_selectedSettingsIndex = 0;
             m_screenState = ScreenState::Settings;
             break;
 
@@ -258,37 +337,30 @@ void PongGame::UpdateSettingsMenu(AppContext &context) {
     }
 
     if (WasMenuUpPressed(input)) {
-        m_selectedSettingsIndex = (m_selectedSettingsIndex + 3) % 4;
+        m_selectedSettingsIndex = (m_selectedSettingsIndex + 2) % 3;
     } else if (WasMenuDownPressed(input)) {
-        m_selectedSettingsIndex = (m_selectedSettingsIndex + 1) % 4;
+        m_selectedSettingsIndex = (m_selectedSettingsIndex + 1) % 3;
     }
 
-    if (!m_settingsButtons[m_selectedSettingsIndex].HandleKeyboard(input, true)) {
+    if (m_selectedSettingsIndex == 0) {
+        if (m_difficultySwitcher.HandleKeyboard(input)) {
+            m_difficulty = static_cast<Difficulty>(m_difficultySwitcher.SelectedIndex());
+            ApplyDifficulty();
+        }
+
         return;
     }
 
-    switch (m_selectedSettingsIndex) {
-        case 0:
-            m_difficulty = Difficulty::Easy;
-            ApplyDifficulty();
-            break;
+    if (m_selectedSettingsIndex == 1) {
+        if (m_matchRuleSwitcher.HandleKeyboard(input)) {
+            m_matchRule = static_cast<MatchRule>(m_matchRuleSwitcher.SelectedIndex());
+        }
 
-        case 1:
-            m_difficulty = Difficulty::Medium;
-            ApplyDifficulty();
-            break;
+        return;
+    }
 
-        case 2:
-            m_difficulty = Difficulty::Hard;
-            ApplyDifficulty();
-            break;
-
-        case 3:
-            m_screenState = ScreenState::MainMenu;
-            break;
-
-        default:
-            break;
+    if (m_settingsBackButton.HandleKeyboard(input, true)) {
+        m_screenState = ScreenState::MainMenu;
     }
 }
 
@@ -340,6 +412,19 @@ void PongGame::UpdateGameplay(AppContext &context, const float deltaTime) {
     }
 }
 
+void PongGame::UpdateGameOver(const AppContext &context) {
+    auto &input = *context.Input;
+
+    if (input.GetKeyboard().WasKeyPressed(Key::Escape)) {
+        m_screenState = ScreenState::MainMenu;
+        return;
+    }
+
+    if (input.GetKeyboard().WasKeyPressed(Key::Enter)) {
+        StartGame(m_gameMode);
+    }
+}
+
 void PongGame::UpdatePlayerPaddle(
     const AppContext &context,
     Paddle &paddle,
@@ -384,7 +469,29 @@ void PongGame::ScorePoint(const CourtSide outSide) {
         ++m_leftScore;
     }
 
+    if (!IsEndlessModeActive() && (m_leftScore >= kWinningScore || m_rightScore >= kWinningScore)) {
+        FinishMatch();
+        return;
+    }
+
     ResetRound();
+}
+
+void PongGame::FinishMatch() {
+    m_ball.Movement.Stop();
+    m_roundResetTimer = 0.0f;
+
+    if (m_gameMode == GameMode::VersusAI) {
+        m_resultText = (m_leftScore > m_rightScore) ? "WIN" : "LOSE";
+    } else {
+        m_resultText = (m_leftScore > m_rightScore) ? "PLAYER 1 WIN" : "PLAYER 2 WIN";
+    }
+
+    m_screenState = ScreenState::GameOver;
+}
+
+bool PongGame::IsEndlessModeActive() const noexcept {
+    return m_gameMode == GameMode::VersusAI && m_matchRule == MatchRule::Endless;
 }
 
 void PongGame::RenderMainMenu(const AppContext &context) const {
@@ -422,75 +529,99 @@ void PongGame::RenderMainMenu(const AppContext &context) const {
 void PongGame::RenderSettingsMenu(const AppContext &context) const {
     auto &renderer = *context.Shape2D;
 
-    RenderButtons(context, m_settingsButtons, m_selectedSettingsIndex, "SETTINGS");
+    DrawCenteredText(renderer, "SETTINGS", kMenuTitleY, kWhite, 1.8f);
 
     DrawCenteredText(
         renderer,
-        std::string{"CURRENT "} + PongRules::BuildDifficultyText(m_difficulty),
+        "VS PLAYER ALWAYS USES FIRST TO 10",
         kMenuSubtitleY,
-        kAccent,
-        0.84f
+        kMuted,
+        0.72f
     );
 
-    BitmapFont::DrawString(
-        renderer,
-        26.0f,
-        static_cast<float>(Constants::WindowHeight) - 78.0f,
-        "BALL SPEED",
-        kMuted,
-        0.55f
-    );
+    RenderSwitcherRow(renderer, m_difficultySwitcher, m_selectedSettingsIndex == 0);
+    RenderSwitcherRow(renderer, m_matchRuleSwitcher, m_selectedSettingsIndex == 1);
 
-    DrawCenteredText(
-        renderer,
-        "PADDLE SIZE",
-        static_cast<float>(Constants::WindowHeight) - 78.0f,
-        kMuted,
-        0.55f
-    );
+    ButtonStyle style{};
+    style.TextScale = 0.85f;
 
-    DrawRightAlignedText(
+    m_settingsBackButton.Draw(
         renderer,
-        "BOT ACCURACY",
-        static_cast<float>(Constants::WindowWidth) - 26.0f,
-        static_cast<float>(Constants::WindowHeight) - 78.0f,
-        kMuted,
-        0.55f
+        *context.Font,
+        style,
+        m_selectedSettingsIndex == 2
     );
 
     BitmapFont::DrawString(
         renderer,
         26.0f,
         static_cast<float>(Constants::WindowHeight) - 44.0f,
-        "ESC  BACK",
+        "W/S  ROW   A/D OR LEFT/RIGHT  CHANGE",
         kMuted,
-        0.62f
+        0.58f
     );
 
     DrawRightAlignedText(
         renderer,
-        "ENTER  APPLY",
+        "ESC OR ENTER ON BACK",
         static_cast<float>(Constants::WindowWidth) - 26.0f,
         static_cast<float>(Constants::WindowHeight) - 44.0f,
         kMuted,
-        0.62f
+        0.58f
     );
 }
 
 void PongGame::RenderGameplay(const AppContext &context) const {
     m_scene.RenderGameplay(
-      context,
-      m_leftPaddle,
-      m_rightPaddle,
-      m_ball,
-      m_leftScore,
-      m_rightScore,
-      m_displayFps,
-      m_gameMode,
-      m_difficulty
-  );
+        context,
+        m_leftPaddle,
+        m_rightPaddle,
+        m_ball,
+        m_leftScore,
+        m_rightScore,
+        m_displayFps,
+        m_gameMode,
+        m_difficulty
+    );
 }
 
+void PongGame::RenderGameOver(const AppContext &context) const {
+    auto &renderer = *context.Shape2D;
+
+    RenderGameplay(context);
+
+    DrawCenteredText(
+        renderer,
+        m_resultText,
+        170.0f,
+        kWhite,
+        1.45f
+    );
+
+    DrawCenteredText(
+        renderer,
+        "EXIT TO MAIN MENU",
+        225.0f,
+        kMuted,
+        0.72f
+    );
+
+    DrawCenteredText(
+        renderer,
+        "ENTER  RESTART",
+        270.0f,
+        kAccent,
+        0.80f
+    );
+
+    DrawCenteredText(
+        renderer,
+        "ESC  MAIN MENU",
+        305.0f,
+        kMuted,
+        0.72f
+    );
+}
 
 void PongGame::RenderButtons(
     const AppContext &context,

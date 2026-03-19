@@ -12,6 +12,11 @@ enum class Difficulty : std::uint8_t {
     Hard
 };
 
+enum class MatchRule : std::uint8_t {
+    FirstTo10 = 0,
+    Endless
+};
+
 struct DifficultyTuning final {
     const char *Label{nullptr};
     float BallStartSpeed{0.0f};

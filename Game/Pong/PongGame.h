@@ -12,6 +12,7 @@
 #include "Core/Common/Types.h"
 #include "Core/Input/InputSystem.h"
 #include "Core/UI/Button.h"
+#include "Core/UI/Switcher.h"
 #include "Game/Pong/Entities/Ball.h"
 #include "Game/Pong/Entities/Paddle.h"
 #include "Game/Pong/PongScene.h"
@@ -32,7 +33,8 @@ private:
     {
         MainMenu = 0,
         Settings,
-        Playing
+        Playing,
+        GameOver
     };
 
 private:
@@ -44,6 +46,7 @@ private:
     void UpdateMainMenu(AppContext& context);
     void UpdateSettingsMenu(AppContext& context);
     void UpdateGameplay(AppContext& context, float deltaTime);
+    void UpdateGameOver(const AppContext& context);
 
     static void UpdatePlayerPaddle(const AppContext& context, Paddle& paddle, InputPlayer player, float deltaTime);
     void UpdateBall(float deltaTime);
@@ -51,10 +54,14 @@ private:
     static void ClampPaddleToField(Paddle& paddle) noexcept;
     void LaunchBallRandomDirection();
     void ScorePoint(CourtSide outSide);
+    void FinishMatch();
+
+    [[nodiscard]] bool IsEndlessModeActive() const noexcept;
 
     void RenderMainMenu(const AppContext& context) const;
     void RenderSettingsMenu(const AppContext& context) const;
     void RenderGameplay(const AppContext& context) const;
+    void RenderGameOver(const AppContext& context) const;
 
     static void RenderButtons(
         const AppContext& context,
@@ -67,9 +74,13 @@ private:
     ScreenState m_screenState{ScreenState::MainMenu};
     GameMode m_gameMode{GameMode::TwoPlayers};
     Difficulty m_difficulty{Difficulty::Medium};
+    MatchRule m_matchRule{MatchRule::FirstTo10};
 
     std::array<Button, 4> m_mainMenuButtons{};
-    std::array<Button, 4> m_settingsButtons{};
+    Switcher m_difficultySwitcher{};
+    Switcher m_matchRuleSwitcher{};
+    Button m_settingsBackButton{};
+
     int m_selectedMainMenuIndex{0};
     int m_selectedSettingsIndex{0};
 
@@ -87,6 +98,8 @@ private:
     float m_fpsAccumulator{0.0f};
     int m_fpsFrames{0};
     int m_displayFps{0};
+
+    std::string m_resultText{};
 };
 
 

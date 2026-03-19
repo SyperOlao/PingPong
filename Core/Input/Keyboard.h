@@ -14,6 +14,10 @@ enum class Key : std::uint16_t {
     None = 0,
     W = 'W',
     S = 'S',
+    D = 'D',
+    A = 'A',
+    Left = VK_LEFT,
+    Right = VK_RIGHT,
     Up = VK_UP,
     Down = VK_DOWN,
     Escape = VK_ESCAPE,
@@ -26,10 +30,15 @@ public:
     void Update();
 
     [[nodiscard]] bool IsKeyDown(Key key) const noexcept;
+
     [[nodiscard]] bool WasKeyPressed(Key key) const noexcept;
+
     [[nodiscard]] bool WasKeyReleased(Key key) const noexcept;
+
     [[nodiscard]] bool IsVirtualKeyDown(USHORT virtualKey) const noexcept;
+
     [[nodiscard]] bool WasVirtualKeyPressed(USHORT virtualKey) const noexcept;
+
     [[nodiscard]] bool WasVirtualKeyReleased(USHORT virtualKey) const noexcept;
 
 private:

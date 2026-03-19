@@ -54,6 +54,8 @@ add_executable(PingPong
         Game/Pong/Entities/Wall.cpp
         Game/Pong/Entities/PlayField.cpp
         Game/Pong/Entities/CenterLine.cpp
+        Core/UI/Switcher.cpp
+        Core/UI/Switcher.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE
