@@ -48,22 +48,31 @@ void SolarSystemScene::CreateDemoSystem()
     m_roots.clear();
 
     const auto sun = std::make_shared<OrbitalBody>();
-    sun->MeshType = BodyMeshType::Sphere;
+    sun->MeshType = BodyMeshType::Box;
     sun->VisualClass = BodyVisualClass::Star;
+    sun->SurfaceType = BodySurfaceType::Star;
     sun->Scale = Vector3(5.2f, 5.2f, 5.2f);
-    sun->BaseColor = Color(1.0f, 0.88f, 0.18f, 1.0f);
+    sun->BaseColor = Color(1.0f, 0.86f, 0.22f, 1.0f);
+    sun->OrbitColor = Color(0.0f, 0.0f, 0.0f, 0.0f);
     sun->SelfRotationSpeed = 0.18f;
     sun->BaseSelfRotationSpeed = sun->SelfRotationSpeed;
     sun->ShowOrbit = false;
 
-    auto makePlanet = [](const BodyMeshType mesh, const Vector3& scale, const Color& color, const OrbitalParams& orbit,
-                         const float selfSpeed)
+    auto makePlanet = [](
+        const Vector3& scale,
+        const Color& color,
+        const Color& orbitColor,
+        const BodySurfaceType surfaceType,
+        const OrbitalParams& orbit,
+        const float selfSpeed)
     {
         auto body = std::make_shared<OrbitalBody>();
-        body->MeshType = mesh;
+        body->MeshType = BodyMeshType::Sphere;
         body->VisualClass = BodyVisualClass::Planet;
+        body->SurfaceType = surfaceType;
         body->Scale = scale;
         body->BaseColor = color;
+        body->OrbitColor = orbitColor;
         body->HasOrbit = true;
         body->Orbit = orbit;
         body->BaseOrbit = orbit;
@@ -73,14 +82,21 @@ void SolarSystemScene::CreateDemoSystem()
         return body;
     };
 
-    auto makeMoon = [](const BodyMeshType mesh, const Vector3& scale, const Color& color, const OrbitalParams& orbit,
-                       const float selfSpeed)
+    auto makeMoon = [](
+        const Vector3& scale,
+        const Color& color,
+        const Color& orbitColor,
+        const BodySurfaceType surfaceType,
+        const OrbitalParams& orbit,
+        const float selfSpeed)
     {
         auto body = std::make_shared<OrbitalBody>();
-        body->MeshType = mesh;
+        body->MeshType = BodyMeshType::Sphere;
         body->VisualClass = BodyVisualClass::Moon;
+        body->SurfaceType = surfaceType;
         body->Scale = scale;
         body->BaseColor = color;
+        body->OrbitColor = orbitColor;
         body->HasOrbit = true;
         body->Orbit = orbit;
         body->BaseOrbit = orbit;
@@ -91,51 +107,57 @@ void SolarSystemScene::CreateDemoSystem()
     };
 
     const auto planet1 = makePlanet(
-        BodyMeshType::Sphere,
-        Vector3(1.2f, 1.2f, 1.2f),
-        Color(0.15f, 0.55f, 1.0f, 1.0f),
+        Vector3(1.25f, 1.25f, 1.25f),
+        Color(0.74f, 0.48f, 0.24f, 1.0f),              // rocky
+        Color(0.38f, 0.28f, 0.18f, 1.0f),
+        BodySurfaceType::Rocky,
         {13.0f, 0.06f, 7.0f, 0.70f, 0.2f},
-        1.4f
+        1.2f
     );
 
     const auto moon1 = makeMoon(
-        BodyMeshType::Box,
-        Vector3(0.30f, 0.30f, 0.30f),
-        Color(0.72f, 0.72f, 0.74f, 1.0f),
+        Vector3(0.32f, 0.32f, 0.32f),
+        Color(0.78f, 0.78f, 0.80f, 1.0f),
+        Color(0.42f, 0.42f, 0.46f, 1.0f),
+        BodySurfaceType::Rocky,
         {2.1f, 0.02f, 16.0f, 2.4f, 0.5f},
-        2.0f
-    );
-
-    const auto planet2 = makePlanet(
-        BodyMeshType::Box,
-        Vector3(1.6f, 1.6f, 1.6f),
-        Color(0.12f, 0.72f, 0.42f, 1.0f),
-        {21.0f, 0.10f, 11.0f, 0.42f, 1.1f},
-        0.9f
-    );
-
-    const auto moon2 = makeMoon(
-        BodyMeshType::Sphere,
-        Vector3(0.42f, 0.42f, 0.42f),
-        Color(0.58f, 0.58f, 0.61f, 1.0f),
-        {3.0f, 0.03f, 20.0f, 1.65f, 0.3f},
         1.8f
     );
 
-    const auto planet3 = makePlanet(
-        BodyMeshType::Sphere,
-        Vector3(1.9f, 1.9f, 1.9f),
-        Color(0.55f, 0.34f, 0.18f, 1.0f),
-        {30.0f, 0.14f, 4.0f, 0.28f, 2.0f},
+    const auto planet2 = makePlanet(
+        Vector3(2.15f, 2.15f, 2.15f),
+        Color(0.26f, 0.76f, 0.52f, 1.0f),
+        Color(0.18f, 0.40f, 0.30f, 1.0f),
+        BodySurfaceType::GasGiant,
+        {21.0f, 0.10f, 11.0f, 0.42f, 1.1f},
         0.55f
     );
 
+    const auto moon2 = makeMoon(
+        Vector3(0.45f, 0.45f, 0.45f),
+        Color(0.62f, 0.72f, 0.88f, 1.0f),
+        Color(0.36f, 0.46f, 0.62f, 1.0f),
+        BodySurfaceType::Ice,
+        {3.0f, 0.03f, 20.0f, 1.65f, 0.3f},
+        1.5f
+    );
+
+    const auto planet3 = makePlanet(
+        Vector3(1.75f, 1.75f, 1.75f),
+        Color(0.58f, 0.66f, 0.92f, 1.0f),
+        Color(0.26f, 0.36f, 0.62f, 1.0f),
+        BodySurfaceType::Ice,
+        {30.0f, 0.14f, 4.0f, 0.28f, 2.0f},
+        0.35f
+    );
+
     const auto moon3 = makeMoon(
-        BodyMeshType::Box,
-        Vector3(0.35f, 0.35f, 0.35f),
-        Color(0.82f, 0.82f, 0.82f, 1.0f),
+        Vector3(0.38f, 0.38f, 0.38f),
+        Color(0.70f, 0.70f, 0.73f, 1.0f),
+        Color(0.40f, 0.40f, 0.46f, 1.0f),
+        BodySurfaceType::Rocky,
         {3.6f, 0.05f, 12.0f, 1.5f, 0.7f},
-        1.4f
+        1.2f
     );
 
     planet1->AddChild(moon1);

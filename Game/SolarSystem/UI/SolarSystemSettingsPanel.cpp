@@ -116,7 +116,7 @@ void SolarSystemSettingsPanel::Render(ShapeRenderer2D& shapeRenderer) const
         shapeRenderer,
         titleX,
         titleY + 20.0f,
-        "TAB - HIDE  |  DRAG SLIDER TO APPLY",
+        "TAB - HIDE | DRAG SLIDER TO APPLY",
         Color(0.62f, 0.72f, 0.86f, 1.0f),
         hintScale
     );

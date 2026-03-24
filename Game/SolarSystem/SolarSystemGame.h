@@ -40,6 +40,13 @@ private:
     [[nodiscard]] Camera& GetActiveCamera() noexcept;
     [[nodiscard]] const Camera& GetActiveCamera() const noexcept;
 
+    void RenderOrbitRecursive(
+        const OrbitalBody& body,
+        const DirectX::SimpleMath::Matrix& parentWorld,
+        const DirectX::SimpleMath::Matrix& view,
+        const DirectX::SimpleMath::Matrix& projection
+    );
+
     void RenderBodyRecursive(
         const OrbitalBody& body,
         const DirectX::SimpleMath::Matrix& view,
@@ -67,6 +74,5 @@ private:
 
     bool m_initialized{false};
 };
-
 
 #endif //PINGPONG_SOLARSYSTEMGAME_H

@@ -46,6 +46,8 @@ namespace
     constexpr float kOrbitMinPitch = -1.35f;
     constexpr float kOrbitMaxPitch = 1.35f;
 
+    constexpr int kOrbitSegments = 128;
+
     POINT GetMouseClientPosition(HWND__* const hwnd)
     {
         POINT point{};
@@ -159,6 +161,11 @@ void SolarSystemGame::Render(AppContext& context)
 
     for (const auto& root : m_scene.GetRoots())
     {
+        RenderOrbitRecursive(*root, Matrix::Identity, view, projection);
+    }
+
+    for (const auto& root : m_scene.GetRoots())
+    {
         RenderBodyRecursive(*root, view, projection);
     }
 
@@ -176,34 +183,11 @@ void SolarSystemGame::Render(AppContext& context)
         const float x = 16.0f;
         float y = 16.0f;
 
-        BitmapFont::DrawString(
-            *context.Shape2D,
-            x,
-            y,
-            std::format("FPS: {}", m_displayFps),
-            Color(1, 1, 1, 1),
-            hudScale
-        );
+        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("FPS: {}", m_displayFps), Color(1, 1, 1, 1), hudScale);
         y += 18.0f;
-
-        BitmapFont::DrawString(
-            *context.Shape2D,
-            x,
-            y,
-            std::format("CAMERA: {}", cameraLabel),
-            Color(1, 1, 1, 1),
-            hudScale
-        );
+        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("CAMERA: {}", cameraLabel), Color(1, 1, 1, 1), hudScale);
         y += 18.0f;
-
-        BitmapFont::DrawString(
-            *context.Shape2D,
-            x,
-            y,
-            std::format("PROJECTION: {}", projectionLabel),
-            Color(1, 1, 1, 1),
-            hudScale
-        );
+        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("PROJECTION: {}", projectionLabel), Color(1, 1, 1, 1), hudScale);
         y += 26.0f;
 
         BitmapFont::DrawString(
@@ -342,11 +326,7 @@ void SolarSystemGame::UpdateOrbitCamera(const AppContext& context, const float d
     m_orbitCameraPitch = std::clamp(m_orbitCameraPitch, kOrbitMinPitch, kOrbitMaxPitch);
     m_orbitCameraRadius = std::clamp(m_orbitCameraRadius, kOrbitMinRadius, kOrbitMaxRadius);
 
-    m_orbitCamera.SetYawPitchRadius(
-        m_orbitCameraYaw,
-        m_orbitCameraPitch,
-        m_orbitCameraRadius
-    );
+    m_orbitCamera.SetYawPitchRadius(m_orbitCameraYaw, m_orbitCameraPitch, m_orbitCameraRadius);
 }
 
 void SolarSystemGame::SetCameraMode(const CameraMode mode) noexcept
@@ -368,11 +348,41 @@ const Camera& SolarSystemGame::GetActiveCamera() const noexcept
         : static_cast<const Camera&>(m_orbitCamera);
 }
 
+void SolarSystemGame::RenderOrbitRecursive(
+    const OrbitalBody& body,
+    const Matrix& parentWorld,
+    const Matrix& view,
+    const Matrix& projection)
+{
+    if (body.HasOrbit && body.ShowOrbit)
+    {
+        std::vector<Vector3> orbitPoints;
+        orbitPoints.reserve(kOrbitSegments + 1);
+
+        for (int i = 0; i <= kOrbitSegments; ++i)
+        {
+            const float t = static_cast<float>(i) / static_cast<float>(kOrbitSegments);
+            const float meanAnomaly = DirectX::XM_2PI * t + body.Orbit.Phase;
+
+            const Vector3 local = OrbitMath::CalculateLocalPosition(body.Orbit, meanAnomaly);
+            const Vector3 world = Vector3::Transform(local, parentWorld);
+            orbitPoints.push_back(world);
+        }
+
+        m_renderer3D.DrawOrbit(orbitPoints, view, projection, body.OrbitColor);
+    }
+
+    const Matrix currentWorld = body.GetWorldMatrix();
+    for (const auto& child : body.GetChildren())
+    {
+        RenderOrbitRecursive(*child, currentWorld, view, projection);
+    }
+}
+
 void SolarSystemGame::RenderBodyRecursive(
     const OrbitalBody& body,
     const Matrix& view,
-    const Matrix& projection
-)
+    const Matrix& projection)
 {
     switch (body.MeshType)
     {

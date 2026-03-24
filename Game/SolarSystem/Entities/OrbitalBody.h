@@ -23,6 +23,14 @@ enum class BodyVisualClass : std::uint8_t
     Moon
 };
 
+enum class BodySurfaceType : std::uint8_t
+{
+    Star = 0,
+    Rocky,
+    GasGiant,
+    Ice
+};
+
 class OrbitalBody final
 {
 public:
@@ -39,10 +47,13 @@ public:
 public:
     BodyMeshType MeshType{BodyMeshType::Sphere};
     BodyVisualClass VisualClass{BodyVisualClass::Planet};
+    BodySurfaceType SurfaceType{BodySurfaceType::Rocky};
 
     DirectX::SimpleMath::Vector3 Scale{1.0f, 1.0f, 1.0f};
 
     DirectX::SimpleMath::Color BaseColor{1.0f, 1.0f, 1.0f, 1.0f};
+    DirectX::SimpleMath::Color OrbitColor{0.30f, 0.45f, 0.70f, 1.0f};
+
     float EmissiveStrength{0.0f};
     bool ShowOrbit{true};
 
@@ -60,5 +71,6 @@ private:
 
     std::vector<std::shared_ptr<OrbitalBody>> m_children;
 };
+
 
 #endif //PINGPONG_ORBITALBODY_H
