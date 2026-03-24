@@ -35,7 +35,7 @@ private:
 
 private:
     bool m_isOpen{true};
-    RectF m_bounds{20.0f, 150.0f, 360.0f, 420.0f};
+    RectF m_bounds{20.0f, 170.0f, 360.0f, 470.0f};
 
     UITheme m_theme{};
 
@@ -46,8 +46,8 @@ private:
     SliderWidget m_moonRotationSlider;
     SliderWidget m_planetOrbitSpeedSlider;
     SliderWidget m_moonOrbitSpeedSlider;
-    SliderWidget m_orbitRadiusSlider;
+    SliderWidget m_planetOrbitRadiusSlider;
+    SliderWidget m_moonOrbitRadiusSlider;
     SliderWidget m_eccentricitySlider;
 };
-
 #endif //PINGPONG_SOLARSYSTEMSETTINGSPANEL_H

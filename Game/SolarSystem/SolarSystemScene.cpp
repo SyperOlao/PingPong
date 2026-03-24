@@ -171,9 +171,12 @@ void SolarSystemScene::ApplyTuningRecursive(OrbitalBody& body)
             {
                 body.Orbit = body.BaseOrbit;
                 body.Orbit.AngularSpeed = body.BaseOrbit.AngularSpeed * m_tuning.PlanetOrbitSpeedScale;
-                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.OrbitRadiusScale;
-                body.Orbit.Eccentricity = std::clamp(body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale, 0.0f,
-                                                     0.92f);
+                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.PlanetOrbitRadiusScale;
+                body.Orbit.Eccentricity = std::clamp(
+                    body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale,
+                    0.0f,
+                    0.92f
+                );
             }
             break;
 
@@ -183,9 +186,12 @@ void SolarSystemScene::ApplyTuningRecursive(OrbitalBody& body)
             {
                 body.Orbit = body.BaseOrbit;
                 body.Orbit.AngularSpeed = body.BaseOrbit.AngularSpeed * m_tuning.MoonOrbitSpeedScale;
-                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.OrbitRadiusScale;
-                body.Orbit.Eccentricity = std::clamp(body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale, 0.0f,
-                                                     0.92f);
+                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.MoonOrbitRadiusScale;
+                body.Orbit.Eccentricity = std::clamp(
+                    body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale,
+                    0.0f,
+                    0.92f
+                );
             }
             break;
     }

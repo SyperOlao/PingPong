@@ -28,7 +28,6 @@
 #include "Core/UI/BitmapFont.h"
 #include "Game/SolarSystem/Entities/OrbitalBody.h"
 
-
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
 
@@ -47,7 +46,7 @@ namespace
     constexpr float kOrbitMinPitch = -1.35f;
     constexpr float kOrbitMaxPitch = 1.35f;
 
-    POINT GetMouseClientPosition(HWND__ *const hwnd)
+    POINT GetMouseClientPosition(HWND__* const hwnd)
     {
         POINT point{};
         GetCursorPos(&point);
@@ -56,8 +55,10 @@ namespace
     }
 }
 
-void SolarSystemGame::Initialize(AppContext &context) {
-    if (!context.IsValid()) {
+void SolarSystemGame::Initialize(AppContext& context)
+{
+    if (!context.IsValid())
+    {
         throw std::runtime_error("SolarSystemGame::Initialize received invalid AppContext.");
     }
 
@@ -69,7 +70,7 @@ void SolarSystemGame::Initialize(AppContext &context) {
     m_fpsCamera.SetRotation(0.0f, 0.15f);
 
     m_settingsPanel.Initialize();
-    m_settingsPanel.SetBounds(RectF{20.0f, 150.0f, 360.0f, 420.0f});
+    m_settingsPanel.SetBounds(RectF{20.0f, 170.0f, 360.0f, 470.0f});
 
     m_orbitCamera.SetTarget(Vector3(0.0f, 0.0f, 0.0f));
     m_orbitCamera.SetYawPitchRadius(m_orbitCameraYaw, m_orbitCameraPitch, m_orbitCameraRadius);
@@ -83,7 +84,8 @@ void SolarSystemGame::Initialize(AppContext &context) {
     m_initialized = true;
 }
 
-void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
+void SolarSystemGame::Update(AppContext& context, const float deltaTime)
+{
     if (!m_initialized)
     {
         return;
@@ -94,7 +96,7 @@ void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
 
     const auto& raw = RawInputHandler::Instance();
 
-    HWND__ *const hwnd = context.MainWindow->GetHandle();
+    HWND__* const hwnd = context.MainWindow->GetHandle();
     const auto [x, y] = GetMouseClientPosition(hwnd);
 
     MouseState mouse{};
@@ -132,15 +134,18 @@ void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
     RawInputHandler::Instance().ClearFrameDeltas();
 }
 
-void SolarSystemGame::Render(AppContext &context) {
-    if (!m_initialized) {
+void SolarSystemGame::Render(AppContext& context)
+{
+    if (!m_initialized)
+    {
         return;
     }
 
     const int width = context.Graphics->GetWidth();
     const int height = context.Graphics->GetHeight();
 
-    if (width <= 0 || height <= 0) {
+    if (width <= 0 || height <= 0)
+    {
         return;
     }
 
@@ -148,86 +153,151 @@ void SolarSystemGame::Render(AppContext &context) {
 
     m_renderer3D.BeginFrame3D();
 
-    const Camera &activeCamera = GetActiveCamera();
+    const Camera& activeCamera = GetActiveCamera();
     const Matrix view = activeCamera.GetViewMatrix();
     const Matrix projection = activeCamera.GetProjectionMatrix(aspectRatio);
 
-    for (const auto &root: m_scene.GetRoots()) {
+    for (const auto& root : m_scene.GetRoots())
+    {
         RenderBodyRecursive(*root, view, projection);
     }
 
-    if (context.Font != nullptr) {
+    if (context.Font != nullptr)
+    {
         const std::string cameraLabel = (m_cameraMode == CameraMode::Fps) ? "FPS" : "ORBIT";
         const std::string projectionLabel =
-                (activeCamera.GetProjectionMode() == ProjectionMode::PerspectiveFov)
-                    ? "FOV"
-                    : "OFFCENTER";
+            (activeCamera.GetProjectionMode() == ProjectionMode::PerspectiveFov)
+                ? "FOV"
+                : "OFFCENTER";
 
-        constexpr float hudScale = 0.72f;
-        constexpr float helpScale = 0.58f;
+        constexpr float hudScale = 0.54f;
+        constexpr float helpScale = 0.40f;
 
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 16.0f, std::format("FPS: {}", m_displayFps), Color(1, 1, 1, 1),
-                               hudScale);
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 36.0f, std::format("CAMERA: {}", cameraLabel),
-                               Color(1, 1, 1, 1), hudScale);
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 56.0f, std::format("PROJECTION: {}", projectionLabel),
-                               Color(1, 1, 1, 1), hudScale);
+        const float x = 16.0f;
+        float y = 16.0f;
 
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 84.0f, "F1 FPS  F2 ORBIT  P PROJECTION  RMB LOOK",
-                               Color(0.86f, 0.9f, 1.0f, 1.0f), helpScale);
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 100.0f, "FPS: WASD MOVE  ARROWS LOOK",
-                               Color(0.70f, 0.78f, 0.9f, 1.0f), helpScale);
-        BitmapFont::DrawString(*context.Shape2D, 16.0f, 116.0f, "ORBIT: RMB ROTATE  W/S ZOOM",
-                               Color(0.70f, 0.78f, 0.9f, 1.0f), helpScale);
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            std::format("FPS: {}", m_displayFps),
+            Color(1, 1, 1, 1),
+            hudScale
+        );
+        y += 18.0f;
+
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            std::format("CAMERA: {}", cameraLabel),
+            Color(1, 1, 1, 1),
+            hudScale
+        );
+        y += 18.0f;
+
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            std::format("PROJECTION: {}", projectionLabel),
+            Color(1, 1, 1, 1),
+            hudScale
+        );
+        y += 26.0f;
+
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            "F1 FPS   F2 ORBIT   P PROJECTION   TAB SETTINGS",
+            Color(0.86f, 0.90f, 1.0f, 1.0f),
+            helpScale
+        );
+        y += 15.0f;
+
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            "FPS: WASD MOVE   ARROWS LOOK   RMB LOOK",
+            Color(0.70f, 0.78f, 0.90f, 1.0f),
+            helpScale
+        );
+        y += 15.0f;
+
+        BitmapFont::DrawString(
+            *context.Shape2D,
+            x,
+            y,
+            "ORBIT: RMB ROTATE   W/S ZOOM   ARROWS TILT",
+            Color(0.70f, 0.78f, 0.90f, 1.0f),
+            helpScale
+        );
     }
+
     m_settingsPanel.Render(*context.Shape2D);
 }
 
-void SolarSystemGame::Shutdown(AppContext &context) {
-    (void) context;
+void SolarSystemGame::Shutdown(AppContext& context)
+{
+    (void)context;
     m_initialized = false;
 }
 
-void SolarSystemGame::UpdateFpsCounter(const float deltaTime) noexcept {
+void SolarSystemGame::UpdateFpsCounter(const float deltaTime) noexcept
+{
     m_fpsAccumulator += deltaTime;
     ++m_fpsFrames;
 
-    if (m_fpsAccumulator >= 0.25f) {
+    if (m_fpsAccumulator >= 0.25f)
+    {
         m_displayFps = static_cast<int>(std::round(static_cast<float>(m_fpsFrames) / m_fpsAccumulator));
         m_fpsAccumulator = 0.0f;
         m_fpsFrames = 0;
     }
 }
 
-void SolarSystemGame::HandleGlobalInput(const AppContext &context) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+void SolarSystemGame::HandleGlobalInput(const AppContext& context)
+{
+    const Keyboard& keyboard = context.Input->GetKeyboard();
 
-    if (keyboard.WasVirtualKeyPressed(VK_F1)) {
+    if (keyboard.WasVirtualKeyPressed(VK_F1))
+    {
         SetCameraMode(CameraMode::Fps);
     }
 
-    if (keyboard.WasVirtualKeyPressed(VK_F2)) {
+    if (keyboard.WasVirtualKeyPressed(VK_F2))
+    {
         SetCameraMode(CameraMode::Orbit);
     }
-    if (keyboard.WasVirtualKeyPressed('P')) {
-        if (Camera &camera = GetActiveCamera(); camera.GetProjectionMode() == ProjectionMode::PerspectiveFov) {
+
+    if (keyboard.WasVirtualKeyPressed('P'))
+    {
+        if (Camera& camera = GetActiveCamera(); camera.GetProjectionMode() == ProjectionMode::PerspectiveFov)
+        {
             camera.SetProjectionMode(ProjectionMode::PerspectiveOffCenter);
-        } else {
+        }
+        else
+        {
             camera.SetProjectionMode(ProjectionMode::PerspectiveFov);
         }
     }
 
-    if (keyboard.WasKeyPressed(Key::Escape)) {
+    if (keyboard.WasKeyPressed(Key::Escape))
+    {
         PostQuitMessage(0);
     }
+
     if (keyboard.WasKeyPressed(Key::Tab))
     {
         m_settingsPanel.Toggle();
     }
 }
 
-void SolarSystemGame::UpdateFpsCamera(const AppContext &context, const float deltaTime) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+void SolarSystemGame::UpdateFpsCamera(const AppContext& context, const float deltaTime)
+{
+    const Keyboard& keyboard = context.Input->GetKeyboard();
 
     if (keyboard.IsKeyDown(Key::W)) m_fpsCamera.MoveForward(kMoveSpeed * deltaTime);
     if (keyboard.IsKeyDown(Key::S)) m_fpsCamera.MoveForward(-kMoveSpeed * deltaTime);
@@ -237,7 +307,8 @@ void SolarSystemGame::UpdateFpsCamera(const AppContext &context, const float del
     float yawDelta = 0.0f;
     float pitchDelta = 0.0f;
 
-    if (const auto &raw = RawInputHandler::Instance(); raw.IsRightMouseDown()) {
+    if (const auto& raw = RawInputHandler::Instance(); raw.IsRightMouseDown())
+    {
         yawDelta += static_cast<float>(raw.GetMouseDeltaX()) * kMouseFpsSensitivity;
         pitchDelta -= static_cast<float>(raw.GetMouseDeltaY()) * kMouseFpsSensitivity;
     }
@@ -250,10 +321,12 @@ void SolarSystemGame::UpdateFpsCamera(const AppContext &context, const float del
     m_fpsCamera.AddRotation(yawDelta, pitchDelta);
 }
 
-void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float deltaTime) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+void SolarSystemGame::UpdateOrbitCamera(const AppContext& context, const float deltaTime)
+{
+    const Keyboard& keyboard = context.Input->GetKeyboard();
 
-    if (const auto &raw = RawInputHandler::Instance(); raw.IsRightMouseDown()) {
+    if (const auto& raw = RawInputHandler::Instance(); raw.IsRightMouseDown())
+    {
         m_orbitCameraYaw += static_cast<float>(raw.GetMouseDeltaX()) * kMouseOrbitSensitivity;
         m_orbitCameraPitch -= static_cast<float>(raw.GetMouseDeltaY()) * kMouseOrbitSensitivity;
     }
@@ -276,28 +349,33 @@ void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float d
     );
 }
 
-void SolarSystemGame::SetCameraMode(const CameraMode mode) noexcept {
+void SolarSystemGame::SetCameraMode(const CameraMode mode) noexcept
+{
     m_cameraMode = mode;
 }
 
-Camera &SolarSystemGame::GetActiveCamera() noexcept {
+Camera& SolarSystemGame::GetActiveCamera() noexcept
+{
     return (m_cameraMode == CameraMode::Fps)
-               ? static_cast<Camera &>(m_fpsCamera)
-               : static_cast<Camera &>(m_orbitCamera);
+        ? static_cast<Camera&>(m_fpsCamera)
+        : static_cast<Camera&>(m_orbitCamera);
 }
 
-const Camera &SolarSystemGame::GetActiveCamera() const noexcept {
+const Camera& SolarSystemGame::GetActiveCamera() const noexcept
+{
     return (m_cameraMode == CameraMode::Fps)
-               ? static_cast<const Camera &>(m_fpsCamera)
-               : static_cast<const Camera &>(m_orbitCamera);
+        ? static_cast<const Camera&>(m_fpsCamera)
+        : static_cast<const Camera&>(m_orbitCamera);
 }
 
 void SolarSystemGame::RenderBodyRecursive(
-    const OrbitalBody &body,
-    const Matrix &view,
-    const Matrix &projection
-) {
-    switch (body.MeshType) {
+    const OrbitalBody& body,
+    const Matrix& view,
+    const Matrix& projection
+)
+{
+    switch (body.MeshType)
+    {
         case BodyMeshType::Sphere:
             m_renderer3D.DrawSphere(body.GetWorldMatrix(), view, projection, body.BaseColor);
             break;
@@ -307,7 +385,8 @@ void SolarSystemGame::RenderBodyRecursive(
             break;
     }
 
-    for (const auto &child: body.GetChildren()) {
+    for (const auto& child : body.GetChildren())
+    {
         RenderBodyRecursive(*child, view, projection);
     }
 }

@@ -37,10 +37,15 @@ void SolarSystemSettingsPanel::Initialize()
     m_moonOrbitSpeedSlider.SetRange(0.2f, 5.0f);
     m_moonOrbitSpeedSlider.SetValue(1.0f);
 
-    m_orbitRadiusSlider.SetTheme(&m_theme);
-    m_orbitRadiusSlider.SetLabel("Orbit size");
-    m_orbitRadiusSlider.SetRange(0.5f, 2.5f);
-    m_orbitRadiusSlider.SetValue(1.0f);
+    m_planetOrbitRadiusSlider.SetTheme(&m_theme);
+    m_planetOrbitRadiusSlider.SetLabel("Planet orbit size");
+    m_planetOrbitRadiusSlider.SetRange(0.5f, 2.8f);
+    m_planetOrbitRadiusSlider.SetValue(1.0f);
+
+    m_moonOrbitRadiusSlider.SetTheme(&m_theme);
+    m_moonOrbitRadiusSlider.SetLabel("Moon orbit size");
+    m_moonOrbitRadiusSlider.SetRange(0.4f, 3.2f);
+    m_moonOrbitRadiusSlider.SetValue(1.0f);
 
     m_eccentricitySlider.SetTheme(&m_theme);
     m_eccentricitySlider.SetLabel("Orbit eccentricity");
@@ -78,7 +83,8 @@ void SolarSystemSettingsPanel::Update(const MouseState& mouse)
 
     if (m_orbitSection.IsExpanded())
     {
-        m_orbitRadiusSlider.Update(mouse);
+        m_planetOrbitRadiusSlider.Update(mouse);
+        m_moonOrbitRadiusSlider.Update(mouse);
         m_eccentricitySlider.Update(mouse);
     }
 }
@@ -110,7 +116,7 @@ void SolarSystemSettingsPanel::Render(ShapeRenderer2D& shapeRenderer) const
         shapeRenderer,
         titleX,
         titleY + 20.0f,
-        "TAB - HIDE | DRAG SLIDER TO APPLY",
+        "TAB - HIDE  |  DRAG SLIDER TO APPLY",
         Color(0.62f, 0.72f, 0.86f, 1.0f),
         hintScale
     );
@@ -128,7 +134,8 @@ void SolarSystemSettingsPanel::Render(ShapeRenderer2D& shapeRenderer) const
 
     if (m_orbitSection.IsExpanded())
     {
-        m_orbitRadiusSlider.Render(shapeRenderer);
+        m_planetOrbitRadiusSlider.Render(shapeRenderer);
+        m_moonOrbitRadiusSlider.Render(shapeRenderer);
         m_eccentricitySlider.Render(shapeRenderer);
     }
 }
@@ -140,7 +147,8 @@ SolarSystemTuning SolarSystemSettingsPanel::GetTuning() const noexcept
     tuning.MoonRotationScale = m_moonRotationSlider.GetValue();
     tuning.PlanetOrbitSpeedScale = m_planetOrbitSpeedSlider.GetValue();
     tuning.MoonOrbitSpeedScale = m_moonOrbitSpeedSlider.GetValue();
-    tuning.OrbitRadiusScale = m_orbitRadiusSlider.GetValue();
+    tuning.PlanetOrbitRadiusScale = m_planetOrbitRadiusSlider.GetValue();
+    tuning.MoonOrbitRadiusScale = m_moonOrbitRadiusSlider.GetValue();
     tuning.OrbitEccentricityScale = m_eccentricitySlider.GetValue();
     return tuning;
 }
@@ -156,7 +164,8 @@ bool SolarSystemSettingsPanel::IsInteracting() const noexcept
            m_moonRotationSlider.IsDragging() ||
            m_planetOrbitSpeedSlider.IsDragging() ||
            m_moonOrbitSpeedSlider.IsDragging() ||
-           m_orbitRadiusSlider.IsDragging() ||
+           m_planetOrbitRadiusSlider.IsDragging() ||
+           m_moonOrbitRadiusSlider.IsDragging() ||
            m_eccentricitySlider.IsDragging();
 }
 
@@ -196,7 +205,10 @@ void SolarSystemSettingsPanel::UpdateLayout() noexcept
 
     if (m_orbitSection.IsExpanded())
     {
-        m_orbitRadiusSlider.SetBounds(RectF{x, y, width, m_theme.SliderHeight});
+        m_planetOrbitRadiusSlider.SetBounds(RectF{x, y, width, m_theme.SliderHeight});
+        y += m_theme.SliderHeight + m_theme.WidgetSpacing;
+
+        m_moonOrbitRadiusSlider.SetBounds(RectF{x, y, width, m_theme.SliderHeight});
         y += m_theme.SliderHeight + m_theme.WidgetSpacing;
 
         m_eccentricitySlider.SetBounds(RectF{x, y, width, m_theme.SliderHeight});
@@ -216,7 +228,7 @@ float SolarSystemSettingsPanel::CalculateContentHeight() const noexcept
     height += m_theme.HeaderHeight + m_theme.WidgetSpacing;
     if (m_orbitSection.IsExpanded())
     {
-        height += (m_theme.SliderHeight * 2.0f) + m_theme.WidgetSpacing + m_theme.SectionSpacing;
+        height += (m_theme.SliderHeight * 3.0f) + (m_theme.WidgetSpacing * 2.0f) + m_theme.SectionSpacing;
     }
 
     return height;
