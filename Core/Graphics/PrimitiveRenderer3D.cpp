@@ -55,7 +55,8 @@ void PrimitiveRenderer3D::BeginFrame3D() const
 void PrimitiveRenderer3D::DrawBox(
     const Matrix& world,
     const Matrix& view,
-    const Matrix& projection
+    const Matrix& projection,
+    const DirectX::SimpleMath::Color& color
 ) const
 {
     if (m_graphics == nullptr || m_box == nullptr)
@@ -64,14 +65,14 @@ void PrimitiveRenderer3D::DrawBox(
     }
 
     BindTargets();
-
-    m_box->Draw(world, view, projection, DirectX::Colors::CornflowerBlue);
+    m_box->Draw(world, view, projection, color);
 }
 
 void PrimitiveRenderer3D::DrawSphere(
     const Matrix& world,
     const Matrix& view,
-    const Matrix& projection
+    const Matrix& projection,
+    const DirectX::SimpleMath::Color& color
 ) const
 {
     if (m_graphics == nullptr || m_sphere == nullptr)
@@ -80,8 +81,7 @@ void PrimitiveRenderer3D::DrawSphere(
     }
 
     BindTargets();
-
-    m_sphere->Draw(world, view, projection, DirectX::Colors::LightGoldenrodYellow);
+    m_sphere->Draw(world, view, projection, color);
 }
 
 void PrimitiveRenderer3D::CreatePrimitives()

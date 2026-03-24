@@ -22,10 +22,10 @@ const RectF& Wall::GetRect() const noexcept
 void Wall::Render(const ShapeRenderer2D& renderer) const
 {
     renderer.DrawFilledRect(
-        m_rect.x,
-        m_rect.y,
-        m_rect.width,
-        m_rect.height,
+        m_rect.X,
+        m_rect.Y,
+        m_rect.Width,
+        m_rect.Height,
         m_color
     );
 }

@@ -21,15 +21,17 @@ public:
     void BeginFrame3D() const;
 
     void DrawBox(
-        const DirectX::SimpleMath::Matrix& world,
-        const DirectX::SimpleMath::Matrix& view,
-        const DirectX::SimpleMath::Matrix& projection
-    ) const;
+       const DirectX::SimpleMath::Matrix& world,
+       const DirectX::SimpleMath::Matrix& view,
+       const DirectX::SimpleMath::Matrix& projection,
+       const DirectX::SimpleMath::Color& color
+   ) const;
 
     void DrawSphere(
         const DirectX::SimpleMath::Matrix& world,
         const DirectX::SimpleMath::Matrix& view,
-        const DirectX::SimpleMath::Matrix& projection
+        const DirectX::SimpleMath::Matrix& projection,
+        const DirectX::SimpleMath::Color& color
     ) const;
 
 private:

@@ -18,7 +18,7 @@ void InputSystem::Update()
 
 void InputSystem::Clear()
 {
-    RawInputHandler::Instance().Clear();
+    RawInputHandler::Instance().ClearAll();
     m_keyboard.Update();
 }
 

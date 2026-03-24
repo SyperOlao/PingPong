@@ -8,16 +8,10 @@
 #include <wrl/client.h>
 
 #include "../Graphics/Color.h"
+#include "Core/UI/Common/RectF.h"
 
 class GraphicsDevice;
 
-struct RectF final
-{
-    float x{0.0f};
-    float y{0.0f};
-    float width{0.0f};
-    float height{0.0f};
-};
 
 class ShapeRenderer2D final
 {

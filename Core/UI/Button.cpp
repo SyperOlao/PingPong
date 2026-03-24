@@ -26,18 +26,18 @@ void Button::Draw(
 
     renderer.DrawFilledRect(Bounds, background);
 
-    renderer.DrawFilledRect(Bounds.x, Bounds.y, Bounds.width, style.BorderThickness, border);
-    renderer.DrawFilledRect(Bounds.x, Bounds.y + Bounds.height - style.BorderThickness, Bounds.width,
+    renderer.DrawFilledRect(Bounds.X, Bounds.Y, Bounds.Width, style.BorderThickness, border);
+    renderer.DrawFilledRect(Bounds.X, Bounds.Y + Bounds.Height - style.BorderThickness, Bounds.Width,
                             style.BorderThickness, border);
-    renderer.DrawFilledRect(Bounds.x, Bounds.y, style.BorderThickness, Bounds.height, border);
-    renderer.DrawFilledRect(Bounds.x + Bounds.width - style.BorderThickness, Bounds.y, style.BorderThickness,
-                            Bounds.height, border);
+    renderer.DrawFilledRect(Bounds.X, Bounds.Y, style.BorderThickness, Bounds.Height, border);
+    renderer.DrawFilledRect(Bounds.X + Bounds.Width - style.BorderThickness, Bounds.Y, style.BorderThickness,
+                            Bounds.Height, border);
 
     const float textWidth = BitmapFont::MeasureTextWidth(Label, style.TextScale);
     const float textHeight = BitmapFont::MeasureTextHeight(style.TextScale);
 
-    const float textX = Bounds.x + (Bounds.width - textWidth) * 0.5f;
-    const float textY = Bounds.y + (Bounds.height - textHeight) * 0.5f;
+    const float textX = Bounds.X + (Bounds.Width - textWidth) * 0.5f;
+    const float textY = Bounds.Y + (Bounds.Height - textHeight) * 0.5f;
 
     BitmapFont::DrawString(renderer, textX, textY, Label, textColor, style.TextScale);
 }

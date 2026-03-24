@@ -28,7 +28,7 @@ void ShapeRenderer2D::Initialize(GraphicsDevice &graphics) {
 }
 
 void ShapeRenderer2D::DrawFilledRect(const RectF &rect, const Color &color) const {
-    DrawFilledRect(rect.x, rect.y, rect.width, rect.height, color);
+    DrawFilledRect(rect.X, rect.Y, rect.Width, rect.Height, color);
 }
 
 void ShapeRenderer2D::DrawFilledRect(

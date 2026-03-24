@@ -2,7 +2,7 @@
 // Created by SyperOlao on 19.03.2026.
 //
 #include "OrbitMath.h"
-#include "MathHelpers.h"
+#include "../../../Core/Math/MathHelpers.h"
 #include <cmath>
 #include <DirectXMath.h>
 

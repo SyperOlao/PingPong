@@ -13,19 +13,19 @@ RawInputHandler& RawInputHandler::Instance()
     return instance;
 }
 
-void RawInputHandler::Initialize(HWND__ *const targetWindow)
+void RawInputHandler::Initialize(HWND targetWindow)
 {
     if (targetWindow == nullptr)
     {
-        throw std::invalid_argument("RawInputHandler::Initialize received a null window handle");
+        throw std::invalid_argument("RawInputHandler::Initialize received null window handle");
     }
 
     m_targetWindow = targetWindow;
-    RegisterKeyboardDevice(targetWindow);
+    RegisterDevices(targetWindow);
     m_isInitialized = true;
 }
 
-LRESULT RawInputHandler::HandleMessage(const UINT message, const WPARAM /*wParam*/, const LPARAM lParam)
+LRESULT RawInputHandler::HandleMessage(const UINT message, const WPARAM, const LPARAM lParam)
 {
     if (message != WM_INPUT)
     {
@@ -36,9 +36,19 @@ LRESULT RawInputHandler::HandleMessage(const UINT message, const WPARAM /*wParam
     return 0;
 }
 
-void RawInputHandler::Clear() noexcept
+void RawInputHandler::ClearFrameDeltas() noexcept
+{
+    m_mouseDeltaX = 0;
+    m_mouseDeltaY = 0;
+}
+
+void RawInputHandler::ClearAll() noexcept
 {
     m_currentState.fill(false);
+    m_mouseDeltaX = 0;
+    m_mouseDeltaY = 0;
+    m_leftMouseDown = false;
+    m_rightMouseDown = false;
 }
 
 bool RawInputHandler::IsKeyDown(const USHORT virtualKey) const noexcept
@@ -51,21 +61,47 @@ bool RawInputHandler::IsKeyDown(const USHORT virtualKey) const noexcept
     return m_currentState[virtualKey];
 }
 
-void RawInputHandler::RegisterKeyboardDevice(HWND targetWindow)
+LONG RawInputHandler::GetMouseDeltaX() const noexcept
 {
-    RAWINPUTDEVICE rawInputDevice{};
-    rawInputDevice.usUsagePage = 0x01;
-    rawInputDevice.usUsage = 0x06;
-    rawInputDevice.dwFlags = RIDEV_INPUTSINK;
-    rawInputDevice.hwndTarget = targetWindow;
+    return m_mouseDeltaX;
+}
 
-    if (!RegisterRawInputDevices(&rawInputDevice, 1, sizeof(rawInputDevice)))
+LONG RawInputHandler::GetMouseDeltaY() const noexcept
+{
+    return m_mouseDeltaY;
+}
+
+bool RawInputHandler::IsLeftMouseDown() const noexcept
+{
+    return m_leftMouseDown;
+}
+
+bool RawInputHandler::IsRightMouseDown() const noexcept
+{
+    return m_rightMouseDown;
+}
+
+void RawInputHandler::RegisterDevices(HWND__ *const targetWindow)
+{
+    RAWINPUTDEVICE devices[2]{};
+
+    devices[0].usUsagePage = 0x01;
+    devices[0].usUsage = 0x06;
+    devices[0].dwFlags = RIDEV_INPUTSINK;
+    devices[0].hwndTarget = targetWindow;
+
+    devices[1].usUsagePage = 0x01;
+    devices[1].usUsage = 0x02;
+    devices[1].dwFlags = RIDEV_INPUTSINK;
+    devices[1].hwndTarget = targetWindow;
+
+    if (!RegisterRawInputDevices(devices, 2, sizeof(RAWINPUTDEVICE)))
     {
-        throw std::runtime_error("RegisterRawInputDevices failed for keyboard");
+        throw std::runtime_error("RegisterRawInputDevices failed for keyboard/mouse");
     }
 }
 
-void RawInputHandler::ProcessRawInput(const HRAWINPUT rawInputHandle)
+void RawInputHandler::ProcessRawInput(HRAWINPUT__ *const rawInputHandle)
 {
     if (!m_isInitialized)
     {
@@ -85,32 +121,35 @@ void RawInputHandler::ProcessRawInput(const HRAWINPUT rawInputHandle)
     }
 
     const auto* rawInput = reinterpret_cast<const RAWINPUT*>(buffer.data());
-    if (rawInput->header.dwType != RIM_TYPEKEYBOARD)
+
+    if (rawInput->header.dwType == RIM_TYPEKEYBOARD)
     {
+        const RAWKEYBOARD& keyboardData = rawInput->data.keyboard;
+        const USHORT virtualKey = NormalizeVirtualKey(keyboardData);
+
+        if (virtualKey < m_currentState.size())
+        {
+            const bool isBreak = (keyboardData.Flags & RI_KEY_BREAK) != 0;
+            m_currentState[virtualKey] = !isBreak;
+        }
+
         return;
     }
 
-    const RAWKEYBOARD& keyboardData = rawInput->data.keyboard;
-    const USHORT virtualKey = NormalizeVirtualKey(keyboardData);
-    if (virtualKey >= m_currentState.size())
+    if (rawInput->header.dwType == RIM_TYPEMOUSE)
     {
+        const RAWMOUSE& mouse = rawInput->data.mouse;
+
+        m_mouseDeltaX += mouse.lLastX;
+        m_mouseDeltaY += mouse.lLastY;
+
+        if (mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)  m_leftMouseDown = true;
+        if (mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)    m_leftMouseDown = false;
+        if (mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN) m_rightMouseDown = true;
+        if (mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)   m_rightMouseDown = false;
+
         return;
     }
-
-    if (keyboardData.Message == WM_KEYDOWN || keyboardData.Message == WM_SYSKEYDOWN)
-    {
-        m_currentState[virtualKey] = true;
-        return;
-    }
-
-    if (keyboardData.Message == WM_KEYUP || keyboardData.Message == WM_SYSKEYUP)
-    {
-        m_currentState[virtualKey] = false;
-        return;
-    }
-
-    const bool isBreak = (keyboardData.Flags & RI_KEY_BREAK) != 0;
-    m_currentState[virtualKey] = !isBreak;
 }
 
 USHORT RawInputHandler::NormalizeVirtualKey(const RAWKEYBOARD& keyboardData) noexcept

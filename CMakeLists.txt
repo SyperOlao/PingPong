@@ -71,8 +71,8 @@ add_executable(PingPong
         Core/Graphics/OrbitCamera.cpp
         Core/Graphics/OrbitCamera.h
         Core/Math/Transform3D.h
-        Core/Math/OrbitMath.h
-        Core/Math/OrbitMath.cpp
+        Game/SolarSystem/Systems/OrbitMath.h
+        Game/SolarSystem/Systems/OrbitMath.cpp
         Game/SolarSystem/Entities/OrbitalBody.cpp
         Game/SolarSystem/Entities/OrbitalBody.h
         Core/Graphics/MeshData.h
@@ -91,6 +91,18 @@ add_executable(PingPong
         Core/Graphics/FpsCamera.cpp
         Core/Graphics/PrimitiveRenderer3D.cpp
         Core/Graphics/PrimitiveRenderer3D.cpp
+        Game/SolarSystem/UI/SolarSystemSettingsPanel.cpp
+        Game/SolarSystem/UI/SolarSystemSettingsPanel.h
+        Game/SolarSystem/UI/SolarSystemSettingsPanel.h
+        Game/SolarSystem/Systems/SolarSystemTuning.h
+        Core/UI/Widgets/SliderWidget.cpp
+        Core/UI/Widgets/SliderWidget.cpp
+        Core/UI/Widgets/SliderWidget.h
+        Core/UI/Widgets/CollapsibleSection.cpp
+        Core/UI/Widgets/CollapsibleSection.h
+        Core/UI/Common/UITheme.h
+        Core/UI/Common/RectF.h
+        Core/UI/Common/MouseState.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE

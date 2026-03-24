@@ -8,12 +8,19 @@
 #include <SimpleMath.h>
 #include <memory>
 #include <vector>
-#include "Core/Math/OrbitMath.h"
+#include "../Systems/OrbitMath.h"
 
 enum class BodyMeshType : std::uint8_t
 {
     Sphere = 0,
     Box
+};
+
+enum class BodyVisualClass : std::uint8_t
+{
+    Star = 0,
+    Planet,
+    Moon
 };
 
 class OrbitalBody final
@@ -29,10 +36,15 @@ public:
     [[nodiscard]] const DirectX::SimpleMath::Matrix& GetWorldMatrix() const noexcept;
     [[nodiscard]] const std::vector<std::shared_ptr<OrbitalBody>>& GetChildren() const noexcept;
 
-public:
+
     BodyMeshType MeshType{BodyMeshType::Sphere};
+    BodyVisualClass VisualClass{BodyVisualClass::Planet};
 
     DirectX::SimpleMath::Vector3 Scale{1.0f, 1.0f, 1.0f};
+
+    DirectX::SimpleMath::Color BaseColor{1.0f, 1.0f, 1.0f, 1.0f};
+    float EmissiveStrength{0.0f};
+    bool ShowOrbit{true};
 
     OrbitalParams Orbit{};
     bool HasOrbit{false};
