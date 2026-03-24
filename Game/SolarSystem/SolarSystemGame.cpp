@@ -69,7 +69,7 @@ void SolarSystemGame::Initialize(AppContext &context) {
     m_fpsCamera.SetRotation(0.0f, 0.15f);
 
     m_settingsPanel.Initialize();
-    m_settingsPanel.SetBounds(RectF{20.0f, 150.0f, 300.0f, 320.0f});
+    m_settingsPanel.SetBounds(RectF{20.0f, 150.0f, 360.0f, 420.0f});
 
     m_orbitCamera.SetTarget(Vector3(0.0f, 0.0f, 0.0f));
     m_orbitCamera.SetYawPitchRadius(m_orbitCameraYaw, m_orbitCameraPitch, m_orbitCameraRadius);
@@ -108,7 +108,7 @@ void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
     m_prevLeftMouseDown = raw.IsLeftMouseDown();
 
     const SolarSystemTuning tuning = m_settingsPanel.GetTuning();
-    m_scene.Update(deltaTime);
+    m_scene.SetTuning(tuning);
 
     if (const bool uiInteracting = m_settingsPanel.IsInteracting(); !uiInteracting)
     {

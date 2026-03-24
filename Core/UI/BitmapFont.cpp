@@ -12,10 +12,13 @@
 
 #include "../Graphics2D/ShapeRenderer2D.h"
 
-namespace {
+
+namespace
+{
     using Glyph = std::array<std::string_view, 7>;
 
-    const std::unordered_map<char, Glyph> &GetGlyphs() {
+    const std::unordered_map<char, Glyph>& GetGlyphs()
+    {
         static const std::unordered_map<char, Glyph> glyphs
         {
             {'0', {{"01110", "10001", "10011", "10101", "11001", "10001", "01110"}}},
@@ -55,6 +58,7 @@ namespace {
             {'Z', {{"11111", "00001", "00010", "00100", "01000", "10000", "11111"}}},
             {':', {{"00000", "00100", "00100", "00000", "00100", "00100", "00000"}}},
             {'-', {{"00000", "00000", "00000", "11111", "00000", "00000", "00000"}}},
+            {'.', {{"00000", "00000", "00000", "00000", "00000", "00110", "00110"}}},
             {'J', {{"00111", "00010", "00010", "00010", "10010", "10010", "01100"}}},
             {'+', {{"00000", "00100", "00100", "11111", "00100", "00100", "00000"}}},
             {'/', {{"00001", "00010", "00100", "01000", "10000", "00000", "00000"}}},
@@ -68,8 +72,10 @@ namespace {
     }
 }
 
-float BitmapFont::MeasureTextWidth(const std::string_view text, const float scale) noexcept {
-    if (text.empty()) {
+float BitmapFont::MeasureTextWidth(const std::string_view text, const float scale) noexcept
+{
+    if (text.empty())
+    {
         return 0.0f;
     }
 
@@ -77,46 +83,53 @@ float BitmapFont::MeasureTextWidth(const std::string_view text, const float scal
     return glyphAdvance * static_cast<float>(text.size()) - (GlyphSpacing * PixelSize * scale);
 }
 
-float BitmapFont::MeasureTextHeight(const float scale) noexcept {
+float BitmapFont::MeasureTextHeight(const float scale) noexcept
+{
     return static_cast<float>(GlyphHeight) * PixelSize * scale;
 }
 
 void BitmapFont::DrawString(
-    const ShapeRenderer2D &renderer,
+    const ShapeRenderer2D& renderer,
     float x,
     float y,
     const std::string_view text,
-    const Color &color,
+    const Color& color,
     const float scale
-) {
+)
+{
     const float glyphAdvance = (static_cast<float>(GlyphWidth) + GlyphSpacing) * PixelSize * scale;
 
-    for (const char character: text) {
+    for (const char character : text)
+    {
         DrawGlyph(renderer, x, y, character, color, scale);
         x += glyphAdvance;
     }
 }
 
 void BitmapFont::DrawGlyph(
-    const ShapeRenderer2D &renderer,
+    const ShapeRenderer2D& renderer,
     const float x,
     const float y,
     const char character,
-    const Color &color,
+    const Color& color,
     const float scale
-) {
-    const auto &glyphs = GetGlyphs();
+)
+{
+    const auto& glyphs = GetGlyphs();
     const char upper = static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
 
     const auto glyphIt = glyphs.find(upper);
     const auto fallbackIt = glyphs.find(' ');
-    const Glyph &glyph = glyphIt != glyphs.end() ? glyphIt->second : fallbackIt->second;
+    const Glyph& glyph = glyphIt != glyphs.end() ? glyphIt->second : fallbackIt->second;
 
     const float pixel = PixelSize * scale;
 
-    for (int row = 0; row < GlyphHeight; ++row) {
-        for (int column = 0; column < GlyphWidth; ++column) {
-            if (glyph[static_cast<std::size_t>(row)][static_cast<std::size_t>(column)] != '1') {
+    for (int row = 0; row < GlyphHeight; ++row)
+    {
+        for (int column = 0; column < GlyphWidth; ++column)
+        {
+            if (glyph[static_cast<std::size_t>(row)][static_cast<std::size_t>(column)] != '1')
+            {
                 continue;
             }
 

@@ -36,7 +36,7 @@ public:
     [[nodiscard]] const DirectX::SimpleMath::Matrix& GetWorldMatrix() const noexcept;
     [[nodiscard]] const std::vector<std::shared_ptr<OrbitalBody>>& GetChildren() const noexcept;
 
-
+public:
     BodyMeshType MeshType{BodyMeshType::Sphere};
     BodyVisualClass VisualClass{BodyVisualClass::Planet};
 
@@ -47,10 +47,12 @@ public:
     bool ShowOrbit{true};
 
     OrbitalParams Orbit{};
+    OrbitalParams BaseOrbit{};
     bool HasOrbit{false};
 
     float SelfRotationAngle{0.0f};
     float SelfRotationSpeed{0.0f};
+    float BaseSelfRotationSpeed{0.0f};
 
 private:
     float m_currentMeanAnomaly{0.0f};
@@ -58,6 +60,5 @@ private:
 
     std::vector<std::shared_ptr<OrbitalBody>> m_children;
 };
-
 
 #endif //PINGPONG_ORBITALBODY_H

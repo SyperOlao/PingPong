@@ -1,30 +1,50 @@
 //
 // Created by SyperOlao on 19.03.2026.
 //
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
 #include "SolarSystemScene.h"
 
-#include <array>
-#include <DirectXMath.h>
 
+#include <algorithm>
+#include <DirectXMath.h>
 using namespace DirectX::SimpleMath;
 
-void SolarSystemScene::Initialize() {
+void SolarSystemScene::Initialize()
+{
     CreateDemoSystem();
+    ApplyTuning();
 }
 
-void SolarSystemScene::Update(const float deltaTime) const {
-    for (const auto &root: m_roots) {
+void SolarSystemScene::Update(const float deltaTime)
+{
+    ApplyTuning();
+
+    for (const auto& root : m_roots)
+    {
         root->Update(deltaTime);
         root->UpdateWorldMatrix(Matrix::Identity);
     }
 }
 
-const std::vector<std::shared_ptr<OrbitalBody> > &SolarSystemScene::GetRoots() const noexcept {
+void SolarSystemScene::SetTuning(const SolarSystemTuning& tuning) noexcept
+{
+    m_tuning = tuning;
+}
+
+const std::vector<std::shared_ptr<OrbitalBody>>& SolarSystemScene::GetRoots() const noexcept
+{
     return m_roots;
 }
 
-void SolarSystemScene::CreateDemoSystem() {
+void SolarSystemScene::CreateDemoSystem()
+{
     m_roots.clear();
 
     const auto sun = std::make_shared<OrbitalBody>();
@@ -33,10 +53,12 @@ void SolarSystemScene::CreateDemoSystem() {
     sun->Scale = Vector3(5.2f, 5.2f, 5.2f);
     sun->BaseColor = Color(1.0f, 0.88f, 0.18f, 1.0f);
     sun->SelfRotationSpeed = 0.18f;
+    sun->BaseSelfRotationSpeed = sun->SelfRotationSpeed;
     sun->ShowOrbit = false;
 
-    auto makePlanet = [](const BodyMeshType mesh, const Vector3 &scale, const Color &color, const OrbitalParams &orbit,
-                         const float selfSpeed) {
+    auto makePlanet = [](const BodyMeshType mesh, const Vector3& scale, const Color& color, const OrbitalParams& orbit,
+                         const float selfSpeed)
+    {
         auto body = std::make_shared<OrbitalBody>();
         body->MeshType = mesh;
         body->VisualClass = BodyVisualClass::Planet;
@@ -44,13 +66,16 @@ void SolarSystemScene::CreateDemoSystem() {
         body->BaseColor = color;
         body->HasOrbit = true;
         body->Orbit = orbit;
+        body->BaseOrbit = orbit;
         body->SelfRotationSpeed = selfSpeed;
+        body->BaseSelfRotationSpeed = selfSpeed;
         body->ShowOrbit = true;
         return body;
     };
 
-    auto makeMoon = [](const BodyMeshType mesh, const Vector3 &scale, const Color &color, const OrbitalParams &orbit,
-                       const float selfSpeed) {
+    auto makeMoon = [](const BodyMeshType mesh, const Vector3& scale, const Color& color, const OrbitalParams& orbit,
+                       const float selfSpeed)
+    {
         auto body = std::make_shared<OrbitalBody>();
         body->MeshType = mesh;
         body->VisualClass = BodyVisualClass::Moon;
@@ -58,7 +83,9 @@ void SolarSystemScene::CreateDemoSystem() {
         body->BaseColor = color;
         body->HasOrbit = true;
         body->Orbit = orbit;
+        body->BaseOrbit = orbit;
         body->SelfRotationSpeed = selfSpeed;
+        body->BaseSelfRotationSpeed = selfSpeed;
         body->ShowOrbit = true;
         return body;
     };
@@ -120,4 +147,51 @@ void SolarSystemScene::CreateDemoSystem() {
     sun->AddChild(planet3);
 
     m_roots.push_back(sun);
+}
+
+void SolarSystemScene::ApplyTuning()
+{
+    for (const auto& root : m_roots)
+    {
+        ApplyTuningRecursive(*root);
+    }
+}
+
+void SolarSystemScene::ApplyTuningRecursive(OrbitalBody& body)
+{
+    switch (body.VisualClass)
+    {
+        case BodyVisualClass::Star:
+            body.SelfRotationSpeed = body.BaseSelfRotationSpeed;
+            break;
+
+        case BodyVisualClass::Planet:
+            body.SelfRotationSpeed = body.BaseSelfRotationSpeed * m_tuning.PlanetRotationScale;
+            if (body.HasOrbit)
+            {
+                body.Orbit = body.BaseOrbit;
+                body.Orbit.AngularSpeed = body.BaseOrbit.AngularSpeed * m_tuning.PlanetOrbitSpeedScale;
+                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.OrbitRadiusScale;
+                body.Orbit.Eccentricity = std::clamp(body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale, 0.0f,
+                                                     0.92f);
+            }
+            break;
+
+        case BodyVisualClass::Moon:
+            body.SelfRotationSpeed = body.BaseSelfRotationSpeed * m_tuning.MoonRotationScale;
+            if (body.HasOrbit)
+            {
+                body.Orbit = body.BaseOrbit;
+                body.Orbit.AngularSpeed = body.BaseOrbit.AngularSpeed * m_tuning.MoonOrbitSpeedScale;
+                body.Orbit.SemiMajorAxis = body.BaseOrbit.SemiMajorAxis * m_tuning.OrbitRadiusScale;
+                body.Orbit.Eccentricity = std::clamp(body.BaseOrbit.Eccentricity * m_tuning.OrbitEccentricityScale, 0.0f,
+                                                     0.92f);
+            }
+            break;
+    }
+
+    for (const auto& child : body.GetChildren())
+    {
+        ApplyTuningRecursive(*child);
+    }
 }

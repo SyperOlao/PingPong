@@ -32,6 +32,7 @@ private:
     [[nodiscard]] RectF GetTrackRect() const noexcept;
     [[nodiscard]] RectF GetHandleRect() const noexcept;
     [[nodiscard]] float GetNormalizedValue() const noexcept;
+    [[nodiscard]] std::string BuildValueText() const;
     void SetValueFromMouse(float mouseX) noexcept;
 
 private:
@@ -46,6 +47,5 @@ private:
 
     const UITheme* m_theme{nullptr};
 };
-
 
 #endif //PINGPONG_SLIDERWIDGET_H

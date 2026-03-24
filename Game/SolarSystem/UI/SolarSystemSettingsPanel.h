@@ -31,10 +31,11 @@ public:
 
 private:
     void UpdateLayout() noexcept;
+    [[nodiscard]] float CalculateContentHeight() const noexcept;
 
 private:
     bool m_isOpen{true};
-    RectF m_bounds{20.0f, 150.0f, 300.0f, 320.0f};
+    RectF m_bounds{20.0f, 150.0f, 360.0f, 420.0f};
 
     UITheme m_theme{};
 
@@ -43,8 +44,9 @@ private:
 
     SliderWidget m_planetRotationSlider;
     SliderWidget m_moonRotationSlider;
-    SliderWidget m_planetOrbitSlider;
-    SliderWidget m_moonOrbitSlider;
+    SliderWidget m_planetOrbitSpeedSlider;
+    SliderWidget m_moonOrbitSpeedSlider;
+    SliderWidget m_orbitRadiusSlider;
     SliderWidget m_eccentricitySlider;
 };
 
