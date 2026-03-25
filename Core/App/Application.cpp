@@ -53,13 +53,13 @@ void Application::Initialize() {
     m_renderContext.Initialize(m_graphics);
     m_assetCache.Initialize(m_graphics);
 
-    m_context.MainWindow = &m_window;
-    m_context.Input = &m_input;
-    m_context.Graphics = &m_graphics;
-    m_context.Shape2D = &m_renderContext.GetShapeRenderer2D();
-    m_context.Font = &m_bitmapFont;
-    m_context.Audio = &m_audio;
-    m_context.Assets = &m_assetCache;
+    m_context.Platform.MainWindow = &m_window;
+    m_context.Input.System = &m_input;
+    m_context.Graphics.Device = &m_graphics;
+    m_context.Graphics.Render = &m_renderContext;
+    m_context.Ui.Font = &m_bitmapFont;
+    m_context.Audio.System = &m_audio;
+    m_context.Assets.Cache = &m_assetCache;
 
     if (!m_context.IsValid()) {
         throw std::runtime_error("Application failed to build a valid AppContext.");
@@ -67,6 +67,10 @@ void Application::Initialize() {
 
     m_game->Initialize(m_context);
     m_timer.Reset();
+}
+
+void Application::ShutdownEngineServices() {
+    m_audio.Shutdown();
 }
 
 int Application::Run() {
@@ -83,7 +87,7 @@ int Application::Run() {
     }
 
     m_game->Shutdown(m_context);
-    m_audio.Shutdown();
+    ShutdownEngineServices();
     return 0;
 }
 

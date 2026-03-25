@@ -15,7 +15,9 @@ add_executable(PingPong
         Core/App/Timer.cpp
         Core/App/Timer.h
         Core/App/IGame.h
+        Core/App/EngineServices.h
         Core/App/AppContext.h
+        Core/App/AppContext.cpp
 
         Core/Platform/Window.cpp
         Core/Platform/Window.h

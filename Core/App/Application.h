@@ -30,11 +30,6 @@ struct ApplicationDesc final {
     Color ClearColor{0.05f, 0.05f, 0.08f, 1.0f};
 };
 
-class Window;
-class InputSystem;
-class GraphicsDevice;
-class ShapeRenderer2D;
-class BitmapFont;
 class IGame;
 
 class Application final {
@@ -43,17 +38,23 @@ public:
 
     ~Application() = default;
 
-    Application(const Application&) = delete;
-    Application& operator=(const Application&) = delete;
+    Application(const Application &) = delete;
 
-    Application(Application&&) = delete;
-    Application& operator=(Application&&) = delete;
+    Application &operator=(const Application &) = delete;
+
+    Application(Application &&) = delete;
+
+    Application &operator=(Application &&) = delete;
 
     int Run();
 
 private:
     void Initialize();
+
+    void ShutdownEngineServices();
+
     void Update(float deltaTime);
+
     void Render();
 
 private:
@@ -61,9 +62,9 @@ private:
     ApplicationDesc m_desc{};
     std::unique_ptr<IGame> m_game;
 
-    Window m_window;
-    InputSystem m_input;
-    GraphicsDevice m_graphics;
+    Window m_window{};
+    InputSystem m_input{};
+    GraphicsDevice m_graphics{};
     RenderContext m_renderContext{};
     BitmapFont m_bitmapFont{};
     Timer m_timer{};

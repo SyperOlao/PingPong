@@ -2,35 +2,27 @@
 // Created by SyperOlao on 18.03.2026.
 //
 
-#ifndef MYPROJECT_APPCONTEXT_H
-#define MYPROJECT_APPCONTEXT_H
+#ifndef PINGPONG_APPCONTEXT_H
+#define PINGPONG_APPCONTEXT_H
 
+#include "EngineServices.h"
 
-class AssetCache;
-class Window;
-class InputSystem;
-class GraphicsDevice;
 class ShapeRenderer2D;
-class BitmapFont;
-class AudioSystem;
+class PrimitiveRenderer3D;
 
-struct AppContext {
-    Window *MainWindow{nullptr};
-    InputSystem *Input{nullptr};
-    GraphicsDevice *Graphics{nullptr};
-    ShapeRenderer2D *Shape2D{nullptr};
-    BitmapFont *Font{nullptr};
-    AudioSystem *Audio{nullptr};
-    AssetCache *Assets{nullptr};
+struct AppContext final {
+    PlatformServices Platform{};
+    InputServices Input{};
+    GraphicsServices Graphics{};
+    UiServices Ui{};
+    AudioServices Audio{};
+    AssetServices Assets{};
 
-    [[nodiscard]] bool IsValid() const noexcept {
-        return MainWindow != nullptr
-               && Input != nullptr
-               && Graphics != nullptr
-               && Shape2D != nullptr
-               && Audio != nullptr;
-    }
+    [[nodiscard]] bool IsValid() const noexcept;
+
+    [[nodiscard]] ShapeRenderer2D &GetShapeRenderer2D() const;
+
+    [[nodiscard]] PrimitiveRenderer3D &GetPrimitiveRenderer3D() const;
 };
 
-
-#endif //MYPROJECT_APPCONTEXT_H
+#endif //PINGPONG_APPCONTEXT_H

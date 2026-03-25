@@ -63,7 +63,7 @@ void SolarSystemGame::Initialize(AppContext &context) {
 
     m_scene.Initialize();
 
-    m_renderer3D.Initialize(*context.Graphics);
+    m_renderer3D.Initialize(*context.Graphics.Device);
     m_spaceBackdrop.Initialize();
 
     m_fpsCamera.SetPosition(Vector3(0.0f, 8.0f, -30.0f));
@@ -96,7 +96,7 @@ void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
 
     const auto &raw = RawInputHandler::Instance();
 
-    HWND__ *const hwnd = context.MainWindow->GetHandle();
+    HWND__ *const hwnd = context.Platform.MainWindow->GetHandle();
     const auto [x, y] = GetMouseClientPosition(hwnd);
 
     MouseState mouse{};
@@ -106,9 +106,9 @@ void SolarSystemGame::Update(AppContext &context, const float deltaTime) {
     mouse.LeftPressed = raw.IsLeftMouseDown() && !m_prevLeftMouseDown;
     mouse.LeftReleased = !raw.IsLeftMouseDown() && m_prevLeftMouseDown;
 
-    if (const SolarSystemUiAction uiAction = m_settingsPanel.Update(mouse); uiAction == SolarSystemUiAction::SliderMoved && context.Audio != nullptr)
+    if (const SolarSystemUiAction uiAction = m_settingsPanel.Update(mouse); uiAction == SolarSystemUiAction::SliderMoved && context.Audio.System != nullptr)
     {
-        context.Audio->PlayOneShot("solar_ui_move",  0.45f);
+        context.Audio.System->PlayOneShot("solar_ui_move",  0.45f);
     }
     m_prevLeftMouseDown = raw.IsLeftMouseDown();
 
@@ -142,8 +142,8 @@ void SolarSystemGame::Render(AppContext &context) {
         return;
     }
 
-    const int width = context.Graphics->GetWidth();
-    const int height = context.Graphics->GetHeight();
+    const int width = context.Graphics.Device->GetWidth();
+    const int height = context.Graphics.Device->GetHeight();
 
     if (width <= 0 || height <= 0) {
         return;
@@ -167,7 +167,7 @@ void SolarSystemGame::Render(AppContext &context) {
         RenderBodyRecursive(*root, view, projection);
     }
 
-    if (context.Font != nullptr) {
+    if (context.Ui.Font != nullptr) {
         const std::string cameraLabel = (m_cameraMode == CameraMode::Fps) ? "FPS" : "ORBIT";
         const std::string projectionLabel =
                 (activeCamera.GetProjectionMode() == ProjectionMode::PerspectiveFov)
@@ -180,18 +180,18 @@ void SolarSystemGame::Render(AppContext &context) {
         const float x = 16.0f;
         float y = 16.0f;
 
-        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("FPS: {}", m_displayFps), Color(1, 1, 1, 1),
+        BitmapFont::DrawString(context.GetShapeRenderer2D(), x, y, std::format("FPS: {}", m_displayFps), Color(1, 1, 1, 1),
                                hudScale);
         y += 18.0f;
-        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("CAMERA: {}", cameraLabel), Color(1, 1, 1, 1),
+        BitmapFont::DrawString(context.GetShapeRenderer2D(), x, y, std::format("CAMERA: {}", cameraLabel), Color(1, 1, 1, 1),
                                hudScale);
         y += 18.0f;
-        BitmapFont::DrawString(*context.Shape2D, x, y, std::format("PROJECTION: {}", projectionLabel),
+        BitmapFont::DrawString(context.GetShapeRenderer2D(), x, y, std::format("PROJECTION: {}", projectionLabel),
                                Color(1, 1, 1, 1), hudScale);
         y += 26.0f;
 
         BitmapFont::DrawString(
-            *context.Shape2D,
+            context.GetShapeRenderer2D(),
             x,
             y,
             "F1 FPS   F2 ORBIT   P PROJECTION   TAB SETTINGS",
@@ -201,7 +201,7 @@ void SolarSystemGame::Render(AppContext &context) {
         y += 15.0f;
 
         BitmapFont::DrawString(
-            *context.Shape2D,
+            context.GetShapeRenderer2D(),
             x,
             y,
             "FPS: WASD MOVE   ARROWS LOOK   RMB LOOK",
@@ -211,7 +211,7 @@ void SolarSystemGame::Render(AppContext &context) {
         y += 15.0f;
 
         BitmapFont::DrawString(
-            *context.Shape2D,
+            context.GetShapeRenderer2D(),
             x,
             y,
             "ORBIT: RMB ROTATE   W/S ZOOM   ARROWS TILT",
@@ -220,7 +220,7 @@ void SolarSystemGame::Render(AppContext &context) {
         );
     }
 
-    m_settingsPanel.Render(*context.Shape2D);
+    m_settingsPanel.Render(context.GetShapeRenderer2D());
 }
 
 void SolarSystemGame::Shutdown(AppContext &context) {
@@ -240,7 +240,7 @@ void SolarSystemGame::UpdateFpsCounter(const float deltaTime) noexcept {
 }
 
 void SolarSystemGame::HandleGlobalInput(const AppContext &context) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+    const Keyboard &keyboard = context.Input.System->GetKeyboard();
 
     if (keyboard.WasVirtualKeyPressed(VK_F1)) {
         SetCameraMode(CameraMode::Fps);
@@ -268,7 +268,7 @@ void SolarSystemGame::HandleGlobalInput(const AppContext &context) {
 }
 
 void SolarSystemGame::UpdateFpsCamera(const AppContext &context, const float deltaTime) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+    const Keyboard &keyboard = context.Input.System->GetKeyboard();
 
     if (keyboard.IsKeyDown(Key::W)) m_fpsCamera.MoveForward(kMoveSpeed * deltaTime);
     if (keyboard.IsKeyDown(Key::S)) m_fpsCamera.MoveForward(-kMoveSpeed * deltaTime);
@@ -292,7 +292,7 @@ void SolarSystemGame::UpdateFpsCamera(const AppContext &context, const float del
 }
 
 void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float deltaTime) {
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+    const Keyboard &keyboard = context.Input.System->GetKeyboard();
 
     if (const auto &raw = RawInputHandler::Instance(); raw.IsRightMouseDown()) {
         m_orbitCameraYaw += static_cast<float>(raw.GetMouseDeltaX()) * kMouseOrbitSensitivity;
@@ -315,31 +315,31 @@ void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float d
 
 void SolarSystemGame::InitializeEngineAudio(const AppContext& context)
 {
-    if (context.Audio == nullptr)
+    if (context.Audio.System == nullptr)
     {
         throw std::runtime_error("SolarSystemGame::InitializeEngineAudio requires a valid AudioSystem.");
     }
 
-    m_engineAudio.Initialize(*context.Audio);
+    m_engineAudio.Initialize(*context.Audio.System);
 }
 
 void SolarSystemGame::UpdateEngineAudio(const AppContext& context, const float deltaTime)
 {
-    if (context.Audio == nullptr)
+    if (context.Audio.System == nullptr)
     {
         return;
     }
 
-    m_engineAudio.Update(*context.Audio, IsEngineMovementInputActive(context), deltaTime);
+    m_engineAudio.Update(*context.Audio.System, IsEngineMovementInputActive(context), deltaTime);
 }
 
 void SolarSystemGame::ShutdownEngineAudio(const AppContext &context) noexcept {
-    if (context.Audio == nullptr)
+    if (context.Audio.System == nullptr)
     {
         return;
     }
 
-    m_engineAudio.Shutdown(*context.Audio);
+    m_engineAudio.Shutdown(*context.Audio.System);
 }
 
 bool SolarSystemGame::IsEngineMovementInputActive(const AppContext &context) const noexcept {
@@ -348,7 +348,7 @@ bool SolarSystemGame::IsEngineMovementInputActive(const AppContext &context) con
     }
 
 
-    const Keyboard &keyboard = context.Input->GetKeyboard();
+    const Keyboard &keyboard = context.Input.System->GetKeyboard();
 
     return keyboard.IsKeyDown(Key::W)
            || keyboard.IsKeyDown(Key::A)

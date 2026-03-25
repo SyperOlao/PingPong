@@ -24,7 +24,7 @@ void PongScene::RenderGameplay(
     const Difficulty difficulty
 ) const
 {
-    auto& renderer = *context.Shape2D;
+    auto& renderer = context.GetShapeRenderer2D();
 
     m_playField.Render(renderer, leftPaddle, rightPaddle, ball);
     ScoreBoard::Render(renderer, leftScore, rightScore, fps, gameMode, difficulty);

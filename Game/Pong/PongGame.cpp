@@ -38,15 +38,15 @@ void PongGame::Initialize(AppContext &context) {
     m_ui.SyncSettings(m_difficulty, m_matchRule);
     m_ui.SetScreen(PongUI::ScreenState::MainMenu);
 
-    context.Audio->Load("ui_move", "Game/Pong/Assets/UI_MOVE.wav");
-    context.Audio->Load("ui_accept", "Game/Pong/Assets/UI_ACCEPT.wav");
-    context.Audio->Load("paddle_hit", "Game/Pong/Assets/PING.wav");
-    context.Audio->Load("point", "Game/Pong/Assets/POINT.wav");
-    context.Audio->Load("wall_hit", "Game/Pong/Assets/BALL_WALL.wav");
-    context.Audio->Load("score", "Game/Pong/Assets/POINT.wav");
-    context.Audio->Load("music_game", "Game/Pong/Assets/MUSIC.wav");
+    context.Audio.System->Load("ui_move", "Game/Pong/Assets/UI_MOVE.wav");
+    context.Audio.System->Load("ui_accept", "Game/Pong/Assets/UI_ACCEPT.wav");
+    context.Audio.System->Load("paddle_hit", "Game/Pong/Assets/PING.wav");
+    context.Audio.System->Load("point", "Game/Pong/Assets/POINT.wav");
+    context.Audio.System->Load("wall_hit", "Game/Pong/Assets/BALL_WALL.wav");
+    context.Audio.System->Load("score", "Game/Pong/Assets/POINT.wav");
+    context.Audio.System->Load("music_game", "Game/Pong/Assets/MUSIC.wav");
 
-    context.Audio->StartLoop("music_game", 0.35f);
+    context.Audio.System->StartLoop("music_game", 0.35f);
 
     m_scene.Initialize();
 
@@ -217,12 +217,12 @@ void PongGame::UpdateGameplay(const AppContext &context, const float deltaTime) 
     UpdateBall(deltaTime, context);
 
     if (PongCollisionSystem::HandlePaddleCollision(m_ball, m_leftPaddle, m_rightPaddle)) {
-        context.Audio->PlayOneShot("paddle_hit", 0.75f);
+        context.Audio.System->PlayOneShot("paddle_hit", 0.75f);
     }
 
     const CourtSide outOfBounds = PongCollisionSystem::CheckScoring(m_ball);
     if (outOfBounds != CourtSide::None) {
-        context.Audio->PlayOneShot("point", 0.85f);
+        context.Audio.System->PlayOneShot("point", 0.85f);
         ScorePoint(outOfBounds);
     }
 }
@@ -233,7 +233,7 @@ void PongGame::UpdatePlayerPaddle(
     const InputPlayer player,
     const float deltaTime
 ) {
-    const float axis = context.Input->GetVerticalAxis(player);
+    const float axis = context.Input.System->GetVerticalAxis(player);
     paddle.Transform.Position.y += axis * Constants::PaddleSpeed * deltaTime;
     ClampPaddleToField(paddle);
 }
@@ -246,7 +246,7 @@ void PongGame::UpdateBall(const float deltaTime, const AppContext &context) {
         PongRules::GetPlayableTop(),
         PongRules::GetPlayableBottom()
     )) {
-        context.Audio->PlayOneShot("wall_hit", 0.45f);
+        context.Audio.System->PlayOneShot("wall_hit", 0.45f);
     }
 }
 

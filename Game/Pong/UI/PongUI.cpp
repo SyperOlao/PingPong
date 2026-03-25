@@ -280,7 +280,7 @@ void PongUI::SetDisplayedFps(const int fps) noexcept {
 }
 
 PongUI::Action PongUI::UpdateMainMenu(AppContext &context) {
-    auto &input = *context.Input;
+    auto &input = *context.Input.System;
 
     const int previousIndex = m_selectedMainMenuIndex;
 
@@ -291,14 +291,14 @@ PongUI::Action PongUI::UpdateMainMenu(AppContext &context) {
     }
 
     if (previousIndex != m_selectedMainMenuIndex) {
-        context.Audio->PlayOneShot("ui_move", 0.45f);
+        context.Audio.System->PlayOneShot("ui_move", 0.45f);
     }
 
     if (!m_mainMenuButtons[m_selectedMainMenuIndex].HandleKeyboard(input, true)) {
         return Action::None;
     }
 
-    context.Audio->PlayOneShot("ui_accept", 0.65f);
+    context.Audio.System->PlayOneShot("ui_accept", 0.65f);
 
     switch (m_selectedMainMenuIndex) {
         case 0:
@@ -325,10 +325,10 @@ PongUI::Action PongUI::UpdateMainMenu(AppContext &context) {
 }
 
 PongUI::Action PongUI::UpdateSettingsMenu(AppContext &context) {
-    auto &input = *context.Input;
+    auto &input = *context.Input.System;
 
     if (input.GetKeyboard().WasKeyPressed(Key::Escape)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         m_screenState = ScreenState::MainMenu;
         return Action::None;
     }
@@ -342,12 +342,12 @@ PongUI::Action PongUI::UpdateSettingsMenu(AppContext &context) {
     }
 
     if (previousIndex != m_selectedSettingsIndex) {
-        context.Audio->PlayOneShot("ui_move", 0.45f);
+        context.Audio.System->PlayOneShot("ui_move", 0.45f);
     }
 
     if (m_selectedSettingsIndex == 0) {
         if (m_difficultySwitcher.HandleKeyboard(input)) {
-            context.Audio->PlayOneShot("ui_move", 0.5f);
+            context.Audio.System->PlayOneShot("ui_move", 0.5f);
             m_difficulty = static_cast<Difficulty>(m_difficultySwitcher.SelectedIndex());
             return Action::DifficultyChanged;
         }
@@ -357,7 +357,7 @@ PongUI::Action PongUI::UpdateSettingsMenu(AppContext &context) {
 
     if (m_selectedSettingsIndex == 1) {
         if (m_matchRuleSwitcher.HandleKeyboard(input)) {
-            context.Audio->PlayOneShot("ui_move", 0.5f);
+            context.Audio.System->PlayOneShot("ui_move", 0.5f);
             m_matchRule = static_cast<MatchRule>(m_matchRuleSwitcher.SelectedIndex());
             return Action::MatchRuleChanged;
         }
@@ -366,7 +366,7 @@ PongUI::Action PongUI::UpdateSettingsMenu(AppContext &context) {
     }
 
     if (m_settingsBackButton.HandleKeyboard(input, true)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         m_screenState = ScreenState::MainMenu;
     }
 
@@ -374,16 +374,16 @@ PongUI::Action PongUI::UpdateSettingsMenu(AppContext &context) {
 }
 
 PongUI::Action PongUI::UpdatePlaying(AppContext &context) {
-    auto &input = *context.Input;
+    auto &input = *context.Input.System;
 
     if (input.GetKeyboard().WasKeyPressed(Key::Escape)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         m_screenState = ScreenState::MainMenu;
         return Action::None;
     }
 
     if (input.GetKeyboard().WasKeyPressed(Key::Enter)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         return Action::ResetMatch;
     }
 
@@ -391,16 +391,16 @@ PongUI::Action PongUI::UpdatePlaying(AppContext &context) {
 }
 
 PongUI::Action PongUI::UpdateGameOver(AppContext &context) {
-    auto &input = *context.Input;
+    auto &input = *context.Input.System;
 
     if (input.GetKeyboard().WasKeyPressed(Key::Escape)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         m_screenState = ScreenState::MainMenu;
         return Action::None;
     }
 
     if (input.GetKeyboard().WasKeyPressed(Key::Enter)) {
-        context.Audio->PlayOneShot("ui_accept", 0.65f);
+        context.Audio.System->PlayOneShot("ui_accept", 0.65f);
         return Action::RestartGame;
     }
 
@@ -408,7 +408,7 @@ PongUI::Action PongUI::UpdateGameOver(AppContext &context) {
 }
 
 void PongUI::RenderMainMenu(const AppContext &context) const {
-    auto &renderer = *context.Shape2D;
+    auto &renderer = context.GetShapeRenderer2D();
 
     RenderButtons(context, m_mainMenuButtons, m_selectedMainMenuIndex, "PONG");
 
@@ -440,7 +440,7 @@ void PongUI::RenderMainMenu(const AppContext &context) const {
 }
 
 void PongUI::RenderSettingsMenu(const AppContext &context) const {
-    auto &renderer = *context.Shape2D;
+    auto &renderer = context.GetShapeRenderer2D();
 
     DrawCenteredText(renderer, "SETTINGS", kMenuTitleY, kWhite, 1.8f);
 
@@ -460,7 +460,7 @@ void PongUI::RenderSettingsMenu(const AppContext &context) const {
 
     m_settingsBackButton.Draw(
         renderer,
-        *context.Font,
+        *context.Ui.Font,
         style,
         m_selectedSettingsIndex == 2
     );
@@ -517,7 +517,7 @@ void PongUI::RenderGameOver(
     const ScoreType rightScore,
     const GameMode gameMode
 ) const {
-    auto &renderer = *context.Shape2D;
+    auto &renderer = context.GetShapeRenderer2D();
 
     RenderPlaying(
         context,
@@ -563,7 +563,7 @@ void PongUI::RenderButtons(
     const int selectedIndex,
     const char *title
 ) {
-    auto &renderer = *context.Shape2D;
+    auto &renderer = context.GetShapeRenderer2D();
 
     DrawCenteredText(renderer, title, kMenuTitleY, kWhite, 1.8f);
 
@@ -573,7 +573,7 @@ void PongUI::RenderButtons(
     for (int index = 0; index < static_cast<int>(buttons.size()); ++index) {
         buttons[static_cast<std::size_t>(index)].Draw(
             renderer,
-            *context.Font,
+            *context.Ui.Font,
             style,
             index == selectedIndex
         );

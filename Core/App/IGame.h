@@ -2,8 +2,8 @@
 // Created by SyperOlao on 18.03.2026.
 //
 
-#ifndef MYPROJECT_IGAME_H
-#define MYPROJECT_IGAME_H
+#ifndef PINGPONG_IGAME_H
+#define PINGPONG_IGAME_H
 
 struct AppContext;
 
@@ -18,8 +18,7 @@ public:
     virtual void Render(AppContext &context) = 0;
 
     virtual void Shutdown(AppContext &context) {
-        (void) context;
     }
 };
 
-#endif //MYPROJECT_IGAME_H
+#endif //PINGPONG_IGAME_H
