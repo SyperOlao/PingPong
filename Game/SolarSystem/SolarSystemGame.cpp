@@ -47,21 +47,6 @@ namespace {
 
     constexpr int kOrbitSegments = 128;
 
-    constexpr std::string_view kEngineStartSoundId = "solar_engine_start";
-    constexpr std::string_view kEngineWorkSoundId = "solar_engine_work";
-    constexpr std::string_view kEngineStopSoundId = "solar_engine_stop";
-    constexpr std::string_view kMusicId = "main_music";
-
-    constexpr auto kEngineStartSoundPath = "Game/SolarSystem/Assets/EngineStart.wav";
-    constexpr auto kEngineWorkSoundPath = "Game/SolarSystem/Assets/EngineWork.wav";
-    constexpr auto kEngineStopSoundPath = "Game/SolarSystem/Assets/EngineStop.wav";
-    constexpr auto kMusic = "Game/SolarSystem/Assets/AmbientSpaceFinal.wav";
-
-    constexpr float kEngineStartDurationSeconds = 0.50f;
-    constexpr float kEngineStartVolume = 0.90f;
-    constexpr float kEngineWorkVolume = 0.55f;
-    constexpr float kEngineStopVolume = 0.90f;
-
     POINT GetMouseClientPosition(HWND__ *const hwnd) {
         POINT point{};
         GetCursorPos(&point);
@@ -324,81 +309,33 @@ void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float d
     m_orbitCamera.SetYawPitchRadius(m_orbitCameraYaw, m_orbitCameraPitch, m_orbitCameraRadius);
 }
 
-void SolarSystemGame::InitializeEngineAudio(const AppContext &context) {
-    if (context.Audio == nullptr) {
+void SolarSystemGame::InitializeEngineAudio(const AppContext& context)
+{
+    if (context.Audio == nullptr)
+    {
         throw std::runtime_error("SolarSystemGame::InitializeEngineAudio requires a valid AudioSystem.");
     }
 
-    context.Audio->Load(std::string{kEngineStartSoundId}, kEngineStartSoundPath);
-    context.Audio->Load(std::string{kEngineWorkSoundId}, kEngineWorkSoundPath);
-    context.Audio->Load(std::string{kEngineStopSoundId}, kEngineStopSoundPath);
-    context.Audio->Load(std::string{kMusicId}, kMusic);
-    context.Audio->StartLoop(std::string{kMusicId}, 0.35f);
-    m_engineAudioState = EngineAudioState::Idle;
-    m_engineStartElapsed = 0.0f;
+    m_engineAudio.Initialize(*context.Audio);
 }
 
-void SolarSystemGame::UpdateEngineAudio(const AppContext &context, const float deltaTime) {
-    if (context.Audio == nullptr) {
+void SolarSystemGame::UpdateEngineAudio(const AppContext& context, const float deltaTime)
+{
+    if (context.Audio == nullptr)
+    {
         return;
     }
 
-    const bool movementInputActive = IsEngineMovementInputActive(context);
-
-    switch (m_engineAudioState) {
-        case EngineAudioState::Idle: {
-            if (movementInputActive) {
-                context.Audio->PlayOneShot(kEngineStartSoundId, kEngineStartVolume);
-                m_engineStartElapsed = 0.0f;
-                m_engineAudioState = EngineAudioState::Starting;
-            }
-            break;
-        }
-
-        case EngineAudioState::Starting: {
-            if (!movementInputActive) {
-                context.Audio->PlayOneShot(kEngineStopSoundId, kEngineStopVolume);
-                m_engineStartElapsed = 0.0f;
-                m_engineAudioState = EngineAudioState::Idle;
-                break;
-            }
-
-            m_engineStartElapsed += deltaTime;
-
-            if (m_engineStartElapsed >= kEngineStartDurationSeconds) {
-                if (!context.Audio->IsLoopPlaying(kEngineWorkSoundId)) {
-                    context.Audio->StartLoop(kEngineWorkSoundId, kEngineWorkVolume);
-                }
-
-                m_engineAudioState = EngineAudioState::Working;
-            }
-
-            break;
-        }
-
-        case EngineAudioState::Working: {
-            if (!movementInputActive) {
-                context.Audio->StopLoop(kEngineWorkSoundId);
-                context.Audio->PlayOneShot(kEngineStopSoundId, kEngineStopVolume);
-                m_engineAudioState = EngineAudioState::Idle;
-                m_engineStartElapsed = 0.0f;
-            }
-
-            break;
-        }
-
-        default:
-            break;
-    }
+    m_engineAudio.Update(*context.Audio, IsEngineMovementInputActive(context), deltaTime);
 }
 
 void SolarSystemGame::ShutdownEngineAudio(const AppContext &context) noexcept {
-    if (context.Audio != nullptr) {
-        context.Audio->StopLoop(kEngineWorkSoundId);
+    if (context.Audio == nullptr)
+    {
+        return;
     }
 
-    m_engineAudioState = EngineAudioState::Idle;
-    m_engineStartElapsed = 0.0f;
+    m_engineAudio.Shutdown(*context.Audio);
 }
 
 bool SolarSystemGame::IsEngineMovementInputActive(const AppContext &context) const noexcept {

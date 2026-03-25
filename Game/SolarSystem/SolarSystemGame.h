@@ -15,20 +15,13 @@
 struct AppContext;
 class Camera;
 class OrbitalBody;
-
+#include "Systems/SolarSystemEngineAudioController.h"
 enum class CameraMode : std::uint8_t
 {
     Fps = 0,
     Orbit
 };
 
-enum class EngineAudioState : std::uint8_t
-{
-    Idle = 0,
-    Starting,
-    Working,
-    Stopping
-};
 
 class SolarSystemGame final : public IGame
 {
@@ -86,9 +79,8 @@ private:
     float m_fpsAccumulator{0.0f};
     int m_fpsFrames{0};
     int m_displayFps{0};
+    SolarSystemEngineAudioController m_engineAudio{};
 
-    EngineAudioState m_engineAudioState{EngineAudioState::Idle};
-    float m_engineStartElapsed{0.0f};
 
     bool m_initialized{false};
 };

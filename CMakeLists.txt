@@ -106,6 +106,9 @@ add_executable(PingPong
         Game/SolarSystem/Rendering/SpaceBackdropRenderer.cpp
         Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
         Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
+        Game/SolarSystem/Systems/SolarSystemEngineAudioController.cpp
+        Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
+        Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE
