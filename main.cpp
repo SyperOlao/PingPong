@@ -18,7 +18,7 @@ int main()
     {
         HINSTANCE__ *const hInstance = GetModuleHandleW(nullptr);
 
-        constexpr auto demo = DemoType::SolarSystem;
+        constexpr auto demo = DemoType::Pong;
 
         std::unique_ptr<IGame> game;
 

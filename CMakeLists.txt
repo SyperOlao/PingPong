@@ -42,14 +42,24 @@ add_executable(PingPong
         Core/Graphics/MeshData.h
         Core/Graphics/MeshGenerator.h
         Core/Graphics/MeshGenerator.cpp
+        Core/Graphics/MeshLitData.h
+        Core/Graphics/Rendering/Lighting/LightTypes3D.h
+        Core/Graphics/Rendering/Lighting/ShaderConstants3D.h
+        Core/Graphics/Rendering/Lighting/SceneLighting3D.h
+        Core/Graphics/Rendering/Lighting/SceneLighting3D.cpp
         Core/Graphics/ProjectionMode.h
         Core/Graphics/Camera.h
+        Core/Graphics/Camera.cpp
+        Core/Graphics/FollowCamera.h
+        Core/Graphics/FollowCamera.cpp
         Core/Graphics/Vertex3D.h
         Core/Graphics/ObjectConstants.h
         Core/Graphics/ModelAsset.h
         Core/Graphics/ModelAsset.cpp
         Core/Graphics/ModelRenderer.h
         Core/Graphics/ModelRenderer.cpp
+        Core/Graphics/Debug/DebugDrawQueue.h
+        Core/Graphics/Debug/DebugDrawQueue.cpp
         Core/Graphics/Texture2DAsset.h
         Core/Graphics/Texture2DAsset.cpp
 
@@ -59,6 +69,26 @@ add_executable(PingPong
         Core/Graphics/Rendering/PrimitiveRenderer3D.h
         Core/Graphics/Rendering/RenderContext.cpp
         Core/Graphics/Rendering/RenderContext.h
+        Core/Graphics/Rendering/FrameRenderTypes.h
+        Core/Graphics/Rendering/FrameRenderer.h
+        Core/Graphics/Rendering/FrameRenderer.cpp
+        Core/Graphics/Rendering/Deferred/GBufferLayout.h
+        Core/Graphics/Rendering/Deferred/DeferredShaderConstants3D.h
+        Core/Graphics/Rendering/Deferred/ColorRenderTarget2D.h
+        Core/Graphics/Rendering/Deferred/ColorRenderTarget2D.cpp
+        Core/Graphics/Rendering/Deferred/GBufferResources.h
+        Core/Graphics/Rendering/Deferred/GBufferResources.cpp
+        Core/Graphics/Rendering/Deferred/DeferredFrameResources.h
+        Core/Graphics/Rendering/Deferred/DeferredFrameResources.cpp
+        Core/Graphics/Rendering/Shadows/ShadowShaderConstants3D.h
+        Core/Graphics/Rendering/Shadows/ShadowProjection.h
+        Core/Graphics/Rendering/Shadows/ShadowProjection.cpp
+        Core/Graphics/Rendering/Shadows/DepthRenderTarget2D.h
+        Core/Graphics/Rendering/Shadows/DepthRenderTarget2D.cpp
+        Core/Graphics/Rendering/Shadows/ShadowComparisonSamplerState.h
+        Core/Graphics/Rendering/Shadows/ShadowComparisonSamplerState.cpp
+        Core/Graphics/Rendering/Shadows/ShadowDepthPassRasterizerState.h
+        Core/Graphics/Rendering/Shadows/ShadowDepthPassRasterizerState.cpp
         Core/Graphics/Rendering/Renderables/RenderMaterialParameters.h
         Core/Graphics/Rendering/Renderables/RenderTransform3D.h
         Core/Graphics/Rendering/Renderables/RenderGeometry3D.h

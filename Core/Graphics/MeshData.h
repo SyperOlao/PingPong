@@ -5,13 +5,10 @@
 #ifndef PINGPONG_MESHDATA_H
 #define PINGPONG_MESHDATA_H
 
-#include <vector>
-#include <SimpleMath.h>
+#include "Vertex3D.h"
 
-struct Vertex3D final {
-    DirectX::SimpleMath::Vector3 Position;
-    DirectX::SimpleMath::Color Color;
-};
+#include <cstdint>
+#include <vector>
 
 struct MeshData final {
     std::vector<Vertex3D> Vertices;

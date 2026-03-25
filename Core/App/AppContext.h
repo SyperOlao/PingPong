@@ -9,6 +9,10 @@
 
 class ShapeRenderer2D;
 class PrimitiveRenderer3D;
+class ModelRenderer;
+class DebugDrawQueue;
+class FrameRenderer;
+class DeferredFrameResources;
 
 struct AppContext final {
     PlatformServices Platform{};
@@ -23,6 +27,18 @@ struct AppContext final {
     [[nodiscard]] ShapeRenderer2D &GetShapeRenderer2D() const;
 
     [[nodiscard]] PrimitiveRenderer3D &GetPrimitiveRenderer3D() const;
+
+    [[nodiscard]] ModelRenderer &GetModelRenderer() const;
+
+    [[nodiscard]] DebugDrawQueue &GetDebugDraw() const;
+
+    [[nodiscard]] FrameRenderer &GetFrameRenderer() const;
+
+    [[nodiscard]] DeferredFrameResources &GetDeferredFrameResources() const;
+
+    void ResizeDeferredResources() const;
 };
 
-#endif //PINGPONG_APPCONTEXT_H
+#endif
+
+

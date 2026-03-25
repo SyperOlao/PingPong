@@ -9,6 +9,7 @@ class Window;
 class InputSystem;
 class GraphicsDevice;
 class RenderContext;
+class FrameRenderer;
 class BitmapFont;
 class AudioSystem;
 class AssetCache;
@@ -24,6 +25,7 @@ struct InputServices final {
 struct GraphicsServices final {
     GraphicsDevice *Device{nullptr};
     RenderContext *Render{nullptr};
+    FrameRenderer *Frame{nullptr};
 };
 
 struct UiServices final {

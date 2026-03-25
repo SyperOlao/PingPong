@@ -1,8 +1,7 @@
-// Created by SyperOlao on 25.03.2026.
-
 #include "Core/Graphics/Rendering/Renderables/SceneRenderer3D.h"
 
 #include "Core/Graphics/ModelRenderer.h"
+#include "Core/Graphics/Rendering/Lighting/SceneLighting3D.h"
 #include "Core/Graphics/Rendering/PrimitiveRenderer3D.h"
 #include "Core/Graphics/Rendering/Renderables/RenderGeometry3D.h"
 #include "Core/Graphics/Rendering/Renderables/Renderable3D.h"
@@ -27,6 +26,7 @@ void SceneRenderer3D::RenderScene(const SceneRenderData3D &sceneRenderData) cons
 
     const DirectX::SimpleMath::Matrix view = sceneRenderData.View;
     const DirectX::SimpleMath::Matrix projection = sceneRenderData.Projection;
+    const DirectX::SimpleMath::Vector3 cameraWorldPosition = CameraWorldPositionFromViewMatrix(view);
 
     for (const Renderable3D &renderable : sceneRenderData.Renderables)
     {
@@ -37,34 +37,93 @@ void SceneRenderer3D::RenderScene(const SceneRenderData3D &sceneRenderData) cons
 
         const DirectX::SimpleMath::Matrix world = renderable.Transform.GetWorldMatrix();
 
-        std::visit(
-            [&](const auto &geometry)
-            {
-                using GeometryType = std::decay_t<decltype(geometry)>;
+        if (sceneRenderData.UseForwardLighting)
+        {
+            std::visit(
+                [&](const auto &geometry)
+                {
+                    using GeometryType = std::decay_t<decltype(geometry)>;
 
-                if constexpr (std::is_same_v<GeometryType, PrimitiveBoxGeometry3D>)
-                {
-                    m_primitiveRenderer->DrawBox(world, view, projection, renderable.Material.BaseColor);
-                }
-                else if constexpr (std::is_same_v<GeometryType, PrimitiveSphereGeometry3D>)
-                {
-                    m_primitiveRenderer->DrawSphere(world, view, projection, renderable.Material.BaseColor);
-                }
-                else if constexpr (std::is_same_v<GeometryType, PrimitiveOrbitGeometry3D>)
-                {
-                    m_primitiveRenderer->DrawOrbit(geometry.Points, view, projection, renderable.Material.BaseColor);
-                }
-                else if constexpr (std::is_same_v<GeometryType, ModelGeometry3D>)
-                {
-                    if (geometry.Model == nullptr)
+                    if constexpr (std::is_same_v<GeometryType, PrimitiveBoxGeometry3D>)
                     {
-                        return;
+                        m_primitiveRenderer->DrawBoxLit(
+                            world,
+                            view,
+                            projection,
+                            cameraWorldPosition,
+                            sceneRenderData.Lighting,
+                            renderable.Material
+                        );
                     }
+                    else if constexpr (std::is_same_v<GeometryType, PrimitiveSphereGeometry3D>)
+                    {
+                        m_primitiveRenderer->DrawSphereLit(
+                            world,
+                            view,
+                            projection,
+                            cameraWorldPosition,
+                            sceneRenderData.Lighting,
+                            renderable.Material
+                        );
+                    }
+                    else if constexpr (std::is_same_v<GeometryType, PrimitiveOrbitGeometry3D>)
+                    {
+                        m_primitiveRenderer->DrawOrbit(
+                            geometry.Points,
+                            view,
+                            projection,
+                            renderable.Material.BaseColor
+                        );
+                    }
+                    else if constexpr (std::is_same_v<GeometryType, ModelGeometry3D>)
+                    {
+                        if (geometry.Model == nullptr)
+                        {
+                            return;
+                        }
 
-                    m_modelRenderer->DrawModel(*geometry.Model, world, view, projection, renderable.Material);
-                }
-            },
-            renderable.Geometry
-        );
+                        m_modelRenderer->DrawModel(*geometry.Model, world, view, projection, renderable.Material);
+                    }
+                },
+                renderable.Geometry
+            );
+        }
+        else
+        {
+            std::visit(
+                [&](const auto &geometry)
+                {
+                    using GeometryType = std::decay_t<decltype(geometry)>;
+
+                    if constexpr (std::is_same_v<GeometryType, PrimitiveBoxGeometry3D>)
+                    {
+                        m_primitiveRenderer->DrawBox(world, view, projection, renderable.Material.BaseColor);
+                    }
+                    else if constexpr (std::is_same_v<GeometryType, PrimitiveSphereGeometry3D>)
+                    {
+                        m_primitiveRenderer->DrawSphere(world, view, projection, renderable.Material.BaseColor);
+                    }
+                    else if constexpr (std::is_same_v<GeometryType, PrimitiveOrbitGeometry3D>)
+                    {
+                        m_primitiveRenderer->DrawOrbit(
+                            geometry.Points,
+                            view,
+                            projection,
+                            renderable.Material.BaseColor
+                        );
+                    }
+                    else if constexpr (std::is_same_v<GeometryType, ModelGeometry3D>)
+                    {
+                        if (geometry.Model == nullptr)
+                        {
+                            return;
+                        }
+
+                        m_modelRenderer->DrawModel(*geometry.Model, world, view, projection, renderable.Material);
+                    }
+                },
+                renderable.Geometry
+            );
+        }
     }
 }

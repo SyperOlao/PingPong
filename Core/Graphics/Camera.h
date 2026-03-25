@@ -1,56 +1,44 @@
-//
-// Created by SyperOlao on 19.03.2026.
-//
-
 #ifndef PINGPONG_CAMERA_H
 #define PINGPONG_CAMERA_H
+
 #include <SimpleMath.h>
 
 #include "ProjectionMode.h"
 
-
-class Camera {
+class Camera
+{
 public:
     virtual ~Camera() = default;
 
     [[nodiscard]] virtual DirectX::SimpleMath::Matrix GetViewMatrix() const = 0;
 
-    [[nodiscard]] DirectX::SimpleMath::Matrix GetProjectionMatrix(const float aspectRatio) const {
-        using namespace DirectX::SimpleMath;
+    [[nodiscard]] virtual DirectX::SimpleMath::Vector3 GetPosition() const = 0;
 
-        switch (m_projectionMode)
-        {
-            case ProjectionMode::PerspectiveOffCenter:
-                return Matrix::CreatePerspectiveOffCenter(
-                    -aspectRatio, aspectRatio,
-                    -1.0f, 1.0f,
-                    0.1f, 2000.0f
-                );
+    [[nodiscard]] DirectX::SimpleMath::Matrix GetProjectionMatrix(float aspectRatio) const;
 
-            case ProjectionMode::PerspectiveFov:
-            default:
-                return Matrix::CreatePerspectiveFieldOfView(
-                    DirectX::XMConvertToRadians(60.0f),
-                    aspectRatio,
-                    0.1f,
-                    2000.0f
-                );
-        }
-    }
+    void SetProjectionMode(ProjectionMode mode) noexcept;
 
-    void SetProjectionMode(const ProjectionMode mode) noexcept
-    {
-        m_projectionMode = mode;
-    }
+    [[nodiscard]] ProjectionMode GetProjectionMode() const noexcept;
 
-    [[nodiscard]] ProjectionMode GetProjectionMode() const noexcept
-    {
-        return m_projectionMode;
-    }
+    void SetVerticalFieldOfViewDegrees(float verticalFieldOfViewDegrees);
+
+    [[nodiscard]] float GetVerticalFieldOfViewDegrees() const noexcept;
+
+    void SetNearPlane(float nearPlane);
+
+    void SetFarPlane(float farPlane);
+
+    void SetNearPlaneAndFarPlane(float nearPlane, float farPlane);
+
+    [[nodiscard]] float GetNearPlane() const noexcept;
+
+    [[nodiscard]] float GetFarPlane() const noexcept;
 
 protected:
     ProjectionMode m_projectionMode{ProjectionMode::PerspectiveFov};
+    float m_verticalFieldOfViewDegrees{60.0f};
+    float m_nearPlane{0.1f};
+    float m_farPlane{2000.0f};
 };
 
-
-#endif //PINGPONG_CAMERA_H
+#endif

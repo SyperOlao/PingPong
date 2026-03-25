@@ -98,6 +98,46 @@ void GraphicsDevice::BindMainRenderTargets() const
     m_context->OMSetRenderTargets(1, renderTargets, m_mainDepthStencilView.Get());
 }
 
+void GraphicsDevice::BindSingleRenderTarget(ID3D11RenderTargetView *const renderTargetView) const
+{
+    if (renderTargetView == nullptr)
+    {
+        throw std::invalid_argument("GraphicsDevice::BindSingleRenderTarget requires a render target view.");
+    }
+
+    m_context->OMSetRenderTargets(1, &renderTargetView, nullptr);
+}
+
+void GraphicsDevice::BindRenderTargetsAndDepth(
+    ID3D11RenderTargetView *const *const renderTargetViews,
+    const UINT renderTargetCount,
+    ID3D11DepthStencilView *const depthStencilView
+) const
+{
+    if (renderTargetCount > 0u && renderTargetViews == nullptr)
+    {
+        throw std::invalid_argument("GraphicsDevice::BindRenderTargetsAndDepth requires render target views.");
+    }
+
+    if (renderTargetCount > D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT)
+    {
+        throw std::invalid_argument("GraphicsDevice::BindRenderTargetsAndDepth render target count is too large.");
+    }
+
+    m_context->OMSetRenderTargets(renderTargetCount, renderTargetViews, depthStencilView);
+}
+
+void GraphicsDevice::ClearRenderTargetView(ID3D11RenderTargetView *const renderTargetView, const Color &clearColor) const
+{
+    if (renderTargetView == nullptr)
+    {
+        throw std::invalid_argument("GraphicsDevice::ClearRenderTargetView requires a render target view.");
+    }
+
+    const auto clear = clearColor.ToArray();
+    m_context->ClearRenderTargetView(renderTargetView, clear.data());
+}
+
 void GraphicsDevice::ClearMainColor(const Color &clearColor) const
 {
     if (m_mainRenderTargetView == nullptr)
@@ -135,6 +175,53 @@ void GraphicsDevice::SetMainViewport() const
     viewport.MaxDepth = 1.0f;
 
     m_context->RSSetViewports(1, &viewport);
+}
+
+void GraphicsDevice::BindDepthOnlyRenderTarget(ID3D11DepthStencilView *const depthStencilView) const
+{
+    if (depthStencilView == nullptr)
+    {
+        throw std::invalid_argument("GraphicsDevice::BindDepthOnlyRenderTarget requires a depth stencil view.");
+    }
+
+    m_context->OMSetRenderTargets(0, nullptr, depthStencilView);
+}
+
+void GraphicsDevice::SetViewportPixels(
+    const float width,
+    const float height,
+    const float topLeftX,
+    const float topLeftY
+) const
+{
+    D3D11_VIEWPORT viewport{};
+    viewport.TopLeftX = topLeftX;
+    viewport.TopLeftY = topLeftY;
+    viewport.Width = width;
+    viewport.Height = height;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
+    m_context->RSSetViewports(1, &viewport);
+}
+
+void GraphicsDevice::ClearDepthStencilView(
+    ID3D11DepthStencilView *const depthStencilView,
+    const float depthClearValue,
+    const uint8_t stencilClear
+) const
+{
+    if (depthStencilView == nullptr)
+    {
+        throw std::invalid_argument("GraphicsDevice::ClearDepthStencilView requires a depth stencil view.");
+    }
+
+    m_context->ClearDepthStencilView(
+        depthStencilView,
+        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        depthClearValue,
+        stencilClear
+    );
 }
 
 void GraphicsDevice::EndFrame(const bool vSync) const

@@ -32,11 +32,27 @@ public:
 
     void BindMainRenderTargets() const;
 
+    void BindSingleRenderTarget(ID3D11RenderTargetView *renderTargetView) const;
+
+    void BindRenderTargetsAndDepth(
+        ID3D11RenderTargetView *const *renderTargetViews,
+        UINT renderTargetCount,
+        ID3D11DepthStencilView *depthStencilView
+    ) const;
+
+    void ClearRenderTargetView(ID3D11RenderTargetView *renderTargetView, const Color &clearColor) const;
+
     void ClearMainColor(const Color &clearColor) const;
 
     void ClearMainDepthStencil(float depthClearValue = 1.0f, uint8_t stencilClear = 0) const;
 
     void SetMainViewport() const;
+
+    void BindDepthOnlyRenderTarget(ID3D11DepthStencilView *depthStencilView) const;
+
+    void SetViewportPixels(float width, float height, float topLeftX = 0.0f, float topLeftY = 0.0f) const;
+
+    void ClearDepthStencilView(ID3D11DepthStencilView *depthStencilView, float depthClearValue, uint8_t stencilClear = 0) const;
 
     [[nodiscard]] int GetWidth() const noexcept;
 

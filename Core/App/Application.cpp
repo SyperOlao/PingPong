@@ -57,6 +57,7 @@ void Application::Initialize() {
     m_context.Input.System = &m_input;
     m_context.Graphics.Device = &m_graphics;
     m_context.Graphics.Render = &m_renderContext;
+    m_context.Graphics.Frame = &m_renderContext.GetFrameRenderer();
     m_context.Ui.Font = &m_bitmapFont;
     m_context.Audio.System = &m_audio;
     m_context.Assets.Cache = &m_assetCache;
@@ -92,13 +93,14 @@ int Application::Run() {
 }
 
 void Application::Update(const float deltaTime) {
+    m_renderContext.GetDebugDraw().Clear();
     m_input.Update();
     m_audio.Update();
     m_game->Update(m_context, deltaTime);
 }
 
 void Application::Render() {
-    m_graphics.BeginFrame(m_desc.ClearColor);
+    m_renderContext.GetFrameRenderer().BeginFrame(m_desc.ClearColor);
     m_game->Render(m_context);
-    m_graphics.EndFrame(m_desc.VSync);
+    m_renderContext.GetFrameRenderer().EndFrame(m_desc.VSync);
 }

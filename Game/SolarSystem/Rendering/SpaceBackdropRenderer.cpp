@@ -65,10 +65,7 @@ void SpaceBackdropRenderer::Render(
         throw std::logic_error("SpaceBackdropRenderer::Render called before Initialize.");
     }
 
-    (void) camera;
-
-    const Matrix cameraWorld = view.Invert();
-    const Vector3 cameraPosition = cameraWorld.Translation();
+    const Vector3 cameraPosition = camera.GetPosition();
 
     for (const StarInstance &star: m_stars) {
         const Vector3 worldPosition = cameraPosition + star.Direction * star.Distance;
@@ -84,7 +81,7 @@ Vector3 SpaceBackdropRenderer::RandomUnitVector(std::mt19937 &rng) {
     const float z = RandomRange(rng, -1.0f, 1.0f);
     const float azimuth = RandomRange(rng, 0.0f, 2.0f * kPi);
 
-    const float radial = std::sqrt(std::max(0.0f, 1.0f - z * z));
+    const float radial = std::sqrt((std::max)(0.0f, 1.0f - z * z));
     const float x = radial * std::cos(azimuth);
     const float y = radial * std::sin(azimuth);
 

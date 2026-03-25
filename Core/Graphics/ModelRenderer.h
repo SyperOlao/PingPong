@@ -1,7 +1,3 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_MODELRENDERER_H
 #define PINGPONG_MODELRENDERER_H
 
@@ -9,9 +5,10 @@
 #include <directxtk/CommonStates.h>
 #include <memory>
 
+#include "Core/Graphics/Rendering/Renderables/RenderMaterialParameters.h"
+
 class GraphicsDevice;
 class ModelAsset;
-struct RenderMaterialParameters;
 
 class ModelRenderer final
 {
@@ -31,4 +28,4 @@ private:
     std::unique_ptr<DirectX::CommonStates> m_commonStates{};
 };
 
-#endif //PINGPONG_MODELRENDERER_H
+#endif
