@@ -130,6 +130,24 @@ add_executable(PingPong
         Core/Math/Transform2D.h
         Core/Math/Transform2D.cpp
 
+        Core/Gameplay/EntityId.h
+        Core/Gameplay/GameplayComponents.h
+        Core/Gameplay/SceneCollisionTypes.h
+        Core/Gameplay/ISceneSystem.h
+        Core/Gameplay/ISceneSystem.cpp
+        Core/Gameplay/Entity.h
+        Core/Gameplay/Entity.cpp
+        Core/Gameplay/Scene.h
+        Core/Gameplay/Scene.cpp
+        Core/Gameplay/TransformSystem.h
+        Core/Gameplay/TransformSystem.cpp
+        Core/Gameplay/VelocityIntegrationSystem.h
+        Core/Gameplay/VelocityIntegrationSystem.cpp
+        Core/Gameplay/CollisionSystem.h
+        Core/Gameplay/CollisionSystem.cpp
+        Core/Gameplay/RenderSystem.h
+        Core/Gameplay/RenderSystem.cpp
+
         Core/UI/BitmapFont.cpp
         Core/UI/BitmapFont.h
         Core/UI/Button.cpp
