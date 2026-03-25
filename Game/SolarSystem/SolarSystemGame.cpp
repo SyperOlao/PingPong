@@ -67,6 +67,7 @@ void SolarSystemGame::Initialize(AppContext& context)
     m_scene.Initialize();
 
     m_renderer3D.Initialize(*context.Graphics);
+    m_spaceBackdrop.Initialize();
 
     m_fpsCamera.SetPosition(Vector3(0.0f, 8.0f, -30.0f));
     m_fpsCamera.SetRotation(0.0f, 0.15f);
@@ -158,6 +159,8 @@ void SolarSystemGame::Render(AppContext& context)
     const Camera& activeCamera = GetActiveCamera();
     const Matrix view = activeCamera.GetViewMatrix();
     const Matrix projection = activeCamera.GetProjectionMatrix(aspectRatio);
+
+    m_spaceBackdrop.Render(m_renderer3D, activeCamera, view, projection);
 
     for (const auto& root : m_scene.GetRoots())
     {

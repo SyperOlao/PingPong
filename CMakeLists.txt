@@ -103,6 +103,9 @@ add_executable(PingPong
         Core/UI/Common/UITheme.h
         Core/UI/Common/RectF.h
         Core/UI/Common/MouseState.h
+        Game/SolarSystem/Rendering/SpaceBackdropRenderer.cpp
+        Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
+        Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE

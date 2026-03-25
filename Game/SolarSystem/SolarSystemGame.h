@@ -9,6 +9,7 @@
 #include "Core/Graphics/FpsCamera.h"
 #include "../../Core/Graphics/OrbitCamera.h"
 #include "Core/Graphics/PrimitiveRenderer3D.h"
+#include "Rendering/SpaceBackdropRenderer.h"
 #include "UI/SolarSystemSettingsPanel.h"
 
 struct AppContext;
@@ -57,6 +58,7 @@ private:
     SolarSystemScene m_scene{};
 
     PrimitiveRenderer3D m_renderer3D{};
+    SpaceBackdropRenderer m_spaceBackdrop{};
 
     FpsCamera m_fpsCamera{};
     OrbitCamera m_orbitCamera{};
