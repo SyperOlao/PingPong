@@ -324,7 +324,7 @@ void SolarSystemGame::UpdateOrbitCamera(const AppContext &context, const float d
     m_orbitCamera.SetYawPitchRadius(m_orbitCameraYaw, m_orbitCameraPitch, m_orbitCameraRadius);
 }
 
-void SolarSystemGame::InitializeEngineAudio(AppContext &context) {
+void SolarSystemGame::InitializeEngineAudio(const AppContext &context) {
     if (context.Audio == nullptr) {
         throw std::runtime_error("SolarSystemGame::InitializeEngineAudio requires a valid AudioSystem.");
     }
@@ -392,7 +392,7 @@ void SolarSystemGame::UpdateEngineAudio(const AppContext &context, const float d
     }
 }
 
-void SolarSystemGame::ShutdownEngineAudio(AppContext &context) noexcept {
+void SolarSystemGame::ShutdownEngineAudio(const AppContext &context) noexcept {
     if (context.Audio != nullptr) {
         context.Audio->StopLoop(kEngineWorkSoundId);
     }

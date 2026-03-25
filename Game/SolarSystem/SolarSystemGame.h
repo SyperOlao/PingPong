@@ -45,9 +45,9 @@ private:
     void UpdateFpsCamera(const AppContext& context, float deltaTime);
     void UpdateOrbitCamera(const AppContext& context, float deltaTime);
 
-    void InitializeEngineAudio(AppContext& context);
+    void InitializeEngineAudio(const AppContext& context);
     void UpdateEngineAudio(const AppContext& context, float deltaTime);
-    void ShutdownEngineAudio(AppContext& context) noexcept;
+    void ShutdownEngineAudio(const AppContext& context) noexcept;
     [[nodiscard]] bool IsEngineMovementInputActive(const AppContext& context) const noexcept;
 
     void SetCameraMode(CameraMode mode) noexcept;
