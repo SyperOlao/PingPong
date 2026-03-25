@@ -50,10 +50,12 @@ namespace {
     constexpr std::string_view kEngineStartSoundId = "solar_engine_start";
     constexpr std::string_view kEngineWorkSoundId = "solar_engine_work";
     constexpr std::string_view kEngineStopSoundId = "solar_engine_stop";
+    constexpr std::string_view kMusicId = "main_music";
 
-    constexpr const char *kEngineStartSoundPath = "Game/SolarSystem/Assets/EngineStart.wav";
-    constexpr const char *kEngineWorkSoundPath = "Game/SolarSystem/Assets/EngineWork.wav";
-    constexpr const char *kEngineStopSoundPath = "Game/SolarSystem/Assets/EngineStop.wav";
+    constexpr auto kEngineStartSoundPath = "Game/SolarSystem/Assets/EngineStart.wav";
+    constexpr auto kEngineWorkSoundPath = "Game/SolarSystem/Assets/EngineWork.wav";
+    constexpr auto kEngineStopSoundPath = "Game/SolarSystem/Assets/EngineStop.wav";
+    constexpr auto kMusic = "Game/SolarSystem/Assets/AmbientSpaceFinal.wav";
 
     constexpr float kEngineStartDurationSeconds = 0.50f;
     constexpr float kEngineStartVolume = 0.90f;
@@ -330,7 +332,8 @@ void SolarSystemGame::InitializeEngineAudio(AppContext &context) {
     context.Audio->Load(std::string{kEngineStartSoundId}, kEngineStartSoundPath);
     context.Audio->Load(std::string{kEngineWorkSoundId}, kEngineWorkSoundPath);
     context.Audio->Load(std::string{kEngineStopSoundId}, kEngineStopSoundPath);
-
+    context.Audio->Load(std::string{kMusicId}, kMusic);
+    context.Audio->StartLoop(std::string{kMusicId}, 0.35f);
     m_engineAudioState = EngineAudioState::Idle;
     m_engineStartElapsed = 0.0f;
 }
