@@ -11,6 +11,7 @@
 
 class GraphicsDevice;
 class ModelAsset;
+struct RenderMaterialParameters;
 
 class ModelRenderer final
 {
@@ -21,7 +22,8 @@ public:
         const ModelAsset &model,
         const DirectX::SimpleMath::Matrix &world,
         const DirectX::SimpleMath::Matrix &view,
-        const DirectX::SimpleMath::Matrix &projection
+        const DirectX::SimpleMath::Matrix &projection,
+        const RenderMaterialParameters &material
     ) const;
 
 private:

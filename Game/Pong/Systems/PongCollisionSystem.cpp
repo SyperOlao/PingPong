@@ -14,7 +14,7 @@
 #include <cmath>
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Math/MathHelpers.h"
-#include "Core/Physics/CollisionSystem.h"
+#include "Core/Physics/Collision2D/CollisionQueries2D.h"
 #include "Core/Physics/HorizontalBoundsExit.h"
 #include "Game/Pong/Entities/Ball.h"
 #include "Game/Pong/Entities/Paddle.h"
@@ -84,7 +84,7 @@ namespace PongCollisionSystem {
         const AABB leftPaddleAABB = leftPaddle.GetAABB();
         const AABB rightPaddleAABB = rightPaddle.GetAABB();
 
-        if (CollisionSystem::CheckCollision(ballAABB, leftPaddleAABB) && ball.Movement.Velocity.x < 0.0f) {
+        if (CollisionQueries2D::OverlapTestAabbAabb(ballAABB, leftPaddleAABB) && ball.Movement.Velocity.x < 0.0f) {
             ball.Transform.Position.x = leftPaddleAABB.Max.x + 0.5f;
 
             const float nextSpeed = std::min(
@@ -102,7 +102,7 @@ namespace PongCollisionSystem {
             return true;
         }
 
-        if (CollisionSystem::CheckCollision(ballAABB, rightPaddleAABB) && ball.Movement.Velocity.x > 0.0f) {
+        if (CollisionQueries2D::OverlapTestAabbAabb(ballAABB, rightPaddleAABB) && ball.Movement.Velocity.x > 0.0f) {
             ball.Transform.Position.x = rightPaddleAABB.Min.x - ball.Size() - 0.5f;
 
             const float nextSpeed = std::min(
@@ -124,7 +124,7 @@ namespace PongCollisionSystem {
     }
 
     CourtSide CheckScoring(const Ball &ball) noexcept {
-        const HorizontalBoundsExit exit = CollisionSystem::CheckHorizontalBoundsExit(
+        const HorizontalBoundsExit exit = CollisionQueries2D::ClassifyHorizontalBoundsExit(
             ball.GetAABB(),
             0.0f,
             static_cast<float>(Constants::WindowWidth)

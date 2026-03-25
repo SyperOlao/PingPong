@@ -7,7 +7,7 @@
 
 #include <SimpleMath.h>
 
-#include "Transform2D.h"
+#include "Core/Math/Transform2D.h"
 
 struct MovementComponent final {
     DirectX::SimpleMath::Vector2 Velocity{0.0f, 0.0f};

@@ -9,7 +9,7 @@
 #include "Core/Physics/AABB.h"
 #include "Game/Pong/Components/Collider2D.h"
 #include "Game/Pong/Components/MovementComponent.h"
-#include "Game/Pong/Components/Transform2D.h"
+#include "Core/Math/Transform2D.h"
 
 class Ball final{
 public:

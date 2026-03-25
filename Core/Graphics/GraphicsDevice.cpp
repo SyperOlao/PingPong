@@ -1,21 +1,9 @@
-//
-// Created by SyperOlao on 18.03.2026.
-//
+#include "Core/Graphics/GraphicsDevice.h"
 
-#include "GraphicsDevice.h"
+#include "Core/Graphics/D3d11Helpers.h"
+
 #include <array>
 #include <stdexcept>
-
-namespace
-{
-    void ThrowIfFailed(const HRESULT hr, const char* const message)
-    {
-        if (FAILED(hr))
-        {
-            throw std::runtime_error(message);
-        }
-    }
-}
 
 void GraphicsDevice::Initialize(HWND__ *const windowHandle, const int width, const int height)
 {
@@ -34,10 +22,11 @@ void GraphicsDevice::Initialize(HWND__ *const windowHandle, const int width, con
     m_height = height;
 
     CreateDeviceAndSwapChain();
+    CreateMainPassDepthStencilState();
     CreateRenderTarget();
     CreateDepthStencil();
-    BindBackBufferRenderTargetOnly();
-    CreateViewport();
+    BindMainRenderTargets();
+    SetMainViewport();
 }
 
 void GraphicsDevice::Resize(const int width, const int height)
@@ -61,7 +50,7 @@ void GraphicsDevice::Resize(const int width, const int height)
     ReleaseRenderTarget();
     ReleaseDepthStencil();
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         m_swapChain->ResizeBuffers(
             0,
             static_cast<UINT>(width),
@@ -77,67 +66,85 @@ void GraphicsDevice::Resize(const int width, const int height)
 
     CreateRenderTarget();
     CreateDepthStencil();
-    BindBackBufferRenderTargetOnly();
-    CreateViewport();
+    BindMainRenderTargets();
+    SetMainViewport();
 }
 
-void GraphicsDevice::BeginFrame(const Color& clearColor)
+void GraphicsDevice::BeginFrame(const Color &clearColor)
 {
-    if (m_renderTargetView == nullptr)
+    if (m_mainRenderTargetView == nullptr)
     {
         throw std::logic_error("GraphicsDevice::BeginFrame called before render target creation.");
     }
 
-    BindBackBufferRenderTargetOnly();
+    BindMainRenderTargets();
+    ClearMainColor(clearColor);
+    ClearMainDepthStencil();
+    SetMainViewport();
+    if (m_mainPassDepthStencilState != nullptr)
+    {
+        m_context->OMSetDepthStencilState(m_mainPassDepthStencilState.Get(), 0);
+    }
+}
+
+void GraphicsDevice::BindMainRenderTargets() const
+{
+    if (m_mainRenderTargetView == nullptr)
+    {
+        throw std::logic_error("GraphicsDevice::BindMainRenderTargets called before render target creation.");
+    }
+
+    ID3D11RenderTargetView *const renderTargets[] = {m_mainRenderTargetView.Get()};
+    m_context->OMSetRenderTargets(1, renderTargets, m_mainDepthStencilView.Get());
+}
+
+void GraphicsDevice::ClearMainColor(const Color &clearColor) const
+{
+    if (m_mainRenderTargetView == nullptr)
+    {
+        throw std::logic_error("GraphicsDevice::ClearMainColor called before render target creation.");
+    }
 
     const auto clear = clearColor.ToArray();
-    m_context->ClearRenderTargetView(m_renderTargetView.Get(), clear.data());
+    m_context->ClearRenderTargetView(m_mainRenderTargetView.Get(), clear.data());
 }
 
-void GraphicsDevice::BindBackBufferRenderTargetOnly() const
+void GraphicsDevice::ClearMainDepthStencil(const float depthClearValue, const uint8_t stencilClear) const
 {
-    if (m_renderTargetView == nullptr)
-    {
-        throw std::logic_error("GraphicsDevice::BindBackBufferRenderTargetOnly called before render target creation.");
-    }
-
-    ID3D11RenderTargetView* renderTargets[] = {m_renderTargetView.Get()};
-    m_context->OMSetRenderTargets(1, renderTargets, nullptr);
-}
-
-void GraphicsDevice::BindDefaultRenderTargets() const
-{
-    if (m_renderTargetView == nullptr)
-    {
-        throw std::logic_error("GraphicsDevice::BindDefaultRenderTargets called before render target creation.");
-    }
-
-    ID3D11RenderTargetView* renderTargets[] = {m_renderTargetView.Get()};
-    m_context->OMSetRenderTargets(1, renderTargets, m_depthStencilView.Get());
-}
-
-void GraphicsDevice::ClearDefaultDepthStencil() const
-{
-    if (m_depthStencilView == nullptr)
+    if (m_mainDepthStencilView == nullptr)
     {
         return;
     }
 
     m_context->ClearDepthStencilView(
-        m_depthStencilView.Get(),
+        m_mainDepthStencilView.Get(),
         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-        1.0f,
-        0
+        depthClearValue,
+        stencilClear
     );
 }
 
-void GraphicsDevice::EndFrame(const bool vSync) const {
+void GraphicsDevice::SetMainViewport() const
+{
+    D3D11_VIEWPORT viewport{};
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+    viewport.Width = static_cast<float>(m_width);
+    viewport.Height = static_cast<float>(m_height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
+    m_context->RSSetViewports(1, &viewport);
+}
+
+void GraphicsDevice::EndFrame(const bool vSync) const
+{
     if (m_swapChain == nullptr)
     {
         throw std::logic_error("GraphicsDevice::EndFrame called before Initialize.");
     }
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         m_swapChain->Present(vSync ? 1U : 0U, 0U),
         "IDXGISwapChain::Present failed."
     );
@@ -158,29 +165,34 @@ HWND GraphicsDevice::GetWindowHandle() const noexcept
     return m_windowHandle;
 }
 
-ID3D11Device* GraphicsDevice::GetDevice() const noexcept
+ID3D11Device *GraphicsDevice::GetDevice() const noexcept
 {
     return m_device.Get();
 }
 
-ID3D11DeviceContext* GraphicsDevice::GetImmediateContext() const noexcept
+ID3D11DeviceContext *GraphicsDevice::GetImmediateContext() const noexcept
 {
     return m_context.Get();
 }
 
-IDXGISwapChain* GraphicsDevice::GetSwapChain() const noexcept
+D3D_FEATURE_LEVEL GraphicsDevice::GetFeatureLevel() const noexcept
+{
+    return m_featureLevel;
+}
+
+IDXGISwapChain *GraphicsDevice::GetSwapChain() const noexcept
 {
     return m_swapChain.Get();
 }
 
-ID3D11RenderTargetView* GraphicsDevice::GetRenderTargetView() const noexcept
+ID3D11RenderTargetView *GraphicsDevice::GetMainRenderTargetView() const noexcept
 {
-    return m_renderTargetView.Get();
+    return m_mainRenderTargetView.Get();
 }
 
-ID3D11DepthStencilView* GraphicsDevice::GetDepthStencilView() const noexcept
+ID3D11DepthStencilView *GraphicsDevice::GetMainDepthStencilView() const noexcept
 {
-    return m_depthStencilView.Get();
+    return m_mainDepthStencilView.Get();
 }
 
 void GraphicsDevice::CreateDeviceAndSwapChain()
@@ -211,14 +223,13 @@ void GraphicsDevice::CreateDeviceAndSwapChain()
 
     constexpr D3D_FEATURE_LEVEL featureLevels[] =
     {
+        D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0,
         D3D_FEATURE_LEVEL_10_1,
         D3D_FEATURE_LEVEL_10_0
     };
 
-    D3D_FEATURE_LEVEL createdFeatureLevel{};
-
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         D3D11CreateDeviceAndSwapChain(
             nullptr,
             D3D_DRIVER_TYPE_HARDWARE,
@@ -230,31 +241,48 @@ void GraphicsDevice::CreateDeviceAndSwapChain()
             &swapChainDesc,
             m_swapChain.GetAddressOf(),
             m_device.GetAddressOf(),
-            &createdFeatureLevel,
+            &m_featureLevel,
             m_context.GetAddressOf()
         ),
         "D3D11CreateDeviceAndSwapChain failed."
     );
-
-    (void)createdFeatureLevel;
 }
 
 void GraphicsDevice::CreateRenderTarget()
 {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf())),
         "IDXGISwapChain::GetBuffer failed."
     );
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         m_device->CreateRenderTargetView(
             backBuffer.Get(),
             nullptr,
-            m_renderTargetView.GetAddressOf()
+            m_mainRenderTargetView.GetAddressOf()
         ),
         "ID3D11Device::CreateRenderTargetView failed."
+    );
+}
+
+void GraphicsDevice::CreateMainPassDepthStencilState()
+{
+    if (m_device == nullptr)
+    {
+        throw std::logic_error("GraphicsDevice::CreateMainPassDepthStencilState called before device creation.");
+    }
+
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
+    depthStencilDesc.DepthEnable = TRUE;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.StencilEnable = FALSE;
+
+    D3d11Helpers::ThrowIfFailed(
+        m_device->CreateDepthStencilState(&depthStencilDesc, m_mainPassDepthStencilState.GetAddressOf()),
+        "GraphicsDevice failed to create main-pass depth stencil state."
     );
 }
 
@@ -281,37 +309,24 @@ void GraphicsDevice::CreateDepthStencil()
     depthDesc.Usage = D3D11_USAGE_DEFAULT;
     depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
-    ThrowIfFailed(
-        m_device->CreateTexture2D(&depthDesc, nullptr, m_depthTexture.GetAddressOf()),
+    D3d11Helpers::ThrowIfFailed(
+        m_device->CreateTexture2D(&depthDesc, nullptr, m_mainDepthTexture.GetAddressOf()),
         "GraphicsDevice failed to create depth texture."
     );
 
-    ThrowIfFailed(
-        m_device->CreateDepthStencilView(m_depthTexture.Get(), nullptr, m_depthStencilView.GetAddressOf()),
+    D3d11Helpers::ThrowIfFailed(
+        m_device->CreateDepthStencilView(m_mainDepthTexture.Get(), nullptr, m_mainDepthStencilView.GetAddressOf()),
         "GraphicsDevice failed to create depth stencil view."
     );
 }
 
-void GraphicsDevice::CreateViewport() const
-{
-    D3D11_VIEWPORT viewport{};
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
-    viewport.Width = static_cast<float>(m_width);
-    viewport.Height = static_cast<float>(m_height);
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-
-    m_context->RSSetViewports(1, &viewport);
-}
-
 void GraphicsDevice::ReleaseRenderTarget() noexcept
 {
-    m_renderTargetView.Reset();
+    m_mainRenderTargetView.Reset();
 }
 
 void GraphicsDevice::ReleaseDepthStencil() noexcept
 {
-    m_depthStencilView.Reset();
-    m_depthTexture.Reset();
+    m_mainDepthStencilView.Reset();
+    m_mainDepthTexture.Reset();
 }

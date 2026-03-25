@@ -4,10 +4,14 @@
 
 #ifndef PINGPONG_RENDERCONTEXT_H
 #define PINGPONG_RENDERCONTEXT_H
-#include "Core/Graphics/GraphicsDevice.h"
+
 #include "PrimitiveRenderer3D.h"
 #include "ShapeRenderer2D.h"
 
+#include "Core/Graphics/ModelRenderer.h"
+#include "Core/Graphics/Rendering/Renderables/SceneRenderer3D.h"
+
+class GraphicsDevice;
 
 class RenderContext final {
 public:
@@ -25,8 +29,6 @@ public:
 
     void Initialize(GraphicsDevice &graphics);
 
-    void BindDefaultTargets() const;
-
     [[nodiscard]] ShapeRenderer2D &GetShapeRenderer2D() noexcept;
 
     [[nodiscard]] const ShapeRenderer2D &GetShapeRenderer2D() const noexcept;
@@ -35,10 +37,16 @@ public:
 
     [[nodiscard]] const PrimitiveRenderer3D &GetPrimitiveRenderer3D() const noexcept;
 
+    [[nodiscard]] SceneRenderer3D &GetSceneRenderer3D() noexcept;
+
+    [[nodiscard]] const SceneRenderer3D &GetSceneRenderer3D() const noexcept;
+
 private:
     GraphicsDevice *m_graphics{nullptr};
     ShapeRenderer2D m_shapeRenderer2D;
     PrimitiveRenderer3D m_primitiveRenderer3D;
+    ModelRenderer m_modelRenderer{};
+    SceneRenderer3D m_sceneRenderer3D{};
 };
 
 #endif //PINGPONG_RENDERCONTEXT_H

@@ -7,6 +7,7 @@
 
 #include <array>
 
+#include "../D3d11Helpers.h"
 #include "../ObjectConstants.h"
 #include "../ShaderCompiler.h"
 #include "../Vertex3D.h"
@@ -17,12 +18,6 @@ using DirectX::SimpleMath::Vector3;
 
 namespace {
     constexpr UINT kMaxOrbitVertices = 512;
-
-    void ThrowIfFailed(const HRESULT hr, const char *const message) {
-        if (FAILED(hr)) {
-            throw std::runtime_error(message);
-        }
-    }
 }
 
 PrimitiveRenderer3D::~PrimitiveRenderer3D() = default;
@@ -32,15 +27,6 @@ void PrimitiveRenderer3D::Initialize(GraphicsDevice &graphics) {
 
     CreatePrimitives();
     CreateLineResources();
-}
-
-void PrimitiveRenderer3D::BeginFrame3D() const {
-    if (m_graphics == nullptr) {
-        throw std::logic_error("PrimitiveRenderer3D::BeginFrame3D called before Initialize.");
-    }
-
-    m_graphics->BindDefaultRenderTargets();
-    m_graphics->ClearDefaultDepthStencil();
 }
 
 void PrimitiveRenderer3D::DrawBox(
@@ -104,7 +90,7 @@ void PrimitiveRenderer3D::DrawOrbit(
     }
 
     D3D11_MAPPED_SUBRESOURCE mappedVertex{};
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         context->Map(m_lineVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedVertex),
         "PrimitiveRenderer3D failed to map orbit vertex buffer."
     );
@@ -118,7 +104,7 @@ void PrimitiveRenderer3D::DrawOrbit(
     constants.Projection = projection.Transpose();
 
     D3D11_MAPPED_SUBRESOURCE mappedConstants{};
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         context->Map(m_lineConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstants),
         "PrimitiveRenderer3D failed to map orbit constant buffer."
     );
@@ -168,7 +154,7 @@ void PrimitiveRenderer3D::CreateLineResources() {
     const auto vertexShaderBlob = ShaderCompiler::CompileFromFile("Core/Shaders/Basic3D.hlsl", "VSMain", "vs_5_0");
     const auto pixelShaderBlob = ShaderCompiler::CompileFromFile("Core/Shaders/Basic3D.hlsl", "PSMain", "ps_5_0");
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateVertexShader(
             vertexShaderBlob->GetBufferPointer(),
             vertexShaderBlob->GetBufferSize(),
@@ -178,7 +164,7 @@ void PrimitiveRenderer3D::CreateLineResources() {
         "PrimitiveRenderer3D failed to create orbit vertex shader."
     );
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreatePixelShader(
             pixelShaderBlob->GetBufferPointer(),
             pixelShaderBlob->GetBufferSize(),
@@ -200,7 +186,7 @@ void PrimitiveRenderer3D::CreateLineResources() {
         }
     };
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateInputLayout(
             inputElements,
             static_cast<UINT>(std::size(inputElements)),
@@ -217,7 +203,7 @@ void PrimitiveRenderer3D::CreateLineResources() {
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateBuffer(&vertexBufferDesc, nullptr, m_lineVertexBuffer.GetAddressOf()),
         "PrimitiveRenderer3D failed to create orbit vertex buffer."
     );
@@ -228,7 +214,7 @@ void PrimitiveRenderer3D::CreateLineResources() {
     constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateBuffer(&constantBufferDesc, nullptr, m_lineConstantBuffer.GetAddressOf()),
         "PrimitiveRenderer3D failed to create orbit constant buffer."
     );
@@ -239,5 +225,5 @@ void PrimitiveRenderer3D::BindTargets() const {
         throw std::logic_error("PrimitiveRenderer3D::BindTargets requires initialized graphics.");
     }
 
-    m_graphics->BindDefaultRenderTargets();
+    m_graphics->BindMainRenderTargets();
 }

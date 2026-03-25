@@ -48,6 +48,7 @@ private:
 private:
     void CreateShaders();
     void CreateDynamicVertexBuffer();
+    void CreateDepthStencilState();
     void BindPipeline() const;
 
     [[nodiscard]] float ToNdcX(float x) const noexcept;
@@ -60,6 +61,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
+
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilStateNoDepthTest;
 };
 
 #endif //MYPROJECT_SHAPERENDERER2D_H

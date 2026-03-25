@@ -9,22 +9,16 @@
 #include <filesystem>
 #include <stdexcept>
 
+#include "../D3d11Helpers.h"
 #include "../GraphicsDevice.h"
 #include "../ShaderCompiler.h"
-
-namespace {
-    void ThrowIfFailed(const HRESULT hr, const char *const message) {
-        if (FAILED(hr)) {
-            throw std::runtime_error(message);
-        }
-    }
-}
 
 void ShapeRenderer2D::Initialize(GraphicsDevice &graphics) {
     m_graphics = &graphics;
 
     CreateShaders();
     CreateDynamicVertexBuffer();
+    CreateDepthStencilState();
 }
 
 void ShapeRenderer2D::DrawFilledRect(const RectF &rect, const Color &color) const {
@@ -63,7 +57,7 @@ void ShapeRenderer2D::DrawFilledRect(
     ID3D11DeviceContext *const context = m_graphics->GetImmediateContext();
 
     D3D11_MAPPED_SUBRESOURCE mappedResource{};
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         context->Map(m_vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource),
         "ID3D11DeviceContext::Map failed for ShapeRenderer2D vertex buffer."
     );
@@ -88,7 +82,8 @@ bool ShapeRenderer2D::IsInitialized() const noexcept {
            && m_vertexShader != nullptr
            && m_pixelShader != nullptr
            && m_inputLayout != nullptr
-           && m_vertexBuffer != nullptr;
+           && m_vertexBuffer != nullptr
+           && m_depthStencilStateNoDepthTest != nullptr;
 }
 
 void ShapeRenderer2D::CreateShaders() {
@@ -110,7 +105,7 @@ void ShapeRenderer2D::CreateShaders() {
         "ps_5_0"
     );
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateVertexShader(
             vertexShaderBlob->GetBufferPointer(),
             vertexShaderBlob->GetBufferSize(),
@@ -120,7 +115,7 @@ void ShapeRenderer2D::CreateShaders() {
         "ID3D11Device::CreateVertexShader failed for ShapeRenderer2D."
     );
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreatePixelShader(
             pixelShaderBlob->GetBufferPointer(),
             pixelShaderBlob->GetBufferSize(),
@@ -152,7 +147,7 @@ void ShapeRenderer2D::CreateShaders() {
         }
     };
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         device->CreateInputLayout(
             inputLayoutDesc,
             static_cast<UINT>(std::size(inputLayoutDesc)),
@@ -177,15 +172,36 @@ void ShapeRenderer2D::CreateDynamicVertexBuffer() {
     bufferDesc.MiscFlags = 0;
     bufferDesc.StructureByteStride = 0;
 
-    ThrowIfFailed(
+    D3d11Helpers::ThrowIfFailed(
         m_graphics->GetDevice()->CreateBuffer(&bufferDesc, nullptr, m_vertexBuffer.GetAddressOf()),
         "ID3D11Device::CreateBuffer failed for ShapeRenderer2D vertex buffer."
+    );
+}
+
+void ShapeRenderer2D::CreateDepthStencilState() {
+    if (m_graphics == nullptr) {
+        throw std::logic_error("ShapeRenderer2D::CreateDepthStencilState requires a valid GraphicsDevice.");
+    }
+
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
+    depthStencilDesc.DepthEnable = FALSE;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.StencilEnable = FALSE;
+
+    D3d11Helpers::ThrowIfFailed(
+        m_graphics->GetDevice()->CreateDepthStencilState(
+            &depthStencilDesc,
+            m_depthStencilStateNoDepthTest.GetAddressOf()
+        ),
+        "ShapeRenderer2D failed to create depth stencil state."
     );
 }
 
 void ShapeRenderer2D::BindPipeline() const {
     ID3D11DeviceContext *const context = m_graphics->GetImmediateContext();
 
+    context->OMSetDepthStencilState(m_depthStencilStateNoDepthTest.Get(), 0);
     context->IASetInputLayout(m_inputLayout.Get());
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);

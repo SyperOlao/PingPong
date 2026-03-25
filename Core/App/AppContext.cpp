@@ -16,7 +16,8 @@ bool AppContext::IsValid() const noexcept {
            && Graphics.Device != nullptr
            && Graphics.Render != nullptr
            && Ui.Font != nullptr
-           && Audio.System != nullptr;
+           && Audio.System != nullptr
+           && Assets.Cache != nullptr;
 }
 
 ShapeRenderer2D &AppContext::GetShapeRenderer2D() const {

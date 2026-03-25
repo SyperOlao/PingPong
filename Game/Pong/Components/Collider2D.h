@@ -6,8 +6,8 @@
 #define PINGPONG_COLLIDER2D_H
 #include <SimpleMath.h>
 
-#include "../../../Core/Physics/AABB.h"
-#include "Transform2D.h"
+#include "Core/Physics/AABB.h"
+#include "Core/Math/Transform2D.h"
 
 struct Collider2D final
 {

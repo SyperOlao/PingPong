@@ -1,12 +1,10 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_MODELASSET_H
 #define PINGPONG_MODELASSET_H
 
+#include <DirectXCollision.h>
+
+#include <filesystem>
 #include <memory>
-#include <string>
 #include <directxtk/Model.h>
 
 namespace DirectX
@@ -19,14 +17,26 @@ namespace DirectX
 
 class GraphicsDevice;
 
-class ModelAsset final {
+class ModelAsset final
+{
 public:
-    bool LoadFromCmo(GraphicsDevice &graphics, DirectX::IEffectFactory &effectFactory, const std::wstring &path);
+    bool LoadFromCmo(
+        GraphicsDevice &graphics,
+        DirectX::IEffectFactory &effectFactory,
+        const std::filesystem::path &resolvedFilePath
+    );
 
     [[nodiscard]] DirectX::Model *Get() const noexcept;
 
+    [[nodiscard]] bool IsLoaded() const noexcept;
+
+    [[nodiscard]] const std::filesystem::path &GetResolvedSourcePath() const noexcept;
+
+    [[nodiscard]] DirectX::BoundingSphere GetMergedBoundingSphere() const noexcept;
+
 private:
-    std::unique_ptr<DirectX::Model> m_model;
+    std::unique_ptr<DirectX::Model> m_model{};
+    std::filesystem::path m_resolvedSourcePath{};
 };
 
-#endif //PINGPONG_MODELASSET_H
+#endif

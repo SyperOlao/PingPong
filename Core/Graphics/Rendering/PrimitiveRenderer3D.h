@@ -19,8 +19,6 @@ public:
     void Initialize(GraphicsDevice& graphics);
     ~PrimitiveRenderer3D();
 
-    void BeginFrame3D() const;
-
     void DrawBox(
         const DirectX::SimpleMath::Matrix& world,
         const DirectX::SimpleMath::Matrix& view,

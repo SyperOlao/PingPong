@@ -31,6 +31,7 @@ add_executable(PingPong
 
         Core/Graphics/GraphicsDevice.cpp
         Core/Graphics/GraphicsDevice.h
+        Core/Graphics/D3d11Helpers.h
         Core/Graphics/ShaderCompiler.cpp
         Core/Graphics/ShaderCompiler.h
         Core/Graphics/Color.h
@@ -49,6 +50,8 @@ add_executable(PingPong
         Core/Graphics/ModelAsset.cpp
         Core/Graphics/ModelRenderer.h
         Core/Graphics/ModelRenderer.cpp
+        Core/Graphics/Texture2DAsset.h
+        Core/Graphics/Texture2DAsset.cpp
 
         Core/Graphics/Rendering/ShapeRenderer2D.cpp
         Core/Graphics/Rendering/ShapeRenderer2D.h
@@ -56,20 +59,43 @@ add_executable(PingPong
         Core/Graphics/Rendering/PrimitiveRenderer3D.h
         Core/Graphics/Rendering/RenderContext.cpp
         Core/Graphics/Rendering/RenderContext.h
+        Core/Graphics/Rendering/Renderables/RenderMaterialParameters.h
+        Core/Graphics/Rendering/Renderables/RenderTransform3D.h
+        Core/Graphics/Rendering/Renderables/RenderGeometry3D.h
+        Core/Graphics/Rendering/Renderables/Renderable3D.h
+        Core/Graphics/Rendering/Renderables/SceneRenderData3D.h
+        Core/Graphics/Rendering/Renderables/SceneRenderer3D.h
+        Core/Graphics/Rendering/Renderables/SceneRenderer3D.cpp
 
         Core/Assets/AssetCache.h
         Core/Assets/AssetCache.cpp
+        Core/Assets/AssetPathResolver.h
+        Core/Assets/AssetPathResolver.cpp
 
         Core/Physics/AABB.h
         Core/Physics/BoundingSphere.h
-        Core/Physics/Collision3D.cpp
         Core/Physics/Collision3D.h
-        Core/Physics/CollisionSystem.cpp
-        Core/Physics/CollisionSystem.h
+        Core/Physics/CollisionFoundation.h
+        Core/Physics/Collision2D/AABB2D.h
+        Core/Physics/Collision2D/Circle2D.h
+        Core/Physics/Collision2D/CollisionContact2D.h
+        Core/Physics/Collision2D/CollisionQueries2D.cpp
+        Core/Physics/Collision2D/CollisionQueries2D.h
+        Core/Physics/Collision2D/HorizontalBoundsExit.h
+        Core/Physics/Collision3D/AxisAlignedBox3D.h
+        Core/Physics/Collision3D/BoundingSphere3D.h
+        Core/Physics/Collision3D/CollisionContact3D.h
+        Core/Physics/Collision3D/CollisionQueries3D.cpp
+        Core/Physics/Collision3D/CollisionQueries3D.h
         Core/Physics/HorizontalBoundsExit.h
         Core/Physics/PlaneConstraint.h
+        Core/Physics/PlaneConstraint.cpp
 
+        Core/Math/SpatialMath.h
         Core/Math/Transform3D.h
+        Core/Math/Transform3D.cpp
+        Core/Math/Transform2D.h
+        Core/Math/Transform2D.cpp
 
         Core/UI/BitmapFont.cpp
         Core/UI/BitmapFont.h
@@ -183,6 +209,9 @@ target_link_libraries(PingPong PRIVATE
 )
 file(COPY ${CMAKE_SOURCE_DIR}/Game/Pong/Assets DESTINATION ${CMAKE_BINARY_DIR}/Game/Pong)
 file(COPY ${CMAKE_SOURCE_DIR}/Game/SolarSystem/Assets DESTINATION ${CMAKE_BINARY_DIR}/Game/SolarSystem)
+if(EXISTS "${CMAKE_SOURCE_DIR}/Game/Katamari/Assets")
+    file(COPY ${CMAKE_SOURCE_DIR}/Game/Katamari/Assets DESTINATION ${CMAKE_BINARY_DIR}/Game/Katamari)
+endif()
 file(COPY
         ${CMAKE_SOURCE_DIR}/Core/Shaders
         DESTINATION ${CMAKE_BINARY_DIR}/Core

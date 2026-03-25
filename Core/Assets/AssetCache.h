@@ -1,16 +1,14 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_ASSETCACHE_H
 #define PINGPONG_ASSETCACHE_H
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 class GraphicsDevice;
 class ModelAsset;
+class Texture2DAsset;
 
 namespace DirectX
 {
@@ -37,12 +35,19 @@ public:
 
     void Initialize(GraphicsDevice &graphics);
 
-    [[nodiscard]] std::shared_ptr<ModelAsset> LoadModel(const std::wstring &path);
+    [[nodiscard]] bool IsInitialized() const noexcept;
+
+    [[nodiscard]] std::shared_ptr<ModelAsset> LoadModel(const std::filesystem::path &contentRelativeOrAbsolutePath);
+
+    [[nodiscard]] std::shared_ptr<Texture2DAsset> LoadTexture2DWic(const std::filesystem::path &contentRelativeOrAbsolutePath);
+
+    void UnloadAll();
 
 private:
     GraphicsDevice *m_graphics{nullptr};
     std::unique_ptr<DirectX::EffectFactory> m_effectFactory{};
-    std::unordered_map<std::wstring, std::shared_ptr<ModelAsset> > m_models{};
+    std::unordered_map<std::wstring, std::shared_ptr<ModelAsset>> m_models{};
+    std::unordered_map<std::wstring, std::shared_ptr<Texture2DAsset>> m_textures{};
 };
 
-#endif //PINGPONG_ASSETCACHE_H
+#endif

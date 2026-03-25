@@ -151,8 +151,6 @@ void SolarSystemGame::Render(AppContext &context) {
 
     const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
-    m_renderer3D.BeginFrame3D();
-
     const Camera &activeCamera = GetActiveCamera();
     const Matrix view = activeCamera.GetViewMatrix();
     const Matrix projection = activeCamera.GetProjectionMatrix(aspectRatio);

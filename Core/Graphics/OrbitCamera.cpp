@@ -3,7 +3,8 @@
 //
 
 #include "OrbitCamera.h"
-#include <cmath>
+
+#include "Core/Math/SpatialMath.h"
 
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
@@ -24,14 +25,6 @@ Matrix OrbitCamera::GetViewMatrix() const {
 }
 
 Vector3 OrbitCamera::CalculatePosition() const noexcept {
-    const float cosPitch = std::cos(m_pitch);
-    const float sinPitch = std::sin(m_pitch);
-    const float cosYaw = std::cos(m_yaw);
-    const float sinYaw = std::sin(m_yaw);
-
-    return Vector3(
-        m_target.x + m_radius * sinYaw * cosPitch,
-        m_target.y + m_radius * sinPitch,
-        m_target.z + m_radius * cosYaw * cosPitch
-    );
+    const Vector3 offset = SpatialMath::ForwardFromYawPitchRadians(m_yaw, m_pitch) * m_radius;
+    return m_target + offset;
 }

@@ -19,9 +19,11 @@ void ModelRenderer::DrawModel(
     const ModelAsset &model,
     const DirectX::SimpleMath::Matrix &world,
     const DirectX::SimpleMath::Matrix &view,
-    const DirectX::SimpleMath::Matrix &projection
+    const DirectX::SimpleMath::Matrix &projection,
+    const RenderMaterialParameters &material
 ) const
 {
+    (void)material;
     if (m_graphics == nullptr || m_commonStates == nullptr)
     {
         return;

@@ -11,37 +11,13 @@
 
 #include "AudioSystem.h"
 
+#include "Core/Assets/AssetPathResolver.h"
 
 #include <Audio.h>
-#include <Windows.h>
 
 #include <filesystem>
 #include <stdexcept>
 #include <string>
-
-
-namespace {
-    [[nodiscard]] std::filesystem::path GetExecutableDirectory() {
-        std::wstring buffer(MAX_PATH, L'\0');
-
-        DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-        if (length == 0) {
-            throw std::runtime_error("GetModuleFileNameW failed while resolving audio path.");
-        }
-
-        while (length == buffer.size()) {
-            buffer.resize(buffer.size() * 2);
-
-            length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-            if (length == 0) {
-                throw std::runtime_error("GetModuleFileNameW failed while resolving audio path.");
-            }
-        }
-
-        buffer.resize(length);
-        return std::filesystem::path(buffer).parent_path();
-    }
-}
 
 AudioSystem::AudioSystem() = default;
 
@@ -267,33 +243,5 @@ const DirectX::SoundEffectInstance *AudioSystem::GetLoopInstance(std::string_vie
 }
 
 std::filesystem::path AudioSystem::ResolveAssetPath(const std::filesystem::path &filePath) {
-    if (filePath.empty()) {
-        throw std::invalid_argument("AudioSystem::ResolveAssetPath received empty path.");
-    }
-
-    if (std::filesystem::exists(filePath)) {
-        return std::filesystem::absolute(filePath);
-    }
-
-    std::filesystem::path current = GetExecutableDirectory();
-
-    for (int i = 0; i < 8; ++i) {
-        const std::filesystem::path candidate = current / filePath;
-        if (std::filesystem::exists(candidate)) {
-            return std::filesystem::weakly_canonical(candidate);
-        }
-
-        if (!current.has_parent_path()) {
-            break;
-        }
-
-        const auto parent = current.parent_path();
-        if (parent == current) {
-            break;
-        }
-
-        current = parent;
-    }
-
-    throw std::runtime_error("Audio file not found: " + filePath.string());
+    return AssetPathResolver::Resolve(filePath);
 }

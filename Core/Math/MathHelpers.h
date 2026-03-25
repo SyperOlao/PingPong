@@ -4,6 +4,10 @@
 
 #ifndef PINGPONG_MATHHELPERS_H
 #define PINGPONG_MATHHELPERS_H
+
+// General-purpose scalar and 2D helpers (clamp, lerp, random, 2D normalize/reflect).
+// Vector3 TRS composition, basis axes, planes, and yaw/pitch direction: see SpatialMath.h.
+
 #include <algorithm>
 #include <concepts>
 #include <random>
