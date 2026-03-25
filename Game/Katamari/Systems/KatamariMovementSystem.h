@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 25.03.2026.
+//
+
+#ifndef PINGPONG_KATAMARIMOVEMENTSYSTEM_H
+#define PINGPONG_KATAMARIMOVEMENTSYSTEM_H
+
+
+class KatamariMovementSystem {
+};
+
+
+#endif //PINGPONG_KATAMARIMOVEMENTSYSTEM_H

@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 25.03.2026.
+//
+
+#ifndef PINGPONG_KATAMARICAMERACONTROLLER_H
+#define PINGPONG_KATAMARICAMERACONTROLLER_H
+
+
+class KatamariCameraController {
+};
+
+
+#endif //PINGPONG_KATAMARICAMERACONTROLLER_H

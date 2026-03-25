@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 25.03.2026.
+//
+
+#ifndef PINGPONG_KATAMARIABSORPTIONSYSTEM_H
+#define PINGPONG_KATAMARIABSORPTIONSYSTEM_H
+
+
+class KatamariAbsorptionSystem {
+};
+
+
+#endif //PINGPONG_KATAMARIABSORPTIONSYSTEM_H

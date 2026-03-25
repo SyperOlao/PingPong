@@ -1,0 +1,8 @@
+//
+// Created by SyperOlao on 25.03.2026.
+//
+
+#ifndef PINGPONG_KATAMARITYPES_H
+#define PINGPONG_KATAMARITYPES_H
+
+#endif //PINGPONG_KATAMARITYPES_H

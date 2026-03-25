@@ -1,0 +1,13 @@
+//
+// Created by SyperOlao on 25.03.2026.
+//
+
+#ifndef PINGPONG_KATAMARIPROGRESSIONSYSTEM_H
+#define PINGPONG_KATAMARIPROGRESSIONSYSTEM_H
+
+
+class KatamariProgressionSystem {
+};
+
+
+#endif //PINGPONG_KATAMARIPROGRESSIONSYSTEM_H

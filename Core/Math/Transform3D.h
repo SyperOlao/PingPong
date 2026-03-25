@@ -11,6 +11,8 @@ struct Transform3D final {
     DirectX::SimpleMath::Vector3 RotationEulerRad{0.0f, 0.0f, 0.0f};
     DirectX::SimpleMath::Vector3 Scale{1.0f, 1.0f, 1.0f};
 
+    [[nodiscard]] DirectX::SimpleMath::Matrix GetWorldMatrix() const noexcept;
+
     [[nodiscard]] DirectX::SimpleMath::Matrix ToMatrix() const noexcept {
         using namespace DirectX::SimpleMath;
 

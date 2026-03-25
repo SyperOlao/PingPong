@@ -6,6 +6,7 @@
 #define MYPROJECT_APPCONTEXT_H
 
 
+class AssetCache;
 class Window;
 class InputSystem;
 class GraphicsDevice;
@@ -20,6 +21,7 @@ struct AppContext {
     ShapeRenderer2D *Shape2D{nullptr};
     BitmapFont *Font{nullptr};
     AudioSystem *Audio{nullptr};
+    AssetCache *Assets{nullptr};
 
     [[nodiscard]] bool IsValid() const noexcept {
         return MainWindow != nullptr

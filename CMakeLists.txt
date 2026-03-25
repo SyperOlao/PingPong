@@ -109,6 +109,42 @@ add_executable(PingPong
         Game/SolarSystem/Systems/SolarSystemEngineAudioController.cpp
         Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
         Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
+        Core/Physics/BoundingSphere.h
+        Core/Physics/Collision3D.cpp
+        Core/Physics/Collision3D.h
+        Core/Physics/PlaneConstraint.h
+        Core/Graphics/ModelAsset.h
+        Core/Graphics/ModelRenderer.h
+        Core/Assets/AssetCache.h
+        Game/Katamari/KatamariGame.cpp
+        Game/Katamari/KatamariGame.h
+        Game/Katamari/KatamariScene.cpp
+        Game/Katamari/KatamariScene.h
+        Game/Katamari/KatamariTypes.h
+        Game/Katamari/KatamariTypes.h
+        Game/Katamari/Components/SphereColliderComponent.h
+        Game/Katamari/Components/VelocityComponent.h
+        Game/Katamari/Components/PickupVisualComponent.h
+        Game/Katamari/Entities/KatamariBall.cpp
+        Game/Katamari/Entities/KatamariBall.h
+        Game/Katamari/Entities/PickupItem.cpp
+        Game/Katamari/Entities/PickupItem.h
+        Game/Katamari/Entities/LevelBounds.cpp
+        Game/Katamari/Entities/LevelBounds.h
+        Game/Katamari/Systems/KatamariSpawner.cpp
+        Game/Katamari/Systems/KatamariSpawner.h
+        Game/Katamari/Systems/KatamariAbsorptionSystem.cpp
+        Game/Katamari/Systems/KatamariAbsorptionSystem.h
+        Game/Katamari/Systems/KatamariMovementSystem.cpp
+        Game/Katamari/Systems/KatamariMovementSystem.h
+        Game/Katamari/Systems/KatamariCameraController.cpp
+        Game/Katamari/Systems/KatamariCameraController.h
+        Game/Katamari/Systems/KatamariProgressionSystem.cpp
+        Game/Katamari/Systems/KatamariProgressionSystem.h
+        Game/Katamari/Data/PickupArchetype.h
+        Game/Katamari/Data/KatamariGameConfig.h
+        Game/Katamari/UI/KatamariHud.cpp
+        Game/Katamari/UI/KatamariHud.h
 )
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE
