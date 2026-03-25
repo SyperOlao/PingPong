@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/UI/BitmapFont.h"
 
 void SliderWidget::SetBounds(const RectF& bounds) noexcept

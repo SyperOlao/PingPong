@@ -5,7 +5,7 @@
 #include "../Entities/PlayField.h"
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Graphics/Color.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../../Core/Graphics/Rendering/ShapeRenderer2D.h"
 #include "Game/Pong/Entities/Ball.h"
 #include "Game/Pong/Entities/Paddle.h"
 #include "Game/Pong/Systems/PongRules.h"

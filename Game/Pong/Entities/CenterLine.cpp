@@ -5,7 +5,7 @@
 #include "../Entities/CenterLine.h"
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Graphics/Color.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../../Core/Graphics/Rendering/ShapeRenderer2D.h"
 
 void CenterLine::Configure(const float x, const float topY, const float playableHeight) noexcept
 {

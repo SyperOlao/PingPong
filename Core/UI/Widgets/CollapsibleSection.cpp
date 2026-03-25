@@ -5,7 +5,7 @@
 #include "CollapsibleSection.h"
 #include <cassert>
 
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/UI/BitmapFont.h"
 
 void CollapsibleSection::SetBounds(const RectF& bounds) noexcept

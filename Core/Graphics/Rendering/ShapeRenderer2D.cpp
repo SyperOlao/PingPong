@@ -9,8 +9,8 @@
 #include <filesystem>
 #include <stdexcept>
 
-#include "../Graphics/GraphicsDevice.h"
-#include "../Graphics/ShaderCompiler.h"
+#include "../GraphicsDevice.h"
+#include "../ShaderCompiler.h"
 
 namespace {
     void ThrowIfFailed(const HRESULT hr, const char *const message) {

@@ -18,7 +18,7 @@
 #include <stdexcept>
 
 #include "Core/Graphics/Camera.h"
-#include "Core/Graphics/PrimitiveRenderer3D.h"
+#include "../../../Core/Graphics/Rendering/PrimitiveRenderer3D.h"
 
 using DirectX::SimpleMath::Color;
 using DirectX::SimpleMath::Matrix;

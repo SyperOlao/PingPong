@@ -7,7 +7,7 @@
 #include <string>
 
 #include "../Graphics/Color.h"
-#include "../Graphics2D/ShapeRenderer2D.h"
+#include "../Graphics/Rendering/ShapeRenderer2D.h"
 
 class BitmapFont;
 class InputSystem;

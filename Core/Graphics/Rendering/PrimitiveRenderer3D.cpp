@@ -7,9 +7,9 @@
 
 #include <array>
 
-#include "ObjectConstants.h"
-#include "ShaderCompiler.h"
-#include "Vertex3D.h"
+#include "../ObjectConstants.h"
+#include "../ShaderCompiler.h"
+#include "../Vertex3D.h"
 #include "Core/Graphics/GraphicsDevice.h"
 
 using DirectX::SimpleMath::Matrix;
@@ -32,7 +32,6 @@ void PrimitiveRenderer3D::Initialize(GraphicsDevice &graphics) {
 
     CreatePrimitives();
     CreateLineResources();
-    EnsureDepthResources();
 }
 
 void PrimitiveRenderer3D::BeginFrame3D() const {
@@ -40,16 +39,8 @@ void PrimitiveRenderer3D::BeginFrame3D() const {
         throw std::logic_error("PrimitiveRenderer3D::BeginFrame3D called before Initialize.");
     }
 
-    EnsureDepthResources();
-    BindTargets();
-
-    ID3D11DeviceContext *const context = m_graphics->GetImmediateContext();
-    context->ClearDepthStencilView(
-        m_depthStencilView.Get(),
-        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-        1.0f,
-        0
-    );
+    m_graphics->BindDefaultRenderTargets();
+    m_graphics->ClearDefaultDepthStencil();
 }
 
 void PrimitiveRenderer3D::DrawBox(
@@ -243,69 +234,10 @@ void PrimitiveRenderer3D::CreateLineResources() {
     );
 }
 
-void PrimitiveRenderer3D::EnsureDepthResources() const {
-    if (m_graphics == nullptr) {
-        throw std::logic_error("PrimitiveRenderer3D::EnsureDepthResources requires initialized graphics.");
-    }
-
-    const int width = m_graphics->GetWidth();
-    const int height = m_graphics->GetHeight();
-
-    if (width <= 0 || height <= 0) {
-        return;
-    }
-
-    if (m_depthStencilView != nullptr
-        && m_cachedDepthWidth == width
-        && m_cachedDepthHeight == height) {
-        return;
-    }
-
-    m_depthStencilView.Reset();
-    m_depthTexture.Reset();
-
-    D3D11_TEXTURE2D_DESC depthDesc{};
-    depthDesc.Width = static_cast<UINT>(width);
-    depthDesc.Height = static_cast<UINT>(height);
-    depthDesc.MipLevels = 1;
-    depthDesc.ArraySize = 1;
-    depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthDesc.SampleDesc.Count = 1;
-    depthDesc.SampleDesc.Quality = 0;
-    depthDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
-    ID3D11Device *const device = m_graphics->GetDevice();
-    if (device == nullptr) {
-        throw std::logic_error("PrimitiveRenderer3D::EnsureDepthResources failed: null device.");
-    }
-
-    ThrowIfFailed(
-        device->CreateTexture2D(&depthDesc, nullptr, m_depthTexture.GetAddressOf()),
-        "PrimitiveRenderer3D failed to create depth texture."
-    );
-
-    ThrowIfFailed(
-        device->CreateDepthStencilView(m_depthTexture.Get(), nullptr, m_depthStencilView.GetAddressOf()),
-        "PrimitiveRenderer3D failed to create depth stencil view."
-    );
-
-    m_cachedDepthWidth = width;
-    m_cachedDepthHeight = height;
-}
-
 void PrimitiveRenderer3D::BindTargets() const {
     if (m_graphics == nullptr) {
         throw std::logic_error("PrimitiveRenderer3D::BindTargets requires initialized graphics.");
     }
 
-    ID3D11DeviceContext *const context = m_graphics->GetImmediateContext();
-    ID3D11RenderTargetView *const rtv = m_graphics->GetRenderTargetView();
-
-    if (context == nullptr || rtv == nullptr || m_depthStencilView == nullptr) {
-        throw std::logic_error("PrimitiveRenderer3D::BindTargets failed: missing D3D targets.");
-    }
-
-    ID3D11RenderTargetView *renderTargets[] = {rtv};
-    context->OMSetRenderTargets(1, renderTargets, m_depthStencilView.Get());
+    m_graphics->BindDefaultRenderTargets();
 }

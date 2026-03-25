@@ -9,11 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(PingPong
         main.cpp
 
-        Game/Pong/PongGame.cpp
-        Game/Pong/PongGame.h
-
         Core/App/Application.cpp
         Core/App/Application.h
+        Core/App/ApplicationDefaults.h
         Core/App/Timer.cpp
         Core/App/Timer.h
         Core/App/IGame.h
@@ -34,68 +32,49 @@ add_executable(PingPong
         Core/Graphics/ShaderCompiler.cpp
         Core/Graphics/ShaderCompiler.h
         Core/Graphics/Color.h
+        Core/Graphics/OrbitCamera.cpp
+        Core/Graphics/OrbitCamera.h
+        Core/Graphics/FpsCamera.cpp
+        Core/Graphics/FpsCamera.h
+        Core/Graphics/MeshData.h
+        Core/Graphics/MeshGenerator.h
+        Core/Graphics/MeshGenerator.cpp
+        Core/Graphics/ProjectionMode.h
+        Core/Graphics/Camera.h
+        Core/Graphics/Vertex3D.h
+        Core/Graphics/ObjectConstants.h
+        Core/Graphics/ModelAsset.h
+        Core/Graphics/ModelAsset.cpp
+        Core/Graphics/ModelRenderer.h
+        Core/Graphics/ModelRenderer.cpp
 
-        Core/Graphics2D/ShapeRenderer2D.cpp
-        Core/Graphics2D/ShapeRenderer2D.h
+        Core/Graphics/Rendering/ShapeRenderer2D.cpp
+        Core/Graphics/Rendering/ShapeRenderer2D.h
+        Core/Graphics/Rendering/PrimitiveRenderer3D.cpp
+        Core/Graphics/Rendering/PrimitiveRenderer3D.h
+        Core/Graphics/Rendering/RenderContext.cpp
+        Core/Graphics/Rendering/RenderContext.h
+
+        Core/Assets/AssetCache.h
+        Core/Assets/AssetCache.cpp
+
         Core/Physics/AABB.h
+        Core/Physics/BoundingSphere.h
+        Core/Physics/Collision3D.cpp
+        Core/Physics/Collision3D.h
+        Core/Physics/CollisionSystem.cpp
+        Core/Physics/CollisionSystem.h
+        Core/Physics/HorizontalBoundsExit.h
+        Core/Physics/PlaneConstraint.h
+
+        Core/Math/Transform3D.h
+
         Core/UI/BitmapFont.cpp
         Core/UI/BitmapFont.h
         Core/UI/Button.cpp
         Core/UI/Button.h
-        Core/Physics/CollisionSystem.cpp
-        Game/Pong/PongTypes.h
-        Game/Pong/Entities/Paddle.cpp
-        Game/Pong/Entities/Ball.cpp
-        Game/Pong/Systems/PongRules.cpp
-        Game/Pong/Systems/PaddleAI.cpp
-        Game/Pong/Systems/PongCollisionSystem.cpp
-        Game/Pong/PongScene.cpp
-        Game/Pong/Entities/ScoreBoard.cpp
-        Game/Pong/Entities/Wall.cpp
-        Game/Pong/Entities/PlayField.cpp
-        Game/Pong/Entities/CenterLine.cpp
         Core/UI/Switcher.cpp
         Core/UI/Switcher.h
-        Core/Audio/AudioSystem.cpp
-        Core/Audio/AudioSystem.h
-        Core/Audio/AudioSystem.h
-        Game/Pong/UI/PongUI.cpp
-        Game/Pong/UI/PongUI.h
-        Game/Pong/UI/PongUI.h
-        Game/SolarSystem/SolarSystemGame.cpp
-        Game/SolarSystem/SolarSystemGame.h
-        Game/SolarSystem/SolarSystemScene.cpp
-        Game/SolarSystem/SolarSystemScene.h
-        Game/SolarSystem/Entities/PlanetBody.cpp
-        Game/SolarSystem/Entities/PlanetBody.h
-        Core/Graphics/OrbitCamera.cpp
-        Core/Graphics/OrbitCamera.h
-        Core/Math/Transform3D.h
-        Game/SolarSystem/Systems/OrbitMath.h
-        Game/SolarSystem/Systems/OrbitMath.cpp
-        Game/SolarSystem/Entities/OrbitalBody.cpp
-        Game/SolarSystem/Entities/OrbitalBody.h
-        Core/Graphics/MeshData.h
-        Core/Graphics/MeshGenerator.h
-        Core/Graphics/ProjectionMode.h
-        Core/Graphics/Camera.h
-        Core/Graphics/Vertex3D.h
-        Core/Graphics/MeshGenerator.cpp
-        Core/Graphics/MeshGenerator.cpp
-        Core/Graphics/FpsCamera.cpp
-        Core/Graphics/FpsCamera.h
-        Core/Graphics/FpsCamera.h
-        Core/Graphics/FpsCamera.h
-        Core/Graphics/ObjectConstants.h
-        Core/Graphics/PrimitiveRenderer3D.h
-        Core/Graphics/FpsCamera.cpp
-        Core/Graphics/PrimitiveRenderer3D.cpp
-        Core/Graphics/PrimitiveRenderer3D.cpp
-        Game/SolarSystem/UI/SolarSystemSettingsPanel.cpp
-        Game/SolarSystem/UI/SolarSystemSettingsPanel.h
-        Game/SolarSystem/UI/SolarSystemSettingsPanel.h
-        Game/SolarSystem/Systems/SolarSystemTuning.h
-        Core/UI/Widgets/SliderWidget.cpp
         Core/UI/Widgets/SliderWidget.cpp
         Core/UI/Widgets/SliderWidget.h
         Core/UI/Widgets/CollapsibleSection.cpp
@@ -103,24 +82,50 @@ add_executable(PingPong
         Core/UI/Common/UITheme.h
         Core/UI/Common/RectF.h
         Core/UI/Common/MouseState.h
+
+        Core/Audio/AudioSystem.cpp
+        Core/Audio/AudioSystem.h
+
+        Game/Pong/PongGame.cpp
+        Game/Pong/PongGame.h
+        Game/Pong/PongTypes.h
+        Game/Pong/Common/Types.h
+        Game/Pong/Entities/Paddle.cpp
+        Game/Pong/Entities/Ball.cpp
+        Game/Pong/Systems/PongRules.cpp
+        Game/Pong/Systems/PaddleAI.cpp
+        Game/Pong/Systems/PongCollisionSystem.cpp
+        Game/Pong/Systems/PongCollisionSystem.h
+        Game/Pong/PongScene.cpp
+        Game/Pong/Entities/ScoreBoard.cpp
+        Game/Pong/Entities/Wall.cpp
+        Game/Pong/Entities/PlayField.cpp
+        Game/Pong/Entities/CenterLine.cpp
+        Game/Pong/UI/PongUI.cpp
+        Game/Pong/UI/PongUI.h
+
+        Game/SolarSystem/SolarSystemGame.cpp
+        Game/SolarSystem/SolarSystemGame.h
+        Game/SolarSystem/SolarSystemScene.cpp
+        Game/SolarSystem/SolarSystemScene.h
+        Game/SolarSystem/Entities/PlanetBody.cpp
+        Game/SolarSystem/Entities/PlanetBody.h
+        Game/SolarSystem/Systems/OrbitMath.h
+        Game/SolarSystem/Systems/OrbitMath.cpp
+        Game/SolarSystem/Entities/OrbitalBody.cpp
+        Game/SolarSystem/Entities/OrbitalBody.h
+        Game/SolarSystem/UI/SolarSystemSettingsPanel.cpp
+        Game/SolarSystem/UI/SolarSystemSettingsPanel.h
+        Game/SolarSystem/Systems/SolarSystemTuning.h
         Game/SolarSystem/Rendering/SpaceBackdropRenderer.cpp
-        Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
         Game/SolarSystem/Rendering/SpaceBackdropRenderer.h
         Game/SolarSystem/Systems/SolarSystemEngineAudioController.cpp
         Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
-        Game/SolarSystem/Systems/SolarSystemEngineAudioController.h
-        Core/Physics/BoundingSphere.h
-        Core/Physics/Collision3D.cpp
-        Core/Physics/Collision3D.h
-        Core/Physics/PlaneConstraint.h
-        Core/Graphics/ModelAsset.h
-        Core/Graphics/ModelRenderer.h
-        Core/Assets/AssetCache.h
+
         Game/Katamari/KatamariGame.cpp
         Game/Katamari/KatamariGame.h
         Game/Katamari/KatamariScene.cpp
         Game/Katamari/KatamariScene.h
-        Game/Katamari/KatamariTypes.h
         Game/Katamari/KatamariTypes.h
         Game/Katamari/Components/SphereColliderComponent.h
         Game/Katamari/Components/VelocityComponent.h
@@ -145,8 +150,8 @@ add_executable(PingPong
         Game/Katamari/Data/KatamariGameConfig.h
         Game/Katamari/UI/KatamariHud.cpp
         Game/Katamari/UI/KatamariHud.h
-        Game/Pong/Common/Types.h
 )
+
 find_package(directxtk CONFIG REQUIRED)
 target_include_directories(PingPong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}

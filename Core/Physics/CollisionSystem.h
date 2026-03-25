@@ -7,7 +7,7 @@
 #include <SimpleMath.h>
 
 #include "AABB.h"
-#include "Game/Pong/Common/Types.h"
+#include "HorizontalBoundsExit.h"
 
 struct CollisionManifold final
 {
@@ -40,11 +40,7 @@ public:
         bool bounceToRight
     ) noexcept;
 
-    /**
-     * Возвращает сторону, через которую мяч ВЫШЕЛ.
-     * Это не "кто забил", а именно "куда улетел".
-     */
-    [[nodiscard]] static CourtSide CheckOutOfBounds(
+    [[nodiscard]] static HorizontalBoundsExit CheckHorizontalBoundsExit(
         const AABB& ball,
         float leftBoundary,
         float rightBoundary

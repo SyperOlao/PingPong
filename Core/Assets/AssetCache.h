@@ -12,15 +12,37 @@
 class GraphicsDevice;
 class ModelAsset;
 
-class AssetCache final {
+namespace DirectX
+{
+    inline namespace DX11
+    {
+        class EffectFactory;
+    }
+}
+
+class AssetCache final
+{
 public:
+    AssetCache();
+
+    ~AssetCache();
+
+    AssetCache(const AssetCache &) = delete;
+
+    AssetCache &operator=(const AssetCache &) = delete;
+
+    AssetCache(AssetCache &&) = delete;
+
+    AssetCache &operator=(AssetCache &&) = delete;
+
     void Initialize(GraphicsDevice &graphics);
 
     [[nodiscard]] std::shared_ptr<ModelAsset> LoadModel(const std::wstring &path);
 
 private:
     GraphicsDevice *m_graphics{nullptr};
-    std::unordered_map<std::wstring, std::shared_ptr<ModelAsset> > m_models;
+    std::unique_ptr<DirectX::EffectFactory> m_effectFactory{};
+    std::unordered_map<std::wstring, std::shared_ptr<ModelAsset> > m_models{};
 };
 
 #endif //PINGPONG_ASSETCACHE_H

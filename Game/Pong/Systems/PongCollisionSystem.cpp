@@ -15,6 +15,7 @@
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Math/MathHelpers.h"
 #include "Core/Physics/CollisionSystem.h"
+#include "Core/Physics/HorizontalBoundsExit.h"
 #include "Game/Pong/Entities/Ball.h"
 #include "Game/Pong/Entities/Paddle.h"
 
@@ -123,10 +124,20 @@ namespace PongCollisionSystem {
     }
 
     CourtSide CheckScoring(const Ball &ball) noexcept {
-        return CollisionSystem::CheckOutOfBounds(
+        const HorizontalBoundsExit exit = CollisionSystem::CheckHorizontalBoundsExit(
             ball.GetAABB(),
             0.0f,
             static_cast<float>(Constants::WindowWidth)
         );
+
+        switch (exit)
+        {
+            case HorizontalBoundsExit::Left:
+                return CourtSide::Left;
+            case HorizontalBoundsExit::Right:
+                return CourtSide::Right;
+            default:
+                return CourtSide::None;
+        }
     }
 }

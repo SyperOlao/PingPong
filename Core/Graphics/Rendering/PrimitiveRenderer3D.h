@@ -45,7 +45,6 @@ public:
 private:
     void CreatePrimitives();
     void CreateLineResources();
-    void EnsureDepthResources() const;
     void BindTargets() const;
 
 private:
@@ -59,11 +58,5 @@ private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_lineInputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_lineVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_lineConstantBuffer;
-
-    mutable Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthTexture;
-    mutable Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
-
-    mutable int m_cachedDepthWidth{0};
-    mutable int m_cachedDepthHeight{0};
 };
 #endif //PINGPONG_PRIMITIVERENDERER3D_H

@@ -7,8 +7,8 @@
 #include "SolarSystemScene.h"
 #include "Core/App/IGame.h"
 #include "Core/Graphics/FpsCamera.h"
-#include "../../Core/Graphics/OrbitCamera.h"
-#include "Core/Graphics/PrimitiveRenderer3D.h"
+#include "Core/Graphics/OrbitCamera.h"
+#include "Core/Graphics/Rendering/PrimitiveRenderer3D.h"
 #include "Rendering/SpaceBackdropRenderer.h"
 #include "UI/SolarSystemSettingsPanel.h"
 

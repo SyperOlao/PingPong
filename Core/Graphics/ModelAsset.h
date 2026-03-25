@@ -9,11 +9,19 @@
 #include <string>
 #include <directxtk/Model.h>
 
+namespace DirectX
+{
+    inline namespace DX11
+    {
+        class IEffectFactory;
+    }
+}
+
 class GraphicsDevice;
 
 class ModelAsset final {
 public:
-    bool LoadFromCmo(GraphicsDevice &graphics, const std::wstring &path);
+    bool LoadFromCmo(GraphicsDevice &graphics, DirectX::IEffectFactory &effectFactory, const std::wstring &path);
 
     [[nodiscard]] DirectX::Model *Get() const noexcept;
 

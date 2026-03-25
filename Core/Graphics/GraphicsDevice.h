@@ -28,6 +28,10 @@ public:
     void BeginFrame(const Color& clearColor);
     void EndFrame(bool vSync = true) const;
 
+    void BindBackBufferRenderTargetOnly() const;
+    void BindDefaultRenderTargets() const;
+    void ClearDefaultDepthStencil() const;
+
     [[nodiscard]] int GetWidth() const noexcept;
     [[nodiscard]] int GetHeight() const noexcept;
     [[nodiscard]] HWND GetWindowHandle() const noexcept;
@@ -36,12 +40,15 @@ public:
     [[nodiscard]] ID3D11DeviceContext* GetImmediateContext() const noexcept;
     [[nodiscard]] IDXGISwapChain* GetSwapChain() const noexcept;
     [[nodiscard]] ID3D11RenderTargetView* GetRenderTargetView() const noexcept;
+    [[nodiscard]] ID3D11DepthStencilView* GetDepthStencilView() const noexcept;
 
 private:
     void CreateDeviceAndSwapChain();
     void CreateRenderTarget();
+    void CreateDepthStencil();
     void CreateViewport() const;
     void ReleaseRenderTarget() noexcept;
+    void ReleaseDepthStencil() noexcept;
 
 private:
     HWND m_windowHandle{nullptr};
@@ -53,6 +60,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context;
     Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_depthTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 };
 
 

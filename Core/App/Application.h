@@ -9,22 +9,23 @@
 #include <memory>
 #include <string>
 
+#include "ApplicationDefaults.h"
 #include "../Platform/Window.h"
 #include "../Graphics/Color.h"
 #include "../Graphics/GraphicsDevice.h"
-#include "../Graphics2D/ShapeRenderer2D.h"
+#include "../Graphics/Rendering/RenderContext.h"
 #include "../Input/InputSystem.h"
+#include "../Assets/AssetCache.h"
 #include "AppContext.h"
 #include "IGame.h"
 #include "Timer.h"
-#include "Game/Pong/Common/Constants.h"
 #include "Core/UI/BitmapFont.h"
 #include "Core/Audio/AudioSystem.h"
 
 struct ApplicationDesc final {
     std::wstring Title{L"DX11 Application"};
-    int ClientWidth{Constants::WindowWidth};
-    int ClientHeight{Constants::WindowHeight};
+    int ClientWidth{ApplicationDefaults::DefaultClientWidth};
+    int ClientHeight{ApplicationDefaults::DefaultClientHeight};
     bool VSync{true};
     Color ClearColor{0.05f, 0.05f, 0.08f, 1.0f};
 };
@@ -63,11 +64,12 @@ private:
     Window m_window;
     InputSystem m_input;
     GraphicsDevice m_graphics;
-    ShapeRenderer2D m_shapeRenderer2D;
-    BitmapFont m_bitmapFont;
-    Timer m_timer;
+    RenderContext m_renderContext{};
+    BitmapFont m_bitmapFont{};
+    Timer m_timer{};
     AppContext m_context{};
-    AudioSystem m_audio;
+    AudioSystem m_audio{};
+    AssetCache m_assetCache{};
     bool m_isRunning{true};
 };
 

@@ -17,7 +17,7 @@
 #include "Core/App/AppContext.h"
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Graphics/Color.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "Core/Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/Input/InputSystem.h"
 #include "Core/UI/BitmapFont.h"
 #include "Game/Pong/Entities/Ball.h"

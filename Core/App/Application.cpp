@@ -6,7 +6,6 @@
 
 #include "AppContext.h"
 #include "Core/Graphics/GraphicsDevice.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
 #include <stdexcept>
 #include <utility>
 
@@ -51,14 +50,16 @@ void Application::Initialize() {
 
     m_audio.Initialize();
 
-    m_shapeRenderer2D.Initialize(m_graphics);
+    m_renderContext.Initialize(m_graphics);
+    m_assetCache.Initialize(m_graphics);
 
     m_context.MainWindow = &m_window;
     m_context.Input = &m_input;
     m_context.Graphics = &m_graphics;
-    m_context.Shape2D = &m_shapeRenderer2D;
+    m_context.Shape2D = &m_renderContext.GetShapeRenderer2D();
     m_context.Font = &m_bitmapFont;
     m_context.Audio = &m_audio;
+    m_context.Assets = &m_assetCache;
 
     if (!m_context.IsValid()) {
         throw std::runtime_error("Application failed to build a valid AppContext.");

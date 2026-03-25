@@ -6,7 +6,7 @@
 #define MYPROJECT_WALL_H
 
 #include "Core/Graphics/Color.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../../Core/Graphics/Rendering/ShapeRenderer2D.h"
 class ShapeRenderer2D;
 
 

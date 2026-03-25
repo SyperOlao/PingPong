@@ -7,7 +7,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 
-#include "../Graphics/Color.h"
+#include "../Color.h"
 #include "Core/UI/Common/RectF.h"
 
 class GraphicsDevice;

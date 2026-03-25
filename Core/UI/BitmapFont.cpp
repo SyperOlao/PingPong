@@ -10,7 +10,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "../Graphics2D/ShapeRenderer2D.h"
+#include "../Graphics/Rendering/ShapeRenderer2D.h"
 
 
 namespace

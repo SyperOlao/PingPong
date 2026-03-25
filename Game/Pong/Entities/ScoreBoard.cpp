@@ -7,7 +7,7 @@
 
 #include "Game/Pong/Common/Constants.h"
 #include "Core/Graphics/Color.h"
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../../Core/Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/UI/BitmapFont.h"
 #include "Game/Pong/Systems/PongRules.h"
 

@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-#include "Core/Graphics2D/ShapeRenderer2D.h"
+#include "../../../Core/Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/UI/BitmapFont.h"
 
 namespace
