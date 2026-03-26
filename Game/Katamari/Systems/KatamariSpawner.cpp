@@ -21,19 +21,16 @@ namespace
     float archetypeRadiusFallback
 )
 {
+    const float minimumRadius = archetypeRadiusFallback > 0.0f ? archetypeRadiusFallback : 0.2f;
+
     if (modelAsset == nullptr || !modelAsset->IsLoaded())
     {
-        return (std::max)(archetypeRadiusFallback, 0.35f);
+        return (std::max)(minimumRadius, 0.35f);
     }
 
     const DirectX::BoundingSphere merged = modelAsset->GetMergedBoundingSphere();
     const float scaled = merged.Radius * visualUniformScale;
-    if (archetypeRadiusFallback > 0.0f)
-    {
-        return archetypeRadiusFallback;
-    }
-
-    return (std::max)(scaled, 0.2f);
+    return (std::max)(scaled, minimumRadius);
 }
 }
 

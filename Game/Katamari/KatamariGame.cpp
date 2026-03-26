@@ -347,9 +347,8 @@ void KatamariGame::Render(AppContext &context)
             DirectX::SimpleMath::Color(0.02f, 0.03f, 0.03f, 0.45f)
         );
 
-        const float diameter = WorldContext.BallRadius * 2.0f;
         const Matrix ballWorld =
-            Matrix::CreateScale(diameter, diameter, diameter) *
+            Matrix::CreateScale(WorldContext.BallRadius, WorldContext.BallRadius, WorldContext.BallRadius) *
             Matrix::CreateTranslation(ballTransform->Local.Position);
         RenderMaterialParameters ballMaterial{};
         ballMaterial.BaseColor = DirectX::SimpleMath::Color(0.95f, 0.35f, 0.2f, 1.0f);

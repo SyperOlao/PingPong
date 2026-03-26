@@ -126,7 +126,6 @@ void KatamariAbsorptionSystem::Update(Scene &scene, AppContext &, float)
         GameplayWorld->BallVolume += pickupRecord.AbsorbVolumeContribution;
         GameplayWorld->BallRadius = RadiusFromSphereVolume(GameplayWorld->BallVolume);
         ballCollider->Radius = GameplayWorld->BallRadius;
-        ballTransform->Local.Position.y = GameplayWorld->BallRadius;
 
         ++GameplayWorld->CollectedCount;
     }

@@ -21,6 +21,15 @@
 
 namespace
 {
+float ComputeMaximumWorldScaleAxis(const DirectX::SimpleMath::Matrix &worldMatrix)
+{
+    const DirectX::SimpleMath::Vector3 basisX(worldMatrix._11, worldMatrix._12, worldMatrix._13);
+    const DirectX::SimpleMath::Vector3 basisY(worldMatrix._21, worldMatrix._22, worldMatrix._23);
+    const DirectX::SimpleMath::Vector3 basisZ(worldMatrix._31, worldMatrix._32, worldMatrix._33);
+
+    return (std::max)(basisX.Length(), (std::max)(basisY.Length(), basisZ.Length()));
+}
+
 bool LayersOverlapSphereSphere(const SphereColliderComponent &first, const SphereColliderComponent &second)
 {
     const std::uint32_t bitFirst = 1u << first.CollisionLayer;
@@ -131,11 +140,13 @@ void CollisionSystem::Update(Scene &scene, AppContext &, float)
                 slot.SphereCollider->LocalCenter,
                 slot.Transform->WorldMatrix
             );
+            const float worldScaleMaximumAxis = ComputeMaximumWorldScaleAxis(slot.Transform->WorldMatrix);
+            const float worldRadius = slot.SphereCollider->Radius * worldScaleMaximumAxis;
 
             SphereCandidate sphereCandidate{};
             sphereCandidate.Id = slot.Id;
             sphereCandidate.WorldSphere.Center = worldCenter;
-            sphereCandidate.WorldSphere.Radius = slot.SphereCollider->Radius;
+            sphereCandidate.WorldSphere.Radius = worldRadius;
             sphereCandidate.Collider = *slot.SphereCollider;
             spheres.push_back(sphereCandidate);
         }
