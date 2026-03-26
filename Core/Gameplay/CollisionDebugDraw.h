@@ -21,6 +21,18 @@ public:
         const DirectX::SimpleMath::Color &color,
         float normalLength
     );
+
+    static void DrawSphereColliderWorldBounds(
+        Scene &scene,
+        DebugDrawQueue &queue,
+        const DirectX::SimpleMath::Color &color
+    );
+
+    static void DrawCollisionWorldBounds(
+        Scene &scene,
+        DebugDrawQueue &queue,
+        const DirectX::SimpleMath::Color &color
+    );
 };
 
 #endif

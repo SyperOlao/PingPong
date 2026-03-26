@@ -39,7 +39,13 @@ int main()
                 break;
         }
 
-        Application app(hInstance, std::move(game));
+        ApplicationDesc applicationDescription{};
+        if (demo == DemoType::Katamari)
+        {
+            applicationDescription.ClearColor = Color(0.015f, 0.03f, 0.08f, 1.0f);
+        }
+
+        Application app(hInstance, std::move(game), applicationDescription);
         return app.Run();
     }
     catch (const std::exception &exception)

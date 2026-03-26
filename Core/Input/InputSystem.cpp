@@ -32,6 +32,21 @@ Keyboard& InputSystem::GetKeyboard() noexcept
     return m_keyboard;
 }
 
+LONG InputSystem::GetMouseDeltaX() const noexcept
+{
+    return RawInputHandler::Instance().GetMouseDeltaX();
+}
+
+LONG InputSystem::GetMouseDeltaY() const noexcept
+{
+    return RawInputHandler::Instance().GetMouseDeltaY();
+}
+
+bool InputSystem::IsRightMouseDown() const noexcept
+{
+    return RawInputHandler::Instance().IsRightMouseDown();
+}
+
 float InputSystem::GetVerticalAxis(const InputPlayer player) const noexcept
 {
     const float up = IsActionDown(player, InputAction::MoveUp) ? 1.0f : 0.0f;

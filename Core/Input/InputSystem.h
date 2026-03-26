@@ -41,6 +41,9 @@ public:
 
     [[nodiscard]] const Keyboard& GetKeyboard() const noexcept;
     [[nodiscard]] Keyboard& GetKeyboard() noexcept;
+    [[nodiscard]] LONG GetMouseDeltaX() const noexcept;
+    [[nodiscard]] LONG GetMouseDeltaY() const noexcept;
+    [[nodiscard]] bool IsRightMouseDown() const noexcept;
 
     /**
      * Возвращает ось Y:

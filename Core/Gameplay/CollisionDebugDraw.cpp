@@ -124,3 +124,39 @@ void CollisionDebugDraw::DrawContactNormalsFromLastFrame(
         queue.AddLineSegment(start, end, color);
     }
 }
+
+void CollisionDebugDraw::DrawSphereColliderWorldBounds(
+    Scene &scene,
+    DebugDrawQueue &queue,
+    const DirectX::SimpleMath::Color &color
+)
+{
+    scene.ForEachEntityWithTransformAndSphereCollider([&](Entity &entity) {
+        TransformComponent *const transform = entity.TryGetTransformComponent();
+        SphereColliderComponent *const sphere = entity.TryGetSphereColliderComponent();
+        if (transform == nullptr || sphere == nullptr)
+        {
+            return;
+        }
+
+        if (sphere->Radius <= 0.0f)
+        {
+            return;
+        }
+
+        const DirectX::SimpleMath::Vector3 worldCenter = DirectX::SimpleMath::Vector3::Transform(
+            sphere->LocalCenter,
+            transform->WorldMatrix
+        );
+        queue.AddWireSphere(worldCenter, sphere->Radius, color, 16);
+    });
+}
+
+void CollisionDebugDraw::DrawCollisionWorldBounds(
+    Scene &scene,
+    DebugDrawQueue &queue,
+    const DirectX::SimpleMath::Color &color
+)
+{
+    queue.AddAxisAlignedBox(scene.GetCollisionWorldBounds(), color);
+}

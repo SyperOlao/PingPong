@@ -3,8 +3,10 @@
 
 #include "Core/App/IGame.h"
 
+#include "Core/Graphics/ModelAsset.h"
 #include "Core/Gameplay/Scene.h"
 #include "Core/Graphics/FollowCamera.h"
+#include "Core/Graphics/Rendering/Lighting/SceneLighting3D.h"
 #include "Game/Katamari/Data/KatamariGameConfig.h"
 #include "Game/Katamari/Data/KatamariWorldContext.h"
 #include "Game/Katamari/Data/PickupArchetype.h"
@@ -45,6 +47,9 @@ private:
     float FpsAccumulator{0.0f};
     int FpsFrames{0};
     int DisplayFps{0};
+    std::shared_ptr<ModelAsset> GroundModel{};
+    std::shared_ptr<ModelAsset> MoonModel{};
+    SceneLightingDescriptor3D KatamariLighting{};
 };
 
 #endif
