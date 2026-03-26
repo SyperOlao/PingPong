@@ -1,0 +1,11 @@
+Model Information:
+* title:	Pipe Organs
+* source:	https://sketchfab.com/3d-models/pipe-organs-a8c0797a4a07498a9eadaead25e5e3e8
+* author:	Ryoce (https://sketchfab.com/Ryoce)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Pipe Organs" (https://sketchfab.com/3d-models/pipe-organs-a8c0797a4a07498a9eadaead25e5e3e8) by Ryoce (https://sketchfab.com/Ryoce) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

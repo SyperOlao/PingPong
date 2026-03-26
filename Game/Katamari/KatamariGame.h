@@ -1,13 +1,50 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_KATAMARIGAME_H
 #define PINGPONG_KATAMARIGAME_H
 
+#include "Core/App/IGame.h"
 
-class KatamariGame {
+#include "Core/Gameplay/Scene.h"
+#include "Core/Graphics/FollowCamera.h"
+#include "Game/Katamari/Data/KatamariGameConfig.h"
+#include "Game/Katamari/Data/KatamariWorldContext.h"
+#include "Game/Katamari/Data/PickupArchetype.h"
+#include "Game/Katamari/Systems/KatamariCameraController.h"
+
+#include <vector>
+
+class KatamariGame final : public IGame
+{
+public:
+    void Initialize(AppContext &context) override;
+
+    void Update(AppContext &context, float deltaTime) override;
+
+    void Render(AppContext &context) override;
+
+    void Shutdown(AppContext &context) override;
+
+private:
+    void RegisterSceneSystems(AppContext &context);
+
+    void ResetLevel(AppContext &context);
+
+    void DestroyAllPickupEntities();
+
+    void UpdateDebugInput(AppContext &context);
+
+    Scene SceneInstance{};
+    FollowCamera FollowCameraInstance{};
+    KatamariCameraController CameraController{};
+    KatamariGameConfig GameConfig{};
+    KatamariWorldContext WorldContext{};
+    std::vector<PickupArchetype> PickupArchetypes{};
+    bool Initialized{false};
+    bool ForwardRenderPipelineBuilt{false};
+    bool StaticWorldCreated{false};
+    float LastDeltaTime{0.0f};
+    float FpsAccumulator{0.0f};
+    int FpsFrames{0};
+    int DisplayFps{0};
 };
 
-
-#endif //PINGPONG_KATAMARIGAME_H
+#endif

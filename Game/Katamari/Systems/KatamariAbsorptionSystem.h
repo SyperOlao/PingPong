@@ -1,13 +1,21 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_KATAMARIABSORPTIONSYSTEM_H
 #define PINGPONG_KATAMARIABSORPTIONSYSTEM_H
 
+#include "Core/Gameplay/ISceneSystem.h"
 
-class KatamariAbsorptionSystem {
+struct KatamariWorldContext;
+
+class KatamariAbsorptionSystem final : public ISceneSystem
+{
+public:
+    explicit KatamariAbsorptionSystem(KatamariWorldContext *gameplayWorld) noexcept;
+
+    void Initialize(Scene &scene, AppContext &context) override;
+
+    void Update(Scene &scene, AppContext &context, float deltaTime) override;
+
+private:
+    KatamariWorldContext *GameplayWorld{nullptr};
 };
 
-
-#endif //PINGPONG_KATAMARIABSORPTIONSYSTEM_H
+#endif

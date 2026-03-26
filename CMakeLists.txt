@@ -229,30 +229,24 @@ add_executable(PingPong
 
         Game/Katamari/KatamariGame.cpp
         Game/Katamari/KatamariGame.h
-        Game/Katamari/KatamariScene.cpp
-        Game/Katamari/KatamariScene.h
+        Game/Katamari/KatamariLevelSetup.cpp
+        Game/Katamari/KatamariLevelSetup.h
         Game/Katamari/KatamariTypes.h
-        Game/Katamari/Components/SphereColliderComponent.h
-        Game/Katamari/Components/VelocityComponent.h
-        Game/Katamari/Components/PickupVisualComponent.h
-        Game/Katamari/Entities/KatamariBall.cpp
-        Game/Katamari/Entities/KatamariBall.h
-        Game/Katamari/Entities/PickupItem.cpp
-        Game/Katamari/Entities/PickupItem.h
-        Game/Katamari/Entities/LevelBounds.cpp
-        Game/Katamari/Entities/LevelBounds.h
         Game/Katamari/Systems/KatamariSpawner.cpp
         Game/Katamari/Systems/KatamariSpawner.h
         Game/Katamari/Systems/KatamariAbsorptionSystem.cpp
         Game/Katamari/Systems/KatamariAbsorptionSystem.h
-        Game/Katamari/Systems/KatamariMovementSystem.cpp
-        Game/Katamari/Systems/KatamariMovementSystem.h
+        Game/Katamari/Systems/KatamariBallControllerSystem.cpp
+        Game/Katamari/Systems/KatamariBallControllerSystem.h
         Game/Katamari/Systems/KatamariCameraController.cpp
         Game/Katamari/Systems/KatamariCameraController.h
-        Game/Katamari/Systems/KatamariProgressionSystem.cpp
-        Game/Katamari/Systems/KatamariProgressionSystem.h
+        Game/Katamari/Systems/KatamariSphereWorldResolveSystem.cpp
+        Game/Katamari/Systems/KatamariSphereWorldResolveSystem.h
         Game/Katamari/Data/PickupArchetype.h
         Game/Katamari/Data/KatamariGameConfig.h
+        Game/Katamari/Data/KatamariWorldContext.h
+        Game/Katamari/Data/KatamariPickupCatalog.cpp
+        Game/Katamari/Data/KatamariPickupCatalog.h
         Game/Katamari/UI/KatamariHud.cpp
         Game/Katamari/UI/KatamariHud.h
 )

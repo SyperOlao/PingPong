@@ -1,7 +1,7 @@
 #ifndef PINGPONG_ISCENESYSTEM_H
 #define PINGPONG_ISCENESYSTEM_H
 
-class AppContext;
+struct AppContext;
 class Scene;
 
 class ISceneSystem

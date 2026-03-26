@@ -3,13 +3,15 @@
 
 #include <Windows.h>
 #include <exception>
+#include "Game/Katamari/KatamariGame.h"
 #include "Game/Pong/PongGame.h"
 #include "Game/SolarSystem/SolarSystemGame.h"
 
 enum class DemoType
 {
     Pong,
-    SolarSystem
+    SolarSystem,
+    Katamari
 };
 
 int main()
@@ -18,7 +20,7 @@ int main()
     {
         HINSTANCE__ *const hInstance = GetModuleHandleW(nullptr);
 
-        constexpr auto demo = DemoType::SolarSystem;
+        constexpr auto demo = DemoType::Katamari;
 
         std::unique_ptr<IGame> game;
 
@@ -30,6 +32,10 @@ int main()
 
             case DemoType::SolarSystem:
                 game = std::make_unique<SolarSystemGame>();
+                break;
+
+            case DemoType::Katamari:
+                game = std::make_unique<KatamariGame>();
                 break;
         }
 

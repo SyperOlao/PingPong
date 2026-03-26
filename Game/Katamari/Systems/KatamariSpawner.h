@@ -1,31 +1,33 @@
-//
-// Created by SyperOlao on 25.03.2026.
-//
-
 #ifndef PINGPONG_KATAMARISPAWNER_H
 #define PINGPONG_KATAMARISPAWNER_H
+
+#include "Game/Katamari/Data/KatamariWorldContext.h"
+#include "Game/Katamari/Data/PickupArchetype.h"
+
 #include <vector>
 
-#include "Core/Assets/AssetCache.h"
-#include "Core/Graphics/Vertex3D.h"
-#include "Game/Katamari/Data/KatamariGameConfig.h"
-#include "Game/Katamari/Data/PickupArchetype.h"
-#include "Game/Katamari/Entities/PickupItem.h"
-
+struct AppContext;
+class Scene;
 
 class KatamariSpawner final
 {
 public:
-    void Initialize(unsigned int seed);
-    void SpawnInitialSet(
-        const std::vector<PickupArchetype>& archetypes,
-        std::vector<PickupItem>& outPickups,
-        const KatamariGameConfig& config,
-        AssetCache& assets
-    );
+    void SpawnPickups(
+        Scene &scene,
+        AppContext &context,
+        KatamariWorldContext &world,
+        std::vector<PickupArchetype> const &archetypes
+    ) const;
 
 private:
-    [[nodiscard]] DirectX::SimpleMath::Vector3 GeneratePosition(const KatamariGameConfig& config);
+    [[nodiscard]] DirectX::SimpleMath::Vector3 SampleSpawnPosition(KatamariWorldContext &world) const;
+
+    [[nodiscard]] bool IsSpawnPositionTooClose(
+        Scene const &scene,
+        KatamariWorldContext const &world,
+        DirectX::SimpleMath::Vector3 const &candidate,
+        float minimumSeparation
+    ) const;
 };
 
-#endif //PINGPONG_KATAMARISPAWNER_H
+#endif
