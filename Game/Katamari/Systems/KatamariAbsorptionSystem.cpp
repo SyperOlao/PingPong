@@ -109,11 +109,6 @@ void KatamariAbsorptionSystem::Update(Scene &scene, AppContext &, float)
             continue;
         }
 
-        if (GameplayWorld->BallRadius < pickupRecord.MinimumBallRadiusToAbsorb)
-        {
-            continue;
-        }
-
         if (GameplayWorld->BallRadius < pickupRecord.CollisionSphereRadius * config.AbsorbMinimumBallToPickupRadiusRatio)
         {
             continue;

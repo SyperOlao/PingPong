@@ -54,6 +54,15 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     );
 
     Keyboard const &keyboard = context.Input.System->GetKeyboard();
+    const float groundedHeightThreshold = GameplayWorld->BallRadius + 0.02f;
+    const bool IsGrounded = transform->Local.Position.y <= groundedHeightThreshold;
+    if (keyboard.WasVirtualKeyPressed(VK_SPACE) && IsGrounded)
+    {
+        velocity->LinearVelocity.y = config.BallJumpVelocity;
+    }
+
+    velocity->LinearVelocity.y -= config.BallGravityAcceleration * deltaTime;
+
     Vector3 wishDirection(0.0f, 0.0f, 0.0f);
     if (keyboard.IsVirtualKeyDown('W'))
     {
@@ -91,8 +100,6 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     const float dragFactor = 1.0f - (std::min)(config.BallHorizontalDrag * deltaTime, 0.95f);
     velocity->LinearVelocity.x *= dragFactor;
     velocity->LinearVelocity.z *= dragFactor;
-    velocity->LinearVelocity.y = 0.0f;
-
     const float safeBallRadius = (std::max)(GameplayWorld->BallRadius, 0.01f);
     const float rollSpeedMultiplier = config.BallVisualRollSpeedMultiplier;
     const float rollAroundXAxis = (velocity->LinearVelocity.z / safeBallRadius) * rollSpeedMultiplier;

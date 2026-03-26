@@ -6,14 +6,14 @@ std::vector<PickupArchetype> KatamariPickupCatalog::BuildDefaultPickupArchetypes
 {
     std::vector<PickupArchetype> archetypes{};
 
-    PickupArchetype kakashi{};
-    kakashi.DisplayName = "Kakashi";
-    kakashi.ModelPath = std::filesystem::path("Game/Katamari/Assets/kakashi_free_fire/scene.gltf");
-    kakashi.VisualUniformScale = 500.0f;
-    kakashi.CollisionSphereRadius = 0.01f;
-    kakashi.AbsorbVolumeContribution = 2.2f;
-    kakashi.MinimumBallRadiusToAbsorb = 1.8f;
-    archetypes.push_back(std::move(kakashi));
+    PickupArchetype tank{};
+    tank.DisplayName = "Tank";
+    tank.ModelPath = std::filesystem::path("Game/Katamari/Assets/tank/Tank.fbx");
+    tank.VisualUniformScale = 0.045f;
+    tank.CollisionSphereRadius = 0.0f;
+    tank.AbsorbVolumeContribution = 2.2f;
+    tank.MinimumBallRadiusToAbsorb = 1.8f;
+    archetypes.push_back(std::move(tank));
 
     PickupArchetype pipes{};
     pipes.DisplayName = "PipeOrgans";
