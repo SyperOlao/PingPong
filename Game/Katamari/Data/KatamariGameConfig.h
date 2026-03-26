@@ -8,6 +8,7 @@ struct KatamariGameConfig final
     float BallMoveAcceleration{55.0f};
     float BallMaxHorizontalSpeed{42.0f};
     float BallHorizontalDrag{4.5f};
+    float BallVisualRollSpeedMultiplier{1.0f};
     float AbsorbMinimumBallToPickupRadiusRatio{1.08f};
     float CollisionCellSize{6.0f};
     float WallThickness{2.0f};

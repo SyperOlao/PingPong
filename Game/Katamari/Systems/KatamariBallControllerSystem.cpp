@@ -9,6 +9,8 @@
 #include "Core/Math/SpatialMath.h"
 #include "Game/Katamari/Data/KatamariWorldContext.h"
 
+#include <algorithm>
+
 using DirectX::SimpleMath::Vector3;
 
 KatamariBallControllerSystem::KatamariBallControllerSystem(KatamariWorldContext *const gameplayWorld) noexcept
@@ -90,4 +92,11 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     velocity->LinearVelocity.x *= dragFactor;
     velocity->LinearVelocity.z *= dragFactor;
     velocity->LinearVelocity.y = 0.0f;
+
+    const float safeBallRadius = (std::max)(GameplayWorld->BallRadius, 0.01f);
+    const float rollSpeedMultiplier = config.BallVisualRollSpeedMultiplier;
+    const float rollAroundXAxis = (velocity->LinearVelocity.z / safeBallRadius) * rollSpeedMultiplier;
+    const float rollAroundZAxis = (-velocity->LinearVelocity.x / safeBallRadius) * rollSpeedMultiplier;
+    transform->Local.RotationEulerRad.x += rollAroundXAxis * deltaTime;
+    transform->Local.RotationEulerRad.z += rollAroundZAxis * deltaTime;
 }
