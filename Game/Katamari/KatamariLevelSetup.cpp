@@ -1,6 +1,7 @@
 #include "Game/Katamari/KatamariLevelSetup.h"
 
 #include "Core/App/AppContext.h"
+#include "Core/Assets/AssetCache.h"
 #include "Core/Gameplay/Entity.h"
 #include "Core/Gameplay/GameplayComponents.h"
 #include "Core/Gameplay/Scene.h"
@@ -11,6 +12,40 @@
 #include "Game/Katamari/Systems/KatamariSpawner.h"
 
 using DirectX::SimpleMath::Vector3;
+
+namespace
+{
+void SpawnDefaultAttachedTestObject(Scene &scene, AppContext &context, KatamariWorldContext const &world)
+{
+    if (world.BallEntityId == 0u)
+    {
+        return;
+    }
+
+    AssetCache *const assetCache = context.Assets.Cache;
+    if (assetCache == nullptr)
+    {
+        return;
+    }
+
+    Entity attachedTestEntity = scene.CreateEntity();
+
+    TransformComponent transform{};
+    transform.Local.Position = Vector3::Zero;
+    transform.Local.Scale = Vector3(0.28f, 0.28f, 0.28f);
+    attachedTestEntity.AddTransformComponent(transform);
+
+    ModelComponent model{};
+    model.Asset = assetCache->LoadModel("Game/Katamari/Assets/Environment/moon_sphere.obj");
+    model.Tint = DirectX::SimpleMath::Color(0.1f, 0.85f, 1.0f, 1.0f);
+    attachedTestEntity.AddModelComponent(model);
+
+    AttachmentComponent attachment{};
+    attachment.ParentEntityId = world.BallEntityId;
+    attachment.LocalOffset = Vector3(world.BallRadius * 1.6f, world.BallRadius * 0.15f, 0.0f);
+    attachedTestEntity.AddAttachmentComponent(attachment);
+}
+}
 
 float KatamariLevelSetup::SphereVolumeFromRadius(const float radius) noexcept
 {
@@ -132,6 +167,7 @@ void KatamariLevelSetup::SpawnPlayerBallAndPickups(
     world.Config = &config;
     world.Random.seed(config.RandomSeed);
     CreatePlayerBall(scene, world);
+    SpawnDefaultAttachedTestObject(scene, context, world);
 
     KatamariSpawner spawner{};
     spawner.SpawnPickups(scene, context, world, archetypes);

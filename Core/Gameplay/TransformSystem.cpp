@@ -137,6 +137,6 @@ void TransformSystem::Update(Scene &scene, AppContext &, float)
         const DirectX::SimpleMath::Matrix offsetMatrix = DirectX::SimpleMath::Matrix::CreateTranslation(
             slot.Attachment->LocalOffset
         );
-        transform.WorldMatrix = parentWorldMatrix * offsetMatrix * transform.Local.GetWorldMatrix();
+        transform.WorldMatrix = transform.Local.GetWorldMatrix() * offsetMatrix * parentWorldMatrix;
     }
 }
