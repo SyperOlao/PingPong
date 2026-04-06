@@ -168,6 +168,8 @@ add_executable(PingPong
         Core/Gameplay/Entity.h
         Core/Gameplay/Entity.cpp
         Core/Gameplay/Scene.h
+        Core/Gameplay/AttachmentTransformHelpers.cpp
+        Core/Gameplay/AttachmentTransformHelpers.h
         Core/Gameplay/Scene.cpp
         Core/Gameplay/TransformSystem.h
         Core/Gameplay/TransformSystem.cpp
@@ -246,6 +248,8 @@ add_executable(PingPong
         Game/Katamari/Systems/KatamariAbsorptionSystem.h
         Game/Katamari/Systems/KatamariBallControllerSystem.cpp
         Game/Katamari/Systems/KatamariBallControllerSystem.h
+        Game/Katamari/Systems/KatamariBallVisualRadiusSystem.cpp
+        Game/Katamari/Systems/KatamariBallVisualRadiusSystem.h
         Game/Katamari/Systems/KatamariCameraController.cpp
         Game/Katamari/Systems/KatamariCameraController.h
         Game/Katamari/Systems/KatamariSphereWorldResolveSystem.cpp

@@ -5,6 +5,7 @@ struct KatamariGameConfig final
 {
     float PlayfieldHalfExtent{70.0f};
     float InitialBallRadius{2.0f};
+    float BallVisualRadiusSmoothingTimeConstantSeconds{0.16f};
     float BallGravityAcceleration{48.0f};
     float BallJumpVelocity{15.5f};
     float BallMoveAcceleration{55.0f};

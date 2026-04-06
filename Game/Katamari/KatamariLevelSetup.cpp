@@ -119,6 +119,7 @@ void KatamariLevelSetup::CreatePlayerBall(Scene &scene, KatamariWorldContext &wo
 
     world.BallRadius = config.InitialBallRadius;
     world.BallVolume = SphereVolumeFromRadius(config.InitialBallRadius);
+    world.BallVisualRadius = world.BallRadius;
 }
 
 void KatamariLevelSetup::SpawnPlayerBallAndPickups(

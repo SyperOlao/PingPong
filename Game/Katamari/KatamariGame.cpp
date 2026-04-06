@@ -17,6 +17,7 @@
 #include "Game/Katamari/KatamariLevelSetup.h"
 #include "Game/Katamari/Systems/KatamariAbsorptionSystem.h"
 #include "Game/Katamari/Systems/KatamariBallControllerSystem.h"
+#include "Game/Katamari/Systems/KatamariBallVisualRadiusSystem.h"
 #include "Game/Katamari/Systems/KatamariSphereWorldResolveSystem.h"
 #include "Game/Katamari/UI/KatamariHud.h"
 #include "Core/Platform/Window.h"
@@ -139,6 +140,7 @@ void KatamariGame::RegisterSceneSystems(AppContext &context)
     SceneInstance.AddSystem(std::make_unique<CollisionSystem>());
     SceneInstance.AddSystem(std::make_unique<KatamariSphereWorldResolveSystem>(&WorldContext));
     SceneInstance.AddSystem(std::make_unique<KatamariAbsorptionSystem>(&WorldContext));
+    SceneInstance.AddSystem(std::make_unique<KatamariBallVisualRadiusSystem>(&WorldContext));
     SceneInstance.AddSystem(std::make_unique<RenderSystem>());
     SceneInstance.InitializeSystems(context);
 }
@@ -218,7 +220,7 @@ void KatamariGame::Update(AppContext &context, const float deltaTime)
             deltaTime,
             ballTransform->Local.Position,
             ballVelocity->LinearVelocity,
-            WorldContext.BallRadius,
+            WorldContext.BallVisualRadius,
             context.Input.System->IsRightMouseDown(),
             static_cast<float>(context.Input.System->GetMouseDeltaX()),
             static_cast<float>(context.Input.System->GetMouseDeltaY())
@@ -352,7 +354,7 @@ void KatamariGame::Render(AppContext &context)
         // );
 
         const Matrix ballWorld =
-            Matrix::CreateScale(WorldContext.BallRadius, WorldContext.BallRadius, WorldContext.BallRadius) *
+            Matrix::CreateScale(WorldContext.BallVisualRadius, WorldContext.BallVisualRadius, WorldContext.BallVisualRadius) *
             Matrix::CreateTranslation(ballTransform->Local.Position);
         RenderMaterialParameters ballMaterial{};
         ballMaterial.BaseColor = DirectX::SimpleMath::Color(0.95f, 0.35f, 0.2f, 1.0f);

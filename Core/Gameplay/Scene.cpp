@@ -855,3 +855,24 @@ bool Scene::RemoveAttachmentComponent(const EntityId entityId)
     slot.Attachment.reset();
     return true;
 }
+
+DirectX::SimpleMath::Matrix Scene::ComputeWorldMatrixFromAttachmentHierarchy(const EntityId entityId) const
+{
+    using DirectX::SimpleMath::Matrix;
+
+    const TransformComponent *const transform = TryGetTransformComponent(entityId);
+    if (transform == nullptr)
+    {
+        return Matrix::Identity;
+    }
+
+    const AttachmentComponent *const attachment = TryGetAttachmentComponent(entityId);
+    if (attachment == nullptr || attachment->ParentEntityId == 0u)
+    {
+        return transform->Local.GetWorldMatrix();
+    }
+
+    const Matrix parentWorld = ComputeWorldMatrixFromAttachmentHierarchy(attachment->ParentEntityId);
+    const Matrix offsetMatrix = Matrix::CreateTranslation(attachment->LocalOffset);
+    return transform->Local.GetWorldMatrix() * offsetMatrix * parentWorld;
+}

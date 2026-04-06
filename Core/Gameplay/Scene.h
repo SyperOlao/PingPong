@@ -148,6 +148,8 @@ public:
 
     bool RemoveAttachmentComponent(EntityId entityId);
 
+    [[nodiscard]] DirectX::SimpleMath::Matrix ComputeWorldMatrixFromAttachmentHierarchy(EntityId entityId) const;
+
 private:
     friend class TransformSystem;
     friend class CollisionSystem;

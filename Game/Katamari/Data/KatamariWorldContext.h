@@ -15,10 +15,7 @@ class FollowCamera;
 struct KatamariPickupRecord final
 {
     float AbsorbVolumeContribution{1.0f};
-    float MinimumBallRadiusToAbsorb{0.5f};
-    float CollisionSphereRadius{1.0f};
-    DirectX::SimpleMath::Vector3 AttachedDirectionLocal{1.0f, 0.0f, 0.0f};
-    bool HasAttachmentDirection{false};
+    float MinimumBallRadiusToAbsorb{0.0f};
     bool Absorbed{false};
 };
 
@@ -27,6 +24,7 @@ struct KatamariWorldContext final
     EntityId BallEntityId{};
     float BallVolume{0.0f};
     float BallRadius{1.0f};
+    float BallVisualRadius{1.0f};
     int CollectedCount{0};
     int TotalPickups{0};
     FollowCamera *FollowCameraForMovement{nullptr};
