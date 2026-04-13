@@ -110,14 +110,14 @@ Matrix BuildDirectionalCascadeLightViewProjection(
 
     const std::array<Vector3, 8> cornersViewSpace =
     {
-        Vector3(leftNear, bottomNear, nearZ),
-        Vector3(rightNear, bottomNear, nearZ),
-        Vector3(leftNear, topNear, nearZ),
-        Vector3(rightNear, topNear, nearZ),
-        Vector3(leftFar, bottomFar, farZ),
-        Vector3(rightFar, bottomFar, farZ),
-        Vector3(leftFar, topFar, farZ),
-        Vector3(rightFar, topFar, farZ)
+        Vector3(leftNear, bottomNear, -nearZ),
+        Vector3(rightNear, bottomNear, -nearZ),
+        Vector3(leftNear, topNear, -nearZ),
+        Vector3(rightNear, topNear, -nearZ),
+        Vector3(leftFar, bottomFar, -farZ),
+        Vector3(rightFar, bottomFar, -farZ),
+        Vector3(leftFar, topFar, -farZ),
+        Vector3(rightFar, topFar, -farZ)
     };
 
     const Matrix inverseCameraView = cameraViewMatrix.Invert();

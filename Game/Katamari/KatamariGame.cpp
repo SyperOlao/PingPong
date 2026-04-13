@@ -8,6 +8,7 @@
 #include "Core/Gameplay/TransformSystem.h"
 #include "Core/Gameplay/VelocityIntegrationSystem.h"
 #include "Core/Graphics/ModelRenderer.h"
+#include "Core/Graphics/Rendering/Lighting/LightTypes3D.h"
 #include "Core/Graphics/Rendering/Lighting/SceneLighting3D.h"
 #include "Core/Graphics/Rendering/RenderContext.h"
 #include "Core/Graphics/Rendering/Renderables/RenderMaterialParameters.h"
@@ -85,9 +86,45 @@ void KatamariGame::Initialize(AppContext &context)
     if (!KatamariLighting.DirectionalLights.empty())
     {
         KatamariLighting.DirectionalLights[0].Direction = Vector3(-0.22f, -1.0f, -0.28f);
-        KatamariLighting.DirectionalLights[0].Intensity = 0.55f;
-        KatamariLighting.DirectionalLights[0].LightColor = DirectX::SimpleMath::Color(0.58f, 0.68f, 0.95f, 1.0f);
+        KatamariLighting.DirectionalLights[0].Intensity = 1.05f;
+        KatamariLighting.DirectionalLights[0].LightColor = DirectX::SimpleMath::Color(0.78f, 0.84f, 1.0f, 1.0f);
     }
+
+    PointLight3D FillLightNorth{};
+    FillLightNorth.Position = Vector3(0.0f, 32.0f, 58.0f);
+    FillLightNorth.Range = 130.0f;
+    FillLightNorth.Intensity = 0.48f;
+    FillLightNorth.LightColor = DirectX::SimpleMath::Color(1.0f, 0.94f, 0.82f, 1.0f);
+    KatamariLighting.PointLights.push_back(FillLightNorth);
+
+    PointLight3D FillLightSouth{};
+    FillLightSouth.Position = Vector3(0.0f, 26.0f, -58.0f);
+    FillLightSouth.Range = 130.0f;
+    FillLightSouth.Intensity = 0.4f;
+    FillLightSouth.LightColor = DirectX::SimpleMath::Color(0.82f, 0.9f, 1.0f, 1.0f);
+    KatamariLighting.PointLights.push_back(FillLightSouth);
+
+    PointLight3D FillLightWest{};
+    FillLightWest.Position = Vector3(-52.0f, 24.0f, 0.0f);
+    FillLightWest.Range = 115.0f;
+    FillLightWest.Intensity = 0.38f;
+    FillLightWest.LightColor = DirectX::SimpleMath::Color(0.95f, 0.88f, 1.0f, 1.0f);
+    KatamariLighting.PointLights.push_back(FillLightWest);
+
+    PointLight3D FillLightEast{};
+    FillLightEast.Position = Vector3(52.0f, 24.0f, 0.0f);
+    FillLightEast.Range = 115.0f;
+    FillLightEast.Intensity = 0.38f;
+    FillLightEast.LightColor = DirectX::SimpleMath::Color(1.0f, 0.92f, 0.88f, 1.0f);
+    KatamariLighting.PointLights.push_back(FillLightEast);
+
+    PointLight3D FillLightOverhead{};
+    FillLightOverhead.Position = Vector3(0.0f, 48.0f, 0.0f);
+    FillLightOverhead.Range = 140.0f;
+    FillLightOverhead.Intensity = 0.35f;
+    FillLightOverhead.LightColor = DirectX::SimpleMath::Color(0.92f, 0.96f, 1.0f, 1.0f);
+    KatamariLighting.PointLights.push_back(FillLightOverhead);
+
     SceneInstance.GetSceneLightingDescriptor() = KatamariLighting;
 
     FollowCameraInstance.SetNearPlaneAndFarPlane(0.28f, 260.0f);

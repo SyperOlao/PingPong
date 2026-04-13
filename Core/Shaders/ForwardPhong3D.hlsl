@@ -198,21 +198,21 @@ float SampleShadowPcf(float2 shadowUvAtlas, float depthReference, int pcfRadius)
     return accumulated / max(sampleCount, 1);
 }
 
-uint SelectShadowCascadeIndex(float viewSpaceZ)
+uint SelectShadowCascadeIndex(float ViewDepthPositive)
 {
     if (ShadowMapCascadeCount <= 1u)
     {
         return 0u;
     }
-    if (viewSpaceZ <= CascadeSplits.x)
+    if (ViewDepthPositive <= CascadeSplits.x)
     {
         return 0u;
     }
-    if (ShadowMapCascadeCount >= 2u && viewSpaceZ <= CascadeSplits.y)
+    if (ShadowMapCascadeCount >= 2u && ViewDepthPositive <= CascadeSplits.y)
     {
         return 1u;
     }
-    if (ShadowMapCascadeCount >= 3u && viewSpaceZ <= CascadeSplits.z)
+    if (ShadowMapCascadeCount >= 3u && ViewDepthPositive <= CascadeSplits.z)
     {
         return 2u;
     }
@@ -238,8 +238,8 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal)
     const float3 biasedWorldPosition = worldPosition + worldNormal * DepthBiasAndPcfKernel.z;
 
     const float4 viewPosition = mul(float4(worldPosition, 1.0f), View);
-    const float viewSpaceZ = viewPosition.z;
-    const uint cascadeIndex = SelectShadowCascadeIndex(viewSpaceZ);
+    const float ViewDepthPositive = -viewPosition.z;
+    const uint cascadeIndex = SelectShadowCascadeIndex(ViewDepthPositive);
 
     const float4 lightClip = mul(float4(biasedWorldPosition, 1.0f), LightViewProjection[cascadeIndex]);
     const float invW = 1.0f / max(abs(lightClip.w), 1.0e-5f);
@@ -270,7 +270,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     const float3 viewDirection = normalize(CameraWorldPosition.xyz - input.WorldPosition);
 
     const float4 viewPositionForCascade = mul(float4(input.WorldPosition, 1.0f), View);
-    const uint cascadeDebugIndex = SelectShadowCascadeIndex(viewPositionForCascade.z);
+    const uint cascadeDebugIndex = SelectShadowCascadeIndex(-viewPositionForCascade.z);
 
     const float directionalShadow = DirectionalShadowAttenuation(input.WorldPosition, worldNormal);
 
