@@ -19,8 +19,6 @@ public:
 private:
     KatamariWorldContext *GameplayWorld{nullptr};
     DirectX::SimpleMath::Quaternion RollOrientation{0.0f, 0.0f, 0.0f, 1.0f};
-    DirectX::SimpleMath::Vector3 PreviousBallPosition{0.0f, 0.0f, 0.0f};
-    bool HasPreviousBallPosition{false};
 };
 
 #endif

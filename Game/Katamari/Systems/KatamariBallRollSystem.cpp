@@ -14,7 +14,8 @@ using DirectX::SimpleMath::Vector3;
 
 namespace
 {
-constexpr float MinimumHorizontalDistanceForRolling = 1.0e-4f;
+constexpr float GroundedHeightEpsilon = 0.02f;
+constexpr float MinimumHorizontalSpeedForRolling = 1.0e-3f;
 }
 
 KatamariBallRollSystem::KatamariBallRollSystem(KatamariWorldContext *const gameplayWorld) noexcept
@@ -25,11 +26,9 @@ KatamariBallRollSystem::KatamariBallRollSystem(KatamariWorldContext *const gamep
 void KatamariBallRollSystem::Initialize(Scene &, AppContext &)
 {
     RollOrientation = Quaternion::Identity;
-    PreviousBallPosition = Vector3::Zero;
-    HasPreviousBallPosition = false;
 }
 
-void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float)
+void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float deltaTime)
 {
     if (GameplayWorld == nullptr || GameplayWorld->Config == nullptr)
     {
@@ -38,7 +37,8 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float)
 
     const EntityId ballId = GameplayWorld->BallEntityId;
     TransformComponent *const transform = scene.TryGetTransformComponent(ballId);
-    if (transform == nullptr)
+    VelocityComponent const *const velocity = scene.TryGetVelocityComponent(ballId);
+    if (transform == nullptr || velocity == nullptr)
     {
         return;
     }
@@ -46,33 +46,18 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float)
     transform->Local.UseQuaternionRotation = true;
     transform->Local.RotationQuaternion = RollOrientation;
 
-    const Vector3 currentBallPosition = transform->Local.Position;
-    if (!HasPreviousBallPosition)
-    {
-        PreviousBallPosition = currentBallPosition;
-        HasPreviousBallPosition = true;
-        transform->WorldMatrix = transform->Local.GetWorldMatrix();
-        return;
-    }
-
-    Vector3 horizontalDisplacement = currentBallPosition - PreviousBallPosition;
-    PreviousBallPosition = currentBallPosition;
-    horizontalDisplacement.y = 0.0f;
-
-    const bool isGrounded = transform->Local.Position.y <= GameplayWorld->BallRadius + 0.02f;
-    const float horizontalDistance = horizontalDisplacement.Length();
-    if (!isGrounded || horizontalDistance < MinimumHorizontalDistanceForRolling)
+    Vector3 planarVelocity = velocity->LinearVelocity;
+    planarVelocity.y = 0.0f;
+    const float planarSpeed = planarVelocity.Length();
+    const bool isGrounded = transform->Local.Position.y <= GameplayWorld->BallRadius + GroundedHeightEpsilon;
+    if (!isGrounded || planarSpeed < MinimumHorizontalSpeedForRolling)
     {
         transform->WorldMatrix = transform->Local.GetWorldMatrix();
         return;
     }
 
-    const Vector3 movementDirection = horizontalDisplacement / horizontalDistance;
-
-    const Vector3 rollAxis = SpatialMath::SafeNormalizeVector3(
-        Vector3::UnitY.Cross(movementDirection),
-        Vector3::Zero
-    );
+    const Vector3 movementDirection = planarVelocity / planarSpeed;
+    const Vector3 rollAxis = SpatialMath::SafeNormalizeVector3(movementDirection.Cross(Vector3::UnitY), Vector3::Zero);
     if (rollAxis.LengthSquared() <= 1.0e-8f)
     {
         transform->WorldMatrix = transform->Local.GetWorldMatrix();
@@ -81,17 +66,16 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float)
 
     const float radius = (std::max)(GameplayWorld->BallRadius, 0.01f);
     const float visualScale = GameplayWorld->Config->BallVisualRollSpeedMultiplier;
-    const float angularDisplacement = (horizontalDistance / radius) * visualScale;
+    const float angularDisplacement = (planarSpeed * deltaTime / radius) * visualScale;
     if (angularDisplacement <= 1.0e-6f)
     {
         transform->WorldMatrix = transform->Local.GetWorldMatrix();
         return;
     }
 
-    // Roll from the resolved center displacement so the mesh follows the actual post-physics travel.
     const Matrix currentRotation = Matrix::CreateFromQuaternion(RollOrientation);
     const Matrix deltaRotation = Matrix::CreateFromAxisAngle(rollAxis, angularDisplacement);
-    RollOrientation = Quaternion::CreateFromRotationMatrix(currentRotation * deltaRotation);
+    RollOrientation = Quaternion::CreateFromRotationMatrix(deltaRotation * currentRotation);
     RollOrientation.Normalize();
 
     transform->Local.RotationQuaternion = RollOrientation;

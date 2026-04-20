@@ -19,16 +19,76 @@ constexpr float GroundedHeightEpsilon = 0.02f;
 constexpr float MinimumInputSquaredLength = 1.0e-6f;
 constexpr float MaximumDragPerFrame = 0.95f;
 
-Vector3 ResolveCameraPlanarForward(FollowCamera *const followCamera) noexcept
+Vector3 ResolveCameraPlanarForwardToBall(
+    FollowCamera *const followCamera,
+    Vector3 const &ballWorldPosition
+) noexcept
 {
     if (followCamera == nullptr)
     {
         return Vector3(0.0f, 0.0f, 1.0f);
     }
 
-    Vector3 cameraForward = followCamera->GetMovementDirectionXZ();
-    cameraForward.y = 0.0f;
-    return SpatialMath::SafeNormalizeVector3(cameraForward, Vector3(0.0f, 0.0f, 1.0f));
+    Vector3 cameraToBallDirection = ballWorldPosition - followCamera->GetPosition();
+    cameraToBallDirection.y = 0.0f;
+    if (cameraToBallDirection.LengthSquared() > 1.0e-6f)
+    {
+        cameraToBallDirection.Normalize();
+        return cameraToBallDirection;
+    }
+
+    Vector3 fallbackForward = followCamera->GetMovementDirectionXZ();
+    fallbackForward.y = 0.0f;
+    return SpatialMath::SafeNormalizeVector3(fallbackForward, Vector3(0.0f, 0.0f, 1.0f));
+}
+
+Vector3 ResolveCameraPlanarRight(Vector3 const &cameraPlanarForward) noexcept
+{
+    return SpatialMath::SafeNormalizeVector3(
+        cameraPlanarForward.Cross(Vector3::UnitY),
+        Vector3::UnitX
+    );
+}
+
+float ResolveForwardAxisValue(Keyboard const &keyboard) noexcept
+{
+    float forwardAxisValue = 0.0f;
+    if (keyboard.IsVirtualKeyDown('W'))
+    {
+        forwardAxisValue += 1.0f;
+    }
+    if (keyboard.IsVirtualKeyDown('S'))
+    {
+        forwardAxisValue -= 1.0f;
+    }
+    return forwardAxisValue;
+}
+
+float ResolveRightAxisValue(Keyboard const &keyboard) noexcept
+{
+    float rightAxisValue = 0.0f;
+    if (keyboard.IsVirtualKeyDown('D'))
+    {
+        rightAxisValue += 1.0f;
+    }
+    if (keyboard.IsVirtualKeyDown('A'))
+    {
+        rightAxisValue -= 1.0f;
+    }
+    return rightAxisValue;
+}
+
+Vector3 ResolveMovementInputDirection(Keyboard const &keyboard, Vector3 const &planarForward, Vector3 const &planarRight) noexcept
+{
+    const float forwardAxisValue = ResolveForwardAxisValue(keyboard);
+    const float rightAxisValue = ResolveRightAxisValue(keyboard);
+
+    Vector3 movementInputDirection = planarForward * forwardAxisValue + planarRight * rightAxisValue;
+    if (movementInputDirection.LengthSquared() > MinimumInputSquaredLength)
+    {
+        movementInputDirection.Normalize();
+    }
+    return movementInputDirection;
 }
 }
 
@@ -59,35 +119,27 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     KatamariGameConfig const &config = *GameplayWorld->Config;
     Keyboard const &keyboard = context.Input.System->GetKeyboard();
 
-    // Camera-relative planar basis. In DirectX SimpleMath right-handed space,
-    // the screen-right world direction is forward x up (not up x forward).
-    const Vector3 planarForward = ResolveCameraPlanarForward(GameplayWorld->FollowCameraForMovement);
-    const Vector3 planarRight = SpatialMath::RightFromForwardAndWorldUp(planarForward, Vector3::UnitY);
-
-    // Read WASD as a 2D input vector in camera space.
-    Vector3 inputDirection = Vector3::Zero;
-    if (keyboard.IsVirtualKeyDown('W'))
-    {
-        inputDirection += planarForward;
-    }
-    if (keyboard.IsVirtualKeyDown('S'))
-    {
-        inputDirection -= planarForward;
-    }
-    if (keyboard.IsVirtualKeyDown('D'))
-    {
-        inputDirection += planarRight;
-    }
-    if (keyboard.IsVirtualKeyDown('A'))
-    {
-        inputDirection -= planarRight;
-    }
+    const Vector3 planarForward = ResolveCameraPlanarForwardToBall(
+        GameplayWorld->FollowCameraForMovement,
+        transform->Local.Position
+    );
+    const Vector3 planarRight = ResolveCameraPlanarRight(planarForward);
+    const Vector3 inputDirection = ResolveMovementInputDirection(keyboard, planarForward, planarRight);
 
     if (inputDirection.LengthSquared() > MinimumInputSquaredLength)
     {
-        inputDirection.Normalize();
-        velocity->LinearVelocity.x += inputDirection.x * config.BallMoveAcceleration * deltaTime;
-        velocity->LinearVelocity.z += inputDirection.z * config.BallMoveAcceleration * deltaTime;
+        Vector3 planarVelocity(velocity->LinearVelocity.x, 0.0f, velocity->LinearVelocity.z);
+        const Vector3 targetPlanarVelocity = inputDirection * config.BallMaxHorizontalSpeed;
+        Vector3 requiredPlanarDelta = targetPlanarVelocity - planarVelocity;
+        const float maximumPlanarDelta = config.BallMoveAcceleration * deltaTime;
+        const float requiredPlanarDeltaLength = requiredPlanarDelta.Length();
+        if (requiredPlanarDeltaLength > maximumPlanarDelta && requiredPlanarDeltaLength > 1.0e-6f)
+        {
+            requiredPlanarDelta *= maximumPlanarDelta / requiredPlanarDeltaLength;
+        }
+
+        velocity->LinearVelocity.x += requiredPlanarDelta.x;
+        velocity->LinearVelocity.z += requiredPlanarDelta.z;
     }
 
     // Gravity and jump (vertical axis is independent of input direction).
