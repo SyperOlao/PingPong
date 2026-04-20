@@ -13,6 +13,25 @@
 
 using DirectX::SimpleMath::Vector3;
 
+namespace
+{
+constexpr float GroundedHeightEpsilon = 0.02f;
+constexpr float MinimumInputSquaredLength = 1.0e-6f;
+constexpr float MaximumDragPerFrame = 0.95f;
+
+Vector3 ResolveCameraPlanarForward(FollowCamera *const followCamera) noexcept
+{
+    if (followCamera == nullptr)
+    {
+        return Vector3(0.0f, 0.0f, 1.0f);
+    }
+
+    Vector3 cameraForward = followCamera->GetMovementDirectionXZ();
+    cameraForward.y = 0.0f;
+    return SpatialMath::SafeNormalizeVector3(cameraForward, Vector3(0.0f, 0.0f, 1.0f));
+}
+}
+
 KatamariBallControllerSystem::KatamariBallControllerSystem(KatamariWorldContext *const gameplayWorld) noexcept
     : GameplayWorld(gameplayWorld)
 {
@@ -38,69 +57,60 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     }
 
     KatamariGameConfig const &config = *GameplayWorld->Config;
-    FollowCamera *const followCamera = GameplayWorld->FollowCameraForMovement;
-    Vector3 planarForward(0.0f, 0.0f, 1.0f);
-    if (followCamera != nullptr)
-    {
-        Vector3 cameraMovementDirection = followCamera->GetMovementDirectionXZ();
-        cameraMovementDirection.y = 0.0f;
-        planarForward = SpatialMath::SafeNormalizeVector3(cameraMovementDirection, Vector3(0.0f, 0.0f, 1.0f));
-    }
-
-    const Vector3 planarRight = SpatialMath::SafeNormalizeVector3(
-        Vector3::UnitY.Cross(planarForward),
-        Vector3(1.0f, 0.0f, 0.0f)
-    );
-
     Keyboard const &keyboard = context.Input.System->GetKeyboard();
-    const float groundedHeightThreshold = GameplayWorld->BallRadius + 0.02f;
-    const bool IsGrounded = transform->Local.Position.y <= groundedHeightThreshold;
-    if (keyboard.WasVirtualKeyPressed(VK_SPACE) && IsGrounded)
-    {
-        velocity->LinearVelocity.y = config.BallJumpVelocity;
-    }
 
-    velocity->LinearVelocity.y -= config.BallGravityAcceleration * deltaTime;
+    // Camera-relative planar basis. In DirectX SimpleMath right-handed space,
+    // the screen-right world direction is forward x up (not up x forward).
+    const Vector3 planarForward = ResolveCameraPlanarForward(GameplayWorld->FollowCameraForMovement);
+    const Vector3 planarRight = SpatialMath::RightFromForwardAndWorldUp(planarForward, Vector3::UnitY);
 
-    float forwardInput = 0.0f;
-    float rightInput = 0.0f;
+    // Read WASD as a 2D input vector in camera space.
+    Vector3 inputDirection = Vector3::Zero;
     if (keyboard.IsVirtualKeyDown('W'))
     {
-        forwardInput += 1.0f;
+        inputDirection += planarForward;
     }
     if (keyboard.IsVirtualKeyDown('S'))
     {
-        forwardInput -= 1.0f;
+        inputDirection -= planarForward;
     }
     if (keyboard.IsVirtualKeyDown('D'))
     {
-        rightInput += 1.0f;
+        inputDirection += planarRight;
     }
     if (keyboard.IsVirtualKeyDown('A'))
     {
-        rightInput -= 1.0f;
+        inputDirection -= planarRight;
     }
 
-    Vector3 wishDirection = planarForward * forwardInput + planarRight * rightInput;
-    const bool hasMovementInput = wishDirection.LengthSquared() > 1.0e-8f;
-    if (hasMovementInput)
+    if (inputDirection.LengthSquared() > MinimumInputSquaredLength)
     {
-        wishDirection.Normalize();
-        velocity->LinearVelocity += wishDirection * (config.BallMoveAcceleration * deltaTime);
+        inputDirection.Normalize();
+        velocity->LinearVelocity.x += inputDirection.x * config.BallMoveAcceleration * deltaTime;
+        velocity->LinearVelocity.z += inputDirection.z * config.BallMoveAcceleration * deltaTime;
     }
 
-    Vector3 horizontalVelocity = velocity->LinearVelocity;
-    horizontalVelocity.y = 0.0f;
-    const float speed = horizontalVelocity.Length();
-    if (speed > config.BallMaxHorizontalSpeed)
+    // Gravity and jump (vertical axis is independent of input direction).
+    const float groundedHeightThreshold = GameplayWorld->BallRadius + GroundedHeightEpsilon;
+    const bool isGrounded = transform->Local.Position.y <= groundedHeightThreshold;
+    if (keyboard.WasVirtualKeyPressed(VK_SPACE) && isGrounded)
     {
-        horizontalVelocity *= config.BallMaxHorizontalSpeed / speed;
-        velocity->LinearVelocity.x = horizontalVelocity.x;
-        velocity->LinearVelocity.z = horizontalVelocity.z;
+        velocity->LinearVelocity.y = config.BallJumpVelocity;
+    }
+    velocity->LinearVelocity.y -= config.BallGravityAcceleration * deltaTime;
+
+    // Clamp planar speed to the configured maximum.
+    Vector3 horizontalVelocity(velocity->LinearVelocity.x, 0.0f, velocity->LinearVelocity.z);
+    const float horizontalSpeed = horizontalVelocity.Length();
+    if (horizontalSpeed > config.BallMaxHorizontalSpeed)
+    {
+        const float clampScale = config.BallMaxHorizontalSpeed / horizontalSpeed;
+        velocity->LinearVelocity.x *= clampScale;
+        velocity->LinearVelocity.z *= clampScale;
     }
 
-    const float dragFactor = 1.0f - (std::min)(config.BallHorizontalDrag * deltaTime, 0.95f);
+    // Apply planar drag (exponential damping that does not fight vertical motion).
+    const float dragFactor = 1.0f - (std::min)(config.BallHorizontalDrag * deltaTime, MaximumDragPerFrame);
     velocity->LinearVelocity.x *= dragFactor;
     velocity->LinearVelocity.z *= dragFactor;
-
 }
