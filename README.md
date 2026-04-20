@@ -185,6 +185,7 @@ Gameplay
 - `R` - рестарт уровня
 - `F3` - debug draw коллизий
 - `RMB` - управление камерой
+![img.png](Images/img6.png)
 
 ### LightingTest
 
