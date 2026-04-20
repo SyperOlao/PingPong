@@ -250,6 +250,8 @@ add_executable(PingPong
         Game/Katamari/Systems/KatamariAbsorptionSystem.h
         Game/Katamari/Systems/KatamariBallControllerSystem.cpp
         Game/Katamari/Systems/KatamariBallControllerSystem.h
+        Game/Katamari/Systems/KatamariBallRollSystem.cpp
+        Game/Katamari/Systems/KatamariBallRollSystem.h
         Game/Katamari/Systems/KatamariBallVisualRadiusSystem.cpp
         Game/Katamari/Systems/KatamariBallVisualRadiusSystem.h
         Game/Katamari/Systems/KatamariCameraController.cpp

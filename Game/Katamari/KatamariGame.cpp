@@ -18,6 +18,7 @@
 #include "Game/Katamari/KatamariLevelSetup.h"
 #include "Game/Katamari/Systems/KatamariAbsorptionSystem.h"
 #include "Game/Katamari/Systems/KatamariBallControllerSystem.h"
+#include "Game/Katamari/Systems/KatamariBallRollSystem.h"
 #include "Game/Katamari/Systems/KatamariBallVisualRadiusSystem.h"
 #include "Game/Katamari/Systems/KatamariSphereWorldResolveSystem.h"
 #include "Game/Katamari/UI/KatamariHud.h"
@@ -181,6 +182,7 @@ void KatamariGame::RegisterSceneSystems(AppContext &context)
     SceneInstance.AddSystem(std::make_unique<CollisionSystem>());
     SceneInstance.AddSystem(std::make_unique<KatamariSphereWorldResolveSystem>(&WorldContext));
     SceneInstance.AddSystem(std::make_unique<KatamariAbsorptionSystem>(&WorldContext));
+    SceneInstance.AddSystem(std::make_unique<KatamariBallRollSystem>(&WorldContext));
     SceneInstance.AddSystem(std::make_unique<RenderSystem>());
     SceneInstance.InitializeSystems(context);
 }
