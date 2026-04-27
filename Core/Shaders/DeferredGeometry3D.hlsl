@@ -91,7 +91,7 @@ GBufferOutput PackGBuffer(VSOutput input, float3 textureColor)
 {
     GBufferOutput output;
 
-    const float3 albedo = saturate(textureColor * input.Color.rgb * BaseColor.rgb + EmissiveAndAmbient.rgb);
+    const float3 albedo = saturate(textureColor * input.Color.rgb * BaseColor.rgb);
     const float ambientFactor = saturate(EmissiveAndAmbient.w);
     const float receiveLighting = MaterialParameters.x >= 0.5f ? 1.0f : 0.0f;
     const float encodedSpecularPower = saturate(max(SpecularColorAndPower.w, 1.0f) / 256.0f);

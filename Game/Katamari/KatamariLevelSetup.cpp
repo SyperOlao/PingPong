@@ -194,9 +194,9 @@ void KatamariLevelSetup::CreateStaticObstacles(
         record.Entity = obstacle.GetId();
         record.Shape = definition.Shape;
         record.Material.BaseColor = definition.BaseColor;
-        record.Material.ReceiveLighting = false;
-        record.Material.AmbientFactor = 1.0f;
-        record.Material.EmissiveColor = definition.EmissiveColor;
+        record.Material.ReceiveLighting = true;
+        record.Material.AmbientFactor = 0.14f;
+        record.Material.EmissiveColor = DirectX::SimpleMath::Color(0.0f, 0.0f, 0.0f, 1.0f);
         record.Material.SpecularColor = DirectX::SimpleMath::Color(0.0f, 0.0f, 0.0f, 1.0f);
         record.Material.SpecularPower = 1.0f;
         world.StaticObstacles.push_back(record);
