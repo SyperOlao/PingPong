@@ -28,6 +28,8 @@ public:
 private:
     void RegisterSceneSystems(AppContext &context);
 
+    void ConfigureParticleEmitter(AppContext &context);
+
     void ResetLevel(AppContext &context);
 
     void DestroyAllPickupEntities();

@@ -13,6 +13,9 @@
 
 #include "Core/Math/SpatialMath.h"
 
+#include <array>
+#include <cstddef>
+
 bool CollisionQueries3D::OverlapTestSphereSphere(
     const BoundingSphere3D &firstSphere,
     const BoundingSphere3D &secondSphere
@@ -128,17 +131,8 @@ CollisionContact3D CollisionQueries3D::FindContactSphereAxisAlignedBox(
 
     contact.HasOverlap = true;
 
-    if (minimumFaceDistance >= sphere.Radius)
-    {
-        contact.PenetrationDepth = 0.0f;
-        contact.Normal = DirectX::SimpleMath::Vector3::UnitY;
-        contact.HasContactPoint = true;
-        contact.ContactPoint = sphere.Center - contact.Normal * sphere.Radius;
-        return contact;
-    }
-
     contact.Normal = normal;
-    contact.PenetrationDepth = sphere.Radius - minimumFaceDistance;
+    contact.PenetrationDepth = sphere.Radius + (std::max)(minimumFaceDistance, 0.0f);
     contact.HasContactPoint = true;
     contact.ContactPoint = sphere.Center - contact.Normal * sphere.Radius;
     return contact;
@@ -151,58 +145,103 @@ CollisionContact3D CollisionQueries3D::FindContactSphereOrientedBox(
     const DirectX::SimpleMath::Matrix &entityWorldMatrix
 ) noexcept
 {
-    const DirectX::SimpleMath::Matrix worldToLocal = entityWorldMatrix.Invert();
-    const DirectX::SimpleMath::Vector3 localSphereCenter = DirectX::SimpleMath::Vector3::Transform(
-        worldSphere.Center,
-        worldToLocal
+    CollisionContact3D contact{};
+
+    const DirectX::SimpleMath::Vector3 boxCenterWorld = DirectX::SimpleMath::Vector3::Transform(
+        localBoxCenterInEntitySpace,
+        entityWorldMatrix
     );
 
-    const DirectX::SimpleMath::Vector3 columnX = DirectX::SimpleMath::Vector3(
-        entityWorldMatrix._11,
-        entityWorldMatrix._21,
-        entityWorldMatrix._31
-    );
-    const DirectX::SimpleMath::Vector3 columnY = DirectX::SimpleMath::Vector3(
-        entityWorldMatrix._12,
-        entityWorldMatrix._22,
-        entityWorldMatrix._32
-    );
-    const DirectX::SimpleMath::Vector3 columnZ = DirectX::SimpleMath::Vector3(
-        entityWorldMatrix._13,
-        entityWorldMatrix._23,
-        entityWorldMatrix._33
-    );
-    const float scaleX = columnX.Length();
-    const float scaleY = columnY.Length();
-    const float scaleZ = columnZ.Length();
-    const float maxScale = std::max(std::max(scaleX, scaleY), scaleZ);
-    const float localRadius = maxScale > 1.0e-8f ? worldSphere.Radius / maxScale : worldSphere.Radius;
+    std::array<DirectX::SimpleMath::Vector3, 3> axes =
+    {
+        DirectX::SimpleMath::Vector3(entityWorldMatrix._11, entityWorldMatrix._12, entityWorldMatrix._13),
+        DirectX::SimpleMath::Vector3(entityWorldMatrix._21, entityWorldMatrix._22, entityWorldMatrix._23),
+        DirectX::SimpleMath::Vector3(entityWorldMatrix._31, entityWorldMatrix._32, entityWorldMatrix._33)
+    };
+    const std::array<float, 3> localHalfExtents = {halfExtents.x, halfExtents.y, halfExtents.z};
+    std::array<float, 3> worldHalfExtents{};
 
-    const AxisAlignedBox3D localBox = AxisAlignedBox3D::FromCenterExtents(localBoxCenterInEntitySpace, halfExtents);
-    BoundingSphere3D localSphere{};
-    localSphere.Center = localSphereCenter;
-    localSphere.Radius = localRadius;
+    for (std::size_t axisIndex = 0u; axisIndex < axes.size(); ++axisIndex)
+    {
+        const float axisLength = axes[axisIndex].Length();
+        if (axisLength <= 1.0e-8f)
+        {
+            axes[axisIndex] = axisIndex == 0u
+                ? DirectX::SimpleMath::Vector3::UnitX
+                : axisIndex == 1u
+                    ? DirectX::SimpleMath::Vector3::UnitY
+                    : DirectX::SimpleMath::Vector3::UnitZ;
+            worldHalfExtents[axisIndex] = 0.0f;
+            continue;
+        }
 
-    CollisionContact3D contact = FindContactSphereAxisAlignedBox(localSphere, localBox);
-    if (!contact.HasOverlap)
+        axes[axisIndex] /= axisLength;
+        worldHalfExtents[axisIndex] = localHalfExtents[axisIndex] * axisLength;
+    }
+
+    const DirectX::SimpleMath::Vector3 sphereCenterFromBox = worldSphere.Center - boxCenterWorld;
+    DirectX::SimpleMath::Vector3 closestPoint = boxCenterWorld;
+    std::array<float, 3> projections{};
+    bool sphereCenterInsideBox = true;
+
+    for (std::size_t axisIndex = 0u; axisIndex < axes.size(); ++axisIndex)
+    {
+        projections[axisIndex] = sphereCenterFromBox.Dot(axes[axisIndex]);
+        const float clampedProjection = std::clamp(
+            projections[axisIndex],
+            -worldHalfExtents[axisIndex],
+            worldHalfExtents[axisIndex]
+        );
+        closestPoint += axes[axisIndex] * clampedProjection;
+        if (std::abs(projections[axisIndex]) > worldHalfExtents[axisIndex])
+        {
+            sphereCenterInsideBox = false;
+        }
+    }
+
+    DirectX::SimpleMath::Vector3 closestToSphere = worldSphere.Center - closestPoint;
+    const float distanceSquared = closestToSphere.LengthSquared();
+    constexpr float kMinimumSeparation = 1.0e-6f;
+
+    if (distanceSquared > kMinimumSeparation * kMinimumSeparation)
+    {
+        const float distance = std::sqrt(distanceSquared);
+        if (distance > worldSphere.Radius)
+        {
+            return contact;
+        }
+
+        contact.HasOverlap = true;
+        contact.Normal = SpatialMath::SafeNormalizeVector3(closestToSphere, DirectX::SimpleMath::Vector3::UnitY);
+        contact.PenetrationDepth = worldSphere.Radius - distance;
+        contact.HasContactPoint = true;
+        contact.ContactPoint = worldSphere.Center - contact.Normal * worldSphere.Radius;
+        return contact;
+    }
+
+    if (!sphereCenterInsideBox)
     {
         return contact;
     }
 
-    DirectX::SimpleMath::Vector3 worldNormal = DirectX::SimpleMath::Vector3::TransformNormal(contact.Normal, entityWorldMatrix);
-    if (worldNormal.LengthSquared() > 1.0e-12f)
+    std::size_t nearestFaceAxisIndex = 0u;
+    float nearestFaceDistance = worldHalfExtents[0] - std::abs(projections[0]);
+    for (std::size_t axisIndex = 1u; axisIndex < axes.size(); ++axisIndex)
     {
-        worldNormal.Normalize();
-    }
-    else
-    {
-        worldNormal = DirectX::SimpleMath::Vector3::UnitY;
+        const float faceDistance = worldHalfExtents[axisIndex] - std::abs(projections[axisIndex]);
+        if (faceDistance < nearestFaceDistance)
+        {
+            nearestFaceDistance = faceDistance;
+            nearestFaceAxisIndex = axisIndex;
+        }
     }
 
-    contact.Normal = worldNormal;
-    contact.PenetrationDepth = contact.PenetrationDepth * maxScale;
+    const float normalSign = projections[nearestFaceAxisIndex] >= 0.0f ? 1.0f : -1.0f;
+    contact.HasOverlap = true;
+    contact.Normal = axes[nearestFaceAxisIndex] * normalSign;
+    contact.PenetrationDepth = worldSphere.Radius + (std::max)(nearestFaceDistance, 0.0f);
     contact.HasContactPoint = true;
-    contact.ContactPoint = worldSphere.Center - worldNormal * worldSphere.Radius;
+    contact.ContactPoint = worldSphere.Center - contact.Normal * worldSphere.Radius;
     return contact;
 }
 

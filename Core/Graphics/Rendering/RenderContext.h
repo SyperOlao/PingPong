@@ -8,6 +8,7 @@
 #include "PrimitiveRenderer3D.h"
 #include "ShapeRenderer2D.h"
 
+#include "Core/Graphics/Particles/GpuParticleSystem.h"
 #include "Core/Graphics/Rendering/Deferred/DeferredFrameResources.h"
 #include "Core/Graphics/Debug/DebugDrawQueue.h"
 #include "Core/Graphics/ModelRenderer.h"
@@ -106,6 +107,10 @@ public:
 
     [[nodiscard]] const FrameRenderPipeline &GetFrameRenderPipeline() const noexcept;
 
+    [[nodiscard]] GpuParticleSystem &GetGpuParticleSystem() noexcept;
+
+    [[nodiscard]] const GpuParticleSystem &GetGpuParticleSystem() const noexcept;
+
     void BuildDefaultForwardRenderPipeline();
     void BuildDefaultDeferredRenderPipeline();
 
@@ -138,6 +143,7 @@ private:
     FrameRenderResources m_frameRenderResources{};
     FrameRenderPipeline m_frameRenderPipeline{};
     DirectionalShadowResources m_directionalShadowResources{};
+    GpuParticleSystem m_gpuParticleSystem{};
     RenderMode m_renderMode{RenderMode::Forward};
     bool m_executeGameRenderCallbackDuringUserInterfacePass{false};
     bool m_directionalShadowPassCompletedThisFrame{false};

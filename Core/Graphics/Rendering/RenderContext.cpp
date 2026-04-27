@@ -16,6 +16,7 @@
 #include "Core/Graphics/Rendering/Pipeline/Passes/DebugOverlayRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/GameRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/MainGeometryBindRenderPass.h"
+#include "Core/Graphics/Rendering/Pipeline/Passes/ParticlesRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/ShadowDepthRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/UserInterfaceRenderPass.h"
 #include "Core/Graphics/Rendering/Shadows/CascadedShadowMapMath.h"
@@ -30,6 +31,7 @@
 
 RenderContext::~RenderContext()
 {
+    m_gpuParticleSystem.Shutdown();
     m_directionalShadowResources.Shutdown();
 }
 
@@ -43,6 +45,7 @@ void RenderContext::Initialize(GraphicsDevice &graphics)
     m_frameRenderer.Initialize(graphics);
     m_deferredFrameResources.CreateOrResize(graphics);
     m_directionalShadowResources.Initialize(graphics);
+    m_gpuParticleSystem.Initialize(graphics, 4096u);
     m_shapeRenderer2D.Initialize(graphics);
     m_primitiveRenderer3D.Initialize(graphics);
     m_primitiveRenderer3D.SetShadowBindingHost(this);
@@ -182,8 +185,18 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
     const float inverseAtlasWidth =
         1.0f / static_cast<float>(m_directionalShadowResources.GetShadowAtlasSizePixels());
 
+    constexpr float kConstantDepthBias = 0.0007f;
+    constexpr float kSlopeScaledDepthBias = 0.0022f;
+    constexpr float kNormalOffsetWorldUnits = 0.025f;
+    constexpr float kPcfRadiusTexels = 2.0f;
+
     ShadowSamplingGpuConstants samplingCpu{};
-    samplingCpu.DepthBiasAndPcfKernel = DirectX::XMFLOAT4(0.0011f, 2.75f, 0.016f, 2.0f);
+    samplingCpu.DepthBiasAndPcfKernel = DirectX::XMFLOAT4(
+        kConstantDepthBias,
+        kSlopeScaledDepthBias,
+        kNormalOffsetWorldUnits,
+        kPcfRadiusTexels
+    );
     samplingCpu.InvShadowMapTexelSize = DirectX::XMFLOAT2(inverseAtlasWidth, inverseAtlasWidth);
     samplingCpu.ShadowEnabled = 1u;
     samplingCpu.ShadowedDirectionalLightGpuIndex = shadowPackedDirectionalIndex;
@@ -426,6 +439,16 @@ const FrameRenderPipeline &RenderContext::GetFrameRenderPipeline() const noexcep
     return m_frameRenderPipeline;
 }
 
+GpuParticleSystem &RenderContext::GetGpuParticleSystem() noexcept
+{
+    return m_gpuParticleSystem;
+}
+
+const GpuParticleSystem &RenderContext::GetGpuParticleSystem() const noexcept
+{
+    return m_gpuParticleSystem;
+}
+
 void RenderContext::BuildDefaultForwardRenderPipeline()
 {
     if (m_graphics == nullptr)
@@ -437,6 +460,7 @@ void RenderContext::BuildDefaultForwardRenderPipeline()
     m_frameRenderPipeline.AddPass(std::make_unique<ShadowDepthRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<MainGeometryBindRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<GameRenderPass>());
+    m_frameRenderPipeline.AddPass(std::make_unique<ParticlesRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DebugOverlayRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<UserInterfaceRenderPass>());
     m_frameRenderPipeline.Initialize(*m_graphics, m_frameRenderResources);
@@ -455,6 +479,7 @@ void RenderContext::BuildDefaultDeferredRenderPipeline()
     m_frameRenderPipeline.AddPass(std::make_unique<GameRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DeferredLightingRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DeferredCompositeRenderPass>());
+    m_frameRenderPipeline.AddPass(std::make_unique<ParticlesRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DebugOverlayRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<UserInterfaceRenderPass>());
     m_frameRenderPipeline.Initialize(*m_graphics, m_frameRenderResources);

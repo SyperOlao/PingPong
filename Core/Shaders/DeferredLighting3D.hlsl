@@ -53,6 +53,8 @@ Texture2D ShadowMapDepth : register(t4);
 SamplerState GBufferSampler : register(s0);
 SamplerComparisonState ShadowMapSampler : register(s1);
 
+#include "ShadowSamplingCSM.hlsli"
+
 struct VSOutput
 {
     float4 Position : SV_POSITION;
@@ -170,47 +172,6 @@ void EvaluateLight(
     }
 }
 
-float SampleShadowPcf(float2 shadowUvAtlas, float depthReference, int pcfRadius)
-{
-    float accumulated = 0.0f;
-    int sampleCount = 0;
-    for (int offsetV = -pcfRadius; offsetV <= pcfRadius; ++offsetV)
-    {
-        for (int offsetU = -pcfRadius; offsetU <= pcfRadius; ++offsetU)
-        {
-            const float2 sampleUv = shadowUvAtlas + float2(offsetU, offsetV) * InvShadowMapTexelSize;
-            accumulated += ShadowMapDepth.SampleCmpLevelZero(ShadowMapSampler, sampleUv, depthReference);
-            sampleCount++;
-        }
-    }
-    return accumulated / max(sampleCount, 1);
-}
-
-uint SelectShadowCascadeIndex(float viewDepthPositive)
-{
-    if (ShadowMapCascadeCount <= 1u)
-    {
-        return 0u;
-    }
-    if (viewDepthPositive <= CascadeSplits.x)
-    {
-        return 0u;
-    }
-    if (ShadowMapCascadeCount >= 2u && viewDepthPositive <= CascadeSplits.y)
-    {
-        return 1u;
-    }
-    if (ShadowMapCascadeCount >= 3u && viewDepthPositive <= CascadeSplits.z)
-    {
-        return 2u;
-    }
-    if (ShadowMapCascadeCount >= 4u)
-    {
-        return 3u;
-    }
-    return ShadowMapCascadeCount - 1u;
-}
-
 float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal, float viewDepthPositive)
 {
     if (ShadowEnabled == 0u || ShadowMapCascadeCount == 0u)
@@ -231,22 +192,18 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal, flo
     const float3 ndc = lightClip.xyz * invW;
     const float2 shadowUvLocal = float2(ndc.x * 0.5f + 0.5f, -ndc.y * 0.5f + 0.5f);
 
-    if (shadowUvLocal.x < 0.0f || shadowUvLocal.x > 1.0f || shadowUvLocal.y < 0.0f || shadowUvLocal.y > 1.0f)
+    if (ndc.z < 0.0f || ndc.z > 1.0f
+        || shadowUvLocal.x < 0.0f || shadowUvLocal.x > 1.0f
+        || shadowUvLocal.y < 0.0f || shadowUvLocal.y > 1.0f)
     {
         return 1.0f;
     }
 
-    const float2 atlasOrigin = float2(cascadeIndex & 1u, cascadeIndex / 2u) * 0.5f;
-    const float2 shadowUvAtlas = shadowUvLocal * 0.5f + atlasOrigin;
-
     const float ndcZ = saturate(ndc.z);
-    const float slopeTerm = saturate(1.0f - dot(worldNormal, towardLight));
-    const float depthReference = ndcZ
-        - DepthBiasAndPcfKernel.x
-        - DepthBiasAndPcfKernel.y * slopeTerm;
+    const float depthReference = ComputeShadowDepthReference(ndcZ, worldNormal, towardLight);
 
     const int pcfRadius = clamp((int)DepthBiasAndPcfKernel.w, 1, 4);
-    return SampleShadowPcf(shadowUvAtlas, depthReference, pcfRadius);
+    return SampleShadowPcfClampedToCascade(shadowUvLocal, cascadeIndex, depthReference, pcfRadius);
 }
 
 float4 PSMain(VSOutput input) : SV_TARGET

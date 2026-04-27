@@ -21,6 +21,10 @@ struct KatamariGameConfig final
     unsigned int RandomSeed{1337u};
     unsigned int SpawnMaxAttemptsPerPickup{40u};
     float PickupSpawnMinSeparation{1.5f};
+    float ParticleSpawnRateParticlesPerSecond{260.0f};
+    float ParticleSpawnVolumeCenterHeight{28.0f};
+    float ParticleSpawnVolumeHalfExtentScale{0.84f};
+    float ParticleSpawnVolumeHalfHeight{4.0f};
 };
 
 #endif

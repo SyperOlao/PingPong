@@ -36,9 +36,6 @@ void KatamariSphereWorldResolveSystem::Update(Scene &scene, AppContext &, float)
     VelocityComponent *const velocity = scene.TryGetVelocityComponent(ballId);
     const std::vector<CollisionPair> &pairs = scene.GetCollisionFrameResults();
 
-    const CollisionPair *BestPair = nullptr;
-    float BestPenetrationDepth = 0.0f;
-
     for (CollisionPair const &pair : pairs)
     {
         if (pair.Kind != CollisionPairKind::SphereBox)
@@ -62,23 +59,14 @@ void KatamariSphereWorldResolveSystem::Update(Scene &scene, AppContext &, float)
             continue;
         }
 
-        if (pair.Contact.PenetrationDepth > BestPenetrationDepth)
-        {
-            BestPenetrationDepth = pair.Contact.PenetrationDepth;
-            BestPair = &pair;
-        }
-    }
-
-    if (BestPair != nullptr)
-    {
-        transform->Local.Position += BestPair->Contact.Normal * BestPair->Contact.PenetrationDepth;
+        transform->Local.Position += pair.Contact.Normal * pair.Contact.PenetrationDepth;
 
         if (velocity != nullptr)
         {
-            const float inwardDot = velocity->LinearVelocity.Dot(BestPair->Contact.Normal);
+            const float inwardDot = velocity->LinearVelocity.Dot(pair.Contact.Normal);
             if (inwardDot < 0.0f)
             {
-                velocity->LinearVelocity -= BestPair->Contact.Normal * inwardDot;
+                velocity->LinearVelocity -= pair.Contact.Normal * inwardDot;
             }
         }
     }
@@ -169,4 +157,6 @@ void KatamariSphereWorldResolveSystem::Update(Scene &scene, AppContext &, float)
     {
         transform->Local.Position.y = GameplayWorld->BallRadius;
     }
+
+    transform->WorldMatrix = transform->Local.GetWorldMatrix();
 }

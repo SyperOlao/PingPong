@@ -68,6 +68,9 @@ add_executable(PingPong
         Core/Graphics/Debug/DebugDrawQueue.cpp
         Core/Graphics/Texture2DAsset.h
         Core/Graphics/Texture2DAsset.cpp
+        Core/Graphics/Particles/GpuParticleTypes.h
+        Core/Graphics/Particles/GpuParticleSystem.h
+        Core/Graphics/Particles/GpuParticleSystem.cpp
 
         Core/Graphics/Rendering/ShapeRenderer2D.cpp
         Core/Graphics/Rendering/ShapeRenderer2D.h
@@ -97,6 +100,8 @@ add_executable(PingPong
         Core/Graphics/Rendering/Pipeline/Passes/DeferredLightingRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/DeferredCompositeRenderPass.h
         Core/Graphics/Rendering/Pipeline/Passes/DeferredCompositeRenderPass.cpp
+        Core/Graphics/Rendering/Pipeline/Passes/ParticlesRenderPass.h
+        Core/Graphics/Rendering/Pipeline/Passes/ParticlesRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/DebugOverlayRenderPass.h
         Core/Graphics/Rendering/Pipeline/Passes/DebugOverlayRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/UserInterfaceRenderPass.h
@@ -241,6 +246,8 @@ add_executable(PingPong
 
         Game/Katamari/KatamariGame.cpp
         Game/Katamari/KatamariGame.h
+        Game/Katamari/KatamariSceneLighting.cpp
+        Game/Katamari/KatamariSceneLighting.h
         Game/Katamari/KatamariLevelSetup.cpp
         Game/Katamari/KatamariLevelSetup.h
         Game/Katamari/KatamariTypes.h
@@ -325,9 +332,13 @@ set(CORE_SHADER_SOURCES
         Core/Shaders/BasicPS.hlsl
         Core/Shaders/BasicVS.hlsl
         Core/Shaders/ForwardPhong3D.hlsl
+        Core/Shaders/ShadowSamplingCSM.hlsli
         Core/Shaders/DeferredGeometry3D.hlsl
         Core/Shaders/DeferredLighting3D.hlsl
         Core/Shaders/DeferredComposite3D.hlsl
+        Core/Shaders/GpuParticlesUpdateCS.hlsl
+        Core/Shaders/GpuParticlesBitonicSortCS.hlsl
+        Core/Shaders/GpuParticlesDraw3D.hlsl
         Core/Shaders/ShadowDepth3D.hlsl
         Core/Shaders/Shape2D.hlsl
 )

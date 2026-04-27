@@ -8,7 +8,7 @@
 #include "Core/Gameplay/TransformSystem.h"
 #include "Core/Gameplay/VelocityIntegrationSystem.h"
 #include "Core/Graphics/ModelRenderer.h"
-#include "Core/Graphics/Rendering/Lighting/LightTypes3D.h"
+#include "Core/Graphics/Particles/GpuParticleSystem.h"
 #include "Core/Graphics/Rendering/Lighting/SceneLighting3D.h"
 #include "Core/Graphics/Rendering/RenderContext.h"
 #include "Core/Graphics/Rendering/Renderables/RenderMaterialParameters.h"
@@ -16,6 +16,7 @@
 #include "Core/Input/Keyboard.h"
 #include "Game/Katamari/Data/KatamariPickupCatalog.h"
 #include "Game/Katamari/KatamariLevelSetup.h"
+#include "Game/Katamari/KatamariSceneLighting.h"
 #include "Game/Katamari/Systems/KatamariAbsorptionSystem.h"
 #include "Game/Katamari/Systems/KatamariBallControllerSystem.h"
 #include "Game/Katamari/Systems/KatamariBallRollSystem.h"
@@ -78,6 +79,7 @@ void KatamariGame::Initialize(AppContext &context)
         context.Graphics.Render->SetGameRenderCallbackForUserInterfacePassEnabled(true);
         RenderPipelineConfigured = true;
     }
+    ConfigureParticleEmitter(context);
 
     PickupArchetypes = KatamariPickupCatalog::BuildDefaultPickupArchetypes();
 
@@ -85,67 +87,7 @@ void KatamariGame::Initialize(AppContext &context)
     SceneInstance.SetDirectionalShadowMappingEnabled(true);
     SceneInstance.SetActiveCamera(&FollowCameraInstance);
 
-    KatamariLighting = SceneLighting3DCreateDefaultOutdoor();
-    if (!KatamariLighting.DirectionalLights.empty())
-    {
-        KatamariLighting.DirectionalLights[0].Direction = Vector3(-0.22f, -1.0f, -0.28f);
-        KatamariLighting.DirectionalLights[0].Intensity = 0.58f;
-        KatamariLighting.DirectionalLights[0].LightColor = DirectX::SimpleMath::Color(0.78f, 0.84f, 1.0f, 1.0f);
-    }
-
-    PointLight3D FillLightNorth{};
-    FillLightNorth.Position = Vector3(0.0f, 32.0f, 58.0f);
-    FillLightNorth.Range = 130.0f;
-    FillLightNorth.Intensity = 0.22f;
-    FillLightNorth.LightColor = DirectX::SimpleMath::Color(1.0f, 0.94f, 0.82f, 1.0f);
-    KatamariLighting.PointLights.push_back(FillLightNorth);
-
-    PointLight3D FillLightSouth{};
-    FillLightSouth.Position = Vector3(0.0f, 26.0f, -58.0f);
-    FillLightSouth.Range = 130.0f;
-    FillLightSouth.Intensity = 0.2f;
-    FillLightSouth.LightColor = DirectX::SimpleMath::Color(0.82f, 0.9f, 1.0f, 1.0f);
-    KatamariLighting.PointLights.push_back(FillLightSouth);
-
-    PointLight3D FillLightOverhead{};
-    FillLightOverhead.Position = Vector3(0.0f, 48.0f, 0.0f);
-    FillLightOverhead.Range = 140.0f;
-    FillLightOverhead.Intensity = 0.26f;
-    FillLightOverhead.LightColor = DirectX::SimpleMath::Color(0.92f, 0.96f, 1.0f, 1.0f);
-    KatamariLighting.PointLights.push_back(FillLightOverhead);
-
-    const float halfExtent = GameConfig.PlayfieldHalfExtent;
-    PointLight3D NeonClusterWest{};
-    NeonClusterWest.Position = Vector3(-halfExtent * 0.55f, 10.0f, -halfExtent * 0.28f);
-    NeonClusterWest.Range = 38.0f;
-    NeonClusterWest.Intensity = 0.85f;
-    NeonClusterWest.LightColor = DirectX::SimpleMath::Color(0.1f, 0.95f, 0.95f, 1.0f);
-    KatamariLighting.PointLights.push_back(NeonClusterWest);
-
-    PointLight3D NeonClusterNorth{};
-    NeonClusterNorth.Position = Vector3(-halfExtent * 0.24f, 12.0f, halfExtent * 0.48f);
-    NeonClusterNorth.Range = 42.0f;
-    NeonClusterNorth.Intensity = 0.75f;
-    NeonClusterNorth.LightColor = DirectX::SimpleMath::Color(1.0f, 0.28f, 0.72f, 1.0f);
-    KatamariLighting.PointLights.push_back(NeonClusterNorth);
-
-    PointLight3D NeonClusterEast{};
-    NeonClusterEast.Position = Vector3(halfExtent * 0.56f, 10.0f, halfExtent * 0.14f);
-    NeonClusterEast.Range = 44.0f;
-    NeonClusterEast.Intensity = 0.7f;
-    NeonClusterEast.LightColor = DirectX::SimpleMath::Color(1.0f, 0.72f, 0.16f, 1.0f);
-    KatamariLighting.PointLights.push_back(NeonClusterEast);
-
-    SpotLight3D StageSpot{};
-    StageSpot.Position = Vector3(0.0f, 58.0f, -42.0f);
-    StageSpot.Direction = Vector3(0.0f, -0.82f, 0.58f);
-    StageSpot.Range = 135.0f;
-    StageSpot.InnerConeAngleRadians = 0.38f;
-    StageSpot.OuterConeAngleRadians = 0.72f;
-    StageSpot.Intensity = 0.42f;
-    StageSpot.LightColor = DirectX::SimpleMath::Color(1.0f, 0.91f, 0.78f, 1.0f);
-    KatamariLighting.SpotLights.push_back(StageSpot);
-
+    KatamariLighting = CreateKatamariSceneLighting(GameConfig);
     SceneInstance.GetSceneLightingDescriptor() = KatamariLighting;
 
     FollowCameraInstance.SetNearPlaneAndFarPlane(0.28f, 260.0f);
@@ -207,6 +149,18 @@ void KatamariGame::RegisterSceneSystems(AppContext &context)
     SceneInstance.AddSystem(std::make_unique<RenderSystem>());
     SceneInstance.AddSystem(std::make_unique<KatamariStaticObstacleRenderSystem>(&WorldContext));
     SceneInstance.InitializeSystems(context);
+}
+
+void KatamariGame::ConfigureParticleEmitter(AppContext &context)
+{
+    if (context.Graphics.Render == nullptr)
+    {
+        return;
+    }
+
+    context.Graphics.Render->GetGpuParticleSystem().SetEmitterDesc(
+        CreateKatamariParticleEmitterDesc(GameConfig)
+    );
 }
 
 void KatamariGame::DestroyAllPickupEntities()
@@ -467,7 +421,14 @@ void KatamariGame::Render(AppContext &context)
 
 }
 
-void KatamariGame::Shutdown(AppContext &)
+void KatamariGame::Shutdown(AppContext &context)
 {
+    if (context.Graphics.Render != nullptr)
+    {
+        GpuParticleEmitterDesc particles = context.Graphics.Render->GetGpuParticleSystem().GetEmitterDesc();
+        particles.Enabled = false;
+        context.Graphics.Render->GetGpuParticleSystem().SetEmitterDesc(particles);
+    }
+
     Initialized = false;
 }
