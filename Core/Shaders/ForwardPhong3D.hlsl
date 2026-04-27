@@ -321,9 +321,9 @@ float4 PSMain(PSInput input) : SV_TARGET
     }
 
     const float shadowVisibilityForDirectLighting =
-        ShadowEnabled != 0u ? lerp(0.38f, 1.0f, directionalShadow) : 1.0f;
+        ShadowEnabled != 0u ? lerp(0.32f, 1.0f, directionalShadow) : 1.0f;
     const float shadowVisibilityForAmbient =
-        ShadowEnabled != 0u ? lerp(0.72f, 1.0f, directionalShadow) : 1.0f;
+        ShadowEnabled != 0u ? lerp(0.75f, 1.0f, directionalShadow) : 1.0f;
     const float ambientScale = EmissiveAndAmbient.w;
     const float3 ambientTerm = baseSample * ambientScale * shadowVisibilityForAmbient;
     const float3 emissiveTerm = EmissiveAndAmbient.xyz;

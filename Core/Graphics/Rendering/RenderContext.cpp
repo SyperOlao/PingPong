@@ -187,8 +187,8 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
 
     constexpr float kConstantDepthBias = 0.0f;
     constexpr float kSlopeScaledDepthBias = 0.0f;
-    constexpr float kNormalOffsetWorldUnits = 0.0002f;
-    constexpr float kPcfRadiusTexels = 1.0f;
+    constexpr float kNormalOffsetWorldUnits = 0.0f;
+    constexpr float kPcfRadiusTexels = 2.0f;
 
     ShadowSamplingGpuConstants samplingCpu{};
     samplingCpu.DepthBiasAndPcfKernel = DirectX::XMFLOAT4(
