@@ -115,6 +115,7 @@ void KatamariGame::Initialize(AppContext &context)
         const float groundTopLocalY = groundBounds.Center.y + groundBounds.Extents.y;
         GroundModelVerticalOffset = -groundTopLocalY;
     }
+    CreateGroundEntityIfAvailable();
 
     if (!StaticWorldCreated)
     {
@@ -157,6 +158,44 @@ void KatamariGame::RegisterSceneSystems(AppContext &context)
     SceneInstance.AddSystem(std::make_unique<RenderSystem>());
     SceneInstance.AddSystem(std::make_unique<KatamariStaticObstacleRenderSystem>(&WorldContext));
     SceneInstance.InitializeSystems(context);
+}
+
+void KatamariGame::CreateGroundEntityIfAvailable()
+{
+    if (GroundEntityId != 0u && SceneInstance.IsEntityAlive(GroundEntityId))
+    {
+        return;
+    }
+
+    if (GroundModel == nullptr || !GroundModel->IsLoaded())
+    {
+        return;
+    }
+
+    const float playfieldSpan = GameConfig.PlayfieldHalfExtent * 2.0f + GameConfig.WallThickness * 2.0f;
+
+    Entity ground = SceneInstance.CreateEntity();
+    GroundEntityId = ground.GetId();
+
+    TransformComponent transform{};
+    transform.Local.Scale = Vector3(playfieldSpan, 1.0f, playfieldSpan);
+    transform.Local.Position = Vector3(0.0f, GroundModelVerticalOffset, 0.0f);
+    transform.WorldMatrix = transform.Local.GetWorldMatrix();
+    ground.AddTransformComponent(transform);
+
+    ModelComponent model{};
+    model.Asset = GroundModel;
+    model.Visible = true;
+    model.CastsShadow = false;
+    ground.AddModelComponent(model);
+
+    MaterialComponent material{};
+    material.Parameters.BaseColor = DirectX::SimpleMath::Color(0.62f, 0.7f, 0.88f, 1.0f);
+    material.Parameters.ReceiveLighting = true;
+    material.Parameters.AmbientFactor = 0.09f;
+    material.Parameters.SpecularPower = 92.0f;
+    material.Parameters.SpecularColor = DirectX::SimpleMath::Color(0.72f, 0.72f, 0.72f, 1.0f);
+    ground.AddMaterialComponent(material);
 }
 
 void KatamariGame::ConfigureParticleEmitter(AppContext &context)
@@ -396,23 +435,26 @@ void KatamariGame::Render(AppContext &context)
 
     if (GroundModel != nullptr && GroundModel->IsLoaded())
     {
-        const Matrix groundWorld =
-            Matrix::CreateScale(playfieldSpan, 1.0f, playfieldSpan) *
-            Matrix::CreateTranslation(0.0f, GroundModelVerticalOffset, 0.0f);
-        RenderMaterialParameters groundMaterial{};
-        groundMaterial.BaseColor = DirectX::SimpleMath::Color(0.62f, 0.7f, 0.88f, 1.0f);
-        groundMaterial.AmbientFactor = 0.09f;
-        groundMaterial.SpecularPower = 92.0f;
-        groundMaterial.SpecularColor = DirectX::SimpleMath::Color(0.72f, 0.72f, 0.72f, 1.0f);
-        modelRenderer.DrawModelLit(
-            *GroundModel,
-            groundWorld,
-            viewMatrix,
-            projectionMatrix,
-            cameraWorldPosition,
-            KatamariLighting,
-            groundMaterial
-        );
+        if (!SceneInstance.IsEntityAlive(GroundEntityId))
+        {
+            const Matrix groundWorld =
+                Matrix::CreateScale(playfieldSpan, 1.0f, playfieldSpan) *
+                Matrix::CreateTranslation(0.0f, GroundModelVerticalOffset, 0.0f);
+            RenderMaterialParameters groundMaterial{};
+            groundMaterial.BaseColor = DirectX::SimpleMath::Color(0.62f, 0.7f, 0.88f, 1.0f);
+            groundMaterial.AmbientFactor = 0.09f;
+            groundMaterial.SpecularPower = 92.0f;
+            groundMaterial.SpecularColor = DirectX::SimpleMath::Color(0.72f, 0.72f, 0.72f, 1.0f);
+            modelRenderer.DrawModelLit(
+                *GroundModel,
+                groundWorld,
+                viewMatrix,
+                projectionMatrix,
+                cameraWorldPosition,
+                KatamariLighting,
+                groundMaterial
+            );
+        }
     }
     else
     {

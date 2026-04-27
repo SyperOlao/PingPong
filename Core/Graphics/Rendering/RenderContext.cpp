@@ -26,8 +26,55 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdio>
 #include <memory>
 #include <utility>
+
+#if defined(_WIN32) && defined(_DEBUG)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+#endif
+
+namespace
+{
+void DebugLogDirectionalShadowPass(
+    const std::uint32_t cascadeCount,
+    const CascadedShadowSplitCpu &splitCpu,
+    const std::uint32_t shadowDirectionalIndex,
+    const std::uint32_t shadowCasterCount,
+    const std::uint32_t shadowDrawCount
+)
+{
+#if defined(_WIN32) && defined(_DEBUG)
+    char message[512]{};
+    std::snprintf(
+        message,
+        sizeof(message),
+        "[DirectionalCSM] enabled=1 directionalIndex=%u cascades=%u splits=(%.2f, %.2f, %.2f, %.2f) casters=%u shadowDraws=%u\n",
+        shadowDirectionalIndex,
+        cascadeCount,
+        splitCpu.ViewSpaceSplitBoundaries[1],
+        splitCpu.ViewSpaceSplitBoundaries[2],
+        splitCpu.ViewSpaceSplitBoundaries[3],
+        splitCpu.ViewSpaceSplitBoundaries[4],
+        shadowCasterCount,
+        shadowDrawCount
+    );
+    OutputDebugStringA(message);
+#else
+    (void)cascadeCount;
+    (void)splitCpu;
+    (void)shadowDirectionalIndex;
+    (void)shadowCasterCount;
+    (void)shadowDrawCount;
+#endif
+}
+}
 
 RenderContext::~RenderContext()
 {
@@ -217,6 +264,8 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
     m_graphics->ClearDepthStencilView(shadowDepthStencilView, 1.0f, 0u);
 
     ID3D11RasterizerState *const shadowRasterizerState = m_directionalShadowResources.GetShadowPassRasterizerState();
+    std::uint32_t shadowCasterCount = 0u;
+    std::uint32_t shadowDrawCount = 0u;
 
     for (std::uint32_t cascadeIndex = 0u; cascadeIndex < cascadeCount; ++cascadeIndex)
     {
@@ -237,6 +286,12 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
                 return;
             }
 
+            if (cascadeIndex == 0u)
+            {
+                ++shadowCasterCount;
+            }
+            ++shadowDrawCount;
+
             m_modelRenderer.DrawModelShadowDepth(
                 shadowRasterizerState,
                 *model->Asset,
@@ -245,6 +300,14 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
             );
         });
     }
+
+    DebugLogDirectionalShadowPass(
+        cascadeCount,
+        splitCpu,
+        shadowPackedDirectionalIndex,
+        shadowCasterCount,
+        shadowDrawCount
+    );
 
     deviceContext->RSSetState(nullptr);
     m_graphics->BindMainRenderTargets();

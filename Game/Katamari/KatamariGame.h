@@ -36,6 +36,8 @@ private:
 
     void UpdateDebugInput(AppContext &context);
 
+    void CreateGroundEntityIfAvailable();
+
     Scene SceneInstance{};
     FollowCamera FollowCameraInstance{};
     KatamariCameraController CameraController{};
@@ -50,6 +52,7 @@ private:
     int FpsFrames{0};
     int DisplayFps{0};
     std::shared_ptr<ModelAsset> GroundModel{};
+    EntityId GroundEntityId{0u};
     float GroundModelVerticalOffset{0.0f};
     std::shared_ptr<ModelAsset> MoonModel{};
     std::shared_ptr<ModelAsset> PlayerBallMeshModel{};
