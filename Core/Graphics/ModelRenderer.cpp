@@ -120,7 +120,7 @@ namespace
 
     ID3D11RasterizerState *ResolveRasterizerForMesh(
         DirectX::CommonStates &commonStates,
-        const DirectX::ModelMesh &mesh,
+        const DirectX::ModelMesh &,
         const RenderMaterialParameters &material
     ) noexcept
     {
@@ -129,9 +129,7 @@ namespace
             return commonStates.Wireframe();
         }
 
-        return mesh.ccw
-            ? commonStates.CullClockwise()
-            : commonStates.CullCounterClockwise();
+        return commonStates.CullNone();
     }
 }
 
