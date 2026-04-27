@@ -46,7 +46,7 @@ SceneLightingDescriptor3D CreateKatamariSceneLighting(const KatamariGameConfig &
             definition.Position.z
         );
         pointLight.Range = (std::max)(largestScale * 5.0f, 42.0f);
-        pointLight.Intensity = 0.82f;
+        pointLight.Intensity = 0.4f;
         pointLight.LightColor = definition.LightColor;
         lighting.PointLights.push_back(pointLight);
     }

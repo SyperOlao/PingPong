@@ -16,8 +16,9 @@ using DirectX::SimpleMath::Vector3;
 namespace
 {
 constexpr float GroundedHeightEpsilon = 0.02f;
-constexpr float MinimumInputSquaredLength = 1.0e-6f;
+constexpr float MinimumInputSquaredLength = 1.0e-8f;
 constexpr float MaximumDragPerFrame = 0.95f;
+constexpr float MinimumDirectionSquaredLength = 1.0e-8f;
 
 struct PlanarMovementBasis final
 {
@@ -35,17 +36,23 @@ Vector3 ResolveCameraPlanarForward(
         return Vector3(0.0f, 0.0f, 1.0f);
     }
 
-    Vector3 cameraForward = followCamera->GetMovementDirectionXZ();
-    cameraForward.y = 0.0f;
-    if (cameraForward.LengthSquared() > 1.0e-6f)
-    {
-        cameraForward.Normalize();
-        return cameraForward;
-    }
-
     Vector3 cameraToBallDirection = ballWorldPosition - followCamera->GetPosition();
     cameraToBallDirection.y = 0.0f;
-    return SpatialMath::SafeNormalizeVector3(cameraToBallDirection, Vector3(0.0f, 0.0f, 1.0f));
+    if (cameraToBallDirection.LengthSquared() > MinimumDirectionSquaredLength)
+    {
+        cameraToBallDirection.Normalize();
+        return cameraToBallDirection;
+    }
+
+    Vector3 cameraForwardDirection = followCamera->GetMovementDirectionXZ();
+    cameraForwardDirection.y = 0.0f;
+    if (cameraForwardDirection.LengthSquared() > MinimumDirectionSquaredLength)
+    {
+        cameraForwardDirection.Normalize();
+        return cameraForwardDirection;
+    }
+
+    return Vector3(0.0f, 0.0f, 1.0f);
 }
 
 PlanarMovementBasis ResolvePlanarMovementBasis(
@@ -92,7 +99,8 @@ Vector3 ResolveMovementInputDirection(Keyboard const &keyboard, PlanarMovementBa
     const float forwardAxisValue = ResolveForwardAxisValue(keyboard);
     const float rightAxisValue = ResolveRightAxisValue(keyboard);
 
-    Vector3 movementInputDirection = basis.Forward * forwardAxisValue + basis.Right * rightAxisValue;
+    Vector3 movementInputDirection = basis.Forward * forwardAxisValue;
+    movementInputDirection += basis.Right * rightAxisValue;
     if (movementInputDirection.LengthSquared() > MinimumInputSquaredLength)
     {
         movementInputDirection.Normalize();
@@ -136,18 +144,20 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
 
     if (inputDirection.LengthSquared() > MinimumInputSquaredLength)
     {
-        Vector3 planarVelocity(velocity->LinearVelocity.x, 0.0f, velocity->LinearVelocity.z);
         const Vector3 targetPlanarVelocity = inputDirection * config.BallMaxHorizontalSpeed;
-        Vector3 requiredPlanarDelta = targetPlanarVelocity - planarVelocity;
-        const float maximumPlanarDelta = config.BallMoveAcceleration * deltaTime;
-        const float requiredPlanarDeltaLength = requiredPlanarDelta.Length();
-        if (requiredPlanarDeltaLength > maximumPlanarDelta && requiredPlanarDeltaLength > 1.0e-6f)
+        Vector3 planarVelocity(velocity->LinearVelocity.x, 0.0f, velocity->LinearVelocity.z);
+        Vector3 requiredPlanarVelocityDelta = targetPlanarVelocity - planarVelocity;
+
+        const float maximumPlanarVelocityDelta = config.BallMoveAcceleration * deltaTime;
+        const float requiredPlanarVelocityDeltaLength = requiredPlanarVelocityDelta.Length();
+        if (requiredPlanarVelocityDeltaLength > maximumPlanarVelocityDelta
+            && requiredPlanarVelocityDeltaLength > MinimumDirectionSquaredLength)
         {
-            requiredPlanarDelta *= maximumPlanarDelta / requiredPlanarDeltaLength;
+            requiredPlanarVelocityDelta *= maximumPlanarVelocityDelta / requiredPlanarVelocityDeltaLength;
         }
 
-        velocity->LinearVelocity.x += requiredPlanarDelta.x;
-        velocity->LinearVelocity.z += requiredPlanarDelta.z;
+        velocity->LinearVelocity.x += requiredPlanarVelocityDelta.x;
+        velocity->LinearVelocity.z += requiredPlanarVelocityDelta.z;
     }
 
     // Gravity and jump (vertical axis is independent of input direction).
@@ -159,7 +169,6 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
     }
     velocity->LinearVelocity.y -= config.BallGravityAcceleration * deltaTime;
 
-    // Clamp planar speed to the configured maximum.
     Vector3 horizontalVelocity(velocity->LinearVelocity.x, 0.0f, velocity->LinearVelocity.z);
     const float horizontalSpeed = horizontalVelocity.Length();
     if (horizontalSpeed > config.BallMaxHorizontalSpeed)
@@ -169,7 +178,6 @@ void KatamariBallControllerSystem::Update(Scene &scene, AppContext &context, con
         velocity->LinearVelocity.z *= clampScale;
     }
 
-    // Apply planar drag (exponential damping that does not fight vertical motion).
     const float dragFactor = 1.0f - (std::min)(config.BallHorizontalDrag * deltaTime, MaximumDragPerFrame);
     velocity->LinearVelocity.x *= dragFactor;
     velocity->LinearVelocity.z *= dragFactor;

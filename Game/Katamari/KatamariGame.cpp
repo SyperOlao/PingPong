@@ -394,7 +394,7 @@ void KatamariGame::Render(AppContext &context)
             Matrix::CreateTranslation(0.0f, GroundModelVerticalOffset, 0.0f);
         RenderMaterialParameters groundMaterial{};
         groundMaterial.BaseColor = DirectX::SimpleMath::Color(0.62f, 0.7f, 0.88f, 1.0f);
-        groundMaterial.AmbientFactor = 0.09f;
+        groundMaterial.AmbientFactor = 0.04f;
         groundMaterial.SpecularPower = 92.0f;
         groundMaterial.SpecularColor = DirectX::SimpleMath::Color(0.72f, 0.72f, 0.72f, 1.0f);
         modelRenderer.DrawModelLit(

@@ -256,6 +256,7 @@ void KatamariLevelSetup::CreatePlayerBall(
 
         MaterialComponent materialComponent{};
         materialComponent.Parameters.BaseColor = DirectX::SimpleMath::Color(0.95f, 0.35f, 0.2f, 1.0f);
+        materialComponent.Parameters.ReceiveLighting = true;
         materialComponent.Parameters.AmbientFactor = 0.1f;
         materialComponent.Parameters.SpecularColor = DirectX::SimpleMath::Color(1.0f, 0.96f, 0.88f, 1.0f);
         materialComponent.Parameters.SpecularPower = 22.0f;
