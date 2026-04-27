@@ -249,7 +249,7 @@ void GpuParticleSystem::CreateBuffers(ID3D11Device *const device)
         particles[index].PositionLife = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, -1.0f);
         particles[index].VelocitySize = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
         particles[index].Color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
-        sortKeys[index].Key = std::numeric_limits<float>::max();
+        sortKeys[index].Key = (std::numeric_limits<float>::max)();
         sortKeys[index].Index = index;
         sortKeys[index].Alive = 0u;
     }
