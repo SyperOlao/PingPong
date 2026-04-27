@@ -15,7 +15,7 @@ void DirectionalShadowResources::Initialize(GraphicsDevice &graphicsDevice)
     }
 
     m_comparisonSampler.Create(device);
-    m_shadowPassRasterizer.Create(device, D3D11_CULL_NONE, 12000, 1.1f, 0.0f);
+    m_shadowPassRasterizer.Create(device, D3D11_CULL_NONE, 64, 0.35f, 0.0f);
     m_shadowMap.Create(device, m_shadowAtlasSizePixels, m_shadowAtlasSizePixels);
     CreateConstantBuffers(device);
 }

@@ -20,7 +20,7 @@ void ShadowComparisonSamplerState::Create(ID3D11Device *const device)
     samplerDescription.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
     samplerDescription.MipLODBias = 0.0f;
     samplerDescription.MaxAnisotropy = 1u;
-    samplerDescription.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    samplerDescription.ComparisonFunc = D3D11_COMPARISON_GREATER_EQUAL;
     samplerDescription.BorderColor[0] = 1.0f;
     samplerDescription.BorderColor[1] = 1.0f;
     samplerDescription.BorderColor[2] = 1.0f;

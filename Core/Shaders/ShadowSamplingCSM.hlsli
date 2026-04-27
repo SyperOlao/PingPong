@@ -44,7 +44,7 @@ float2 ClampShadowAtlasUvToCascadeTile(float2 shadowUvAtlas, uint cascadeIndex)
 float ComputeShadowDepthReference(float ndcDepth, float3 worldNormal, float3 towardLight)
 {
     const float slopeTerm = saturate(1.0f - dot(worldNormal, towardLight));
-    return saturate(ndcDepth - DepthBiasAndPcfKernel.x - DepthBiasAndPcfKernel.y * slopeTerm);
+    return saturate(ndcDepth + DepthBiasAndPcfKernel.x + DepthBiasAndPcfKernel.y * slopeTerm);
 }
 
 float SampleShadowPcfClampedToCascade(float2 shadowUvLocal, uint cascadeIndex, float depthReference, int pcfRadius)

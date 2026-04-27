@@ -315,7 +315,15 @@ float4 PSMain(VSOutput input) : SV_TARGET
         specularAccumulation += specularContribution * shadowFactor;
     }
 
-    const float3 ambientTerm = albedo * ambientFactor;
-    const float3 litColor = ambientTerm + emissive + diffuseAccumulation * albedo + specularAccumulation;
+    const float shadowVisibilityForDirectLighting =
+        ShadowEnabled != 0u ? lerp(0.38f, 1.0f, directionalShadow) : 1.0f;
+    const float shadowVisibilityForAmbient =
+        ShadowEnabled != 0u ? lerp(0.72f, 1.0f, directionalShadow) : 1.0f;
+    const float3 ambientTerm = albedo * ambientFactor * shadowVisibilityForAmbient;
+    const float3 litColor =
+        ambientTerm
+        + emissive
+        + diffuseAccumulation * albedo * shadowVisibilityForDirectLighting
+        + specularAccumulation * shadowVisibilityForDirectLighting;
     return float4(litColor, 1.0f);
 }
