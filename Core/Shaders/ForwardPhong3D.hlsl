@@ -203,26 +203,58 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal)
     const float3 biasedWorldPosition = worldPosition + worldNormal * DepthBiasAndPcfKernel.z;
 
     const float4 viewPosition = mul(float4(worldPosition, 1.0f), View);
-    const float ViewDepthPositive = -viewPosition.z;
-    const uint cascadeIndex = SelectShadowCascadeIndex(ViewDepthPositive);
+    const float viewDepthPositive = -viewPosition.z;
+    const uint cascadeIndexPrimary = SelectShadowCascadeIndex(viewDepthPositive);
 
-    const float4 lightClip = mul(float4(biasedWorldPosition, 1.0f), LightViewProjection[cascadeIndex]);
-    const float invW = 1.0f / max(abs(lightClip.w), 1.0e-5f);
-    const float3 ndc = lightClip.xyz * invW;
-    const float2 shadowUvLocal = float2(ndc.x * 0.5f + 0.5f, -ndc.y * 0.5f + 0.5f);
+    const float4 lightClipPrimary = mul(float4(biasedWorldPosition, 1.0f), LightViewProjection[cascadeIndexPrimary]);
+    const float inverseWPrimary = 1.0f / max(abs(lightClipPrimary.w), 1.0e-5f);
+    const float3 ndcPrimary = lightClipPrimary.xyz * inverseWPrimary;
+    const float2 shadowUvLocalPrimary = float2(ndcPrimary.x * 0.5f + 0.5f, -ndcPrimary.y * 0.5f + 0.5f);
 
-    if (ndc.z < 0.0f || ndc.z > 1.0f
-        || shadowUvLocal.x < 0.0f || shadowUvLocal.x > 1.0f
-        || shadowUvLocal.y < 0.0f || shadowUvLocal.y > 1.0f)
+    if (ndcPrimary.z < 0.0f || ndcPrimary.z > 1.0f
+        || shadowUvLocalPrimary.x < 0.0f || shadowUvLocalPrimary.x > 1.0f
+        || shadowUvLocalPrimary.y < 0.0f || shadowUvLocalPrimary.y > 1.0f)
     {
         return 1.0f;
     }
 
-    const float ndcZ = saturate(ndc.z);
-    const float depthReference = ComputeShadowDepthReference(ndcZ, worldNormal, towardLight);
-
     const int pcfRadius = clamp((int)DepthBiasAndPcfKernel.w, 1, 4);
-    return SampleShadowPcfClampedToCascade(shadowUvLocal, cascadeIndex, depthReference, pcfRadius);
+    const float depthReferencePrimary = ComputeShadowDepthReference(saturate(ndcPrimary.z), worldNormal, towardLight);
+    const float shadowPrimary = SampleShadowPcfClampedToCascade(
+        shadowUvLocalPrimary,
+        cascadeIndexPrimary,
+        depthReferencePrimary,
+        pcfRadius
+    );
+
+    const float cascadeBlendFactor = ShadowCascadeTransitionBlend(viewDepthPositive, cascadeIndexPrimary);
+    if (cascadeBlendFactor <= 0.0f || cascadeIndexPrimary + 1u >= ShadowMapCascadeCount)
+    {
+        return shadowPrimary;
+    }
+
+    const uint cascadeIndexSecondary = cascadeIndexPrimary + 1u;
+    const float4 lightClipSecondary = mul(float4(biasedWorldPosition, 1.0f), LightViewProjection[cascadeIndexSecondary]);
+    const float inverseWSecondary = 1.0f / max(abs(lightClipSecondary.w), 1.0e-5f);
+    const float3 ndcSecondary = lightClipSecondary.xyz * inverseWSecondary;
+    const float2 shadowUvLocalSecondary = float2(ndcSecondary.x * 0.5f + 0.5f, -ndcSecondary.y * 0.5f + 0.5f);
+
+    if (ndcSecondary.z < 0.0f || ndcSecondary.z > 1.0f
+        || shadowUvLocalSecondary.x < 0.0f || shadowUvLocalSecondary.x > 1.0f
+        || shadowUvLocalSecondary.y < 0.0f || shadowUvLocalSecondary.y > 1.0f)
+    {
+        return shadowPrimary;
+    }
+
+    const float depthReferenceSecondary = ComputeShadowDepthReference(saturate(ndcSecondary.z), worldNormal, towardLight);
+    const float shadowSecondary = SampleShadowPcfClampedToCascade(
+        shadowUvLocalSecondary,
+        cascadeIndexSecondary,
+        depthReferenceSecondary,
+        pcfRadius
+    );
+
+    return lerp(shadowPrimary, shadowSecondary, cascadeBlendFactor);
 }
 
 float4 PSMain(PSInput input) : SV_TARGET

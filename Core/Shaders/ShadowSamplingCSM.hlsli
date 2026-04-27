@@ -66,3 +66,35 @@ float SampleShadowPcfClampedToCascade(float2 shadowUvLocal, uint cascadeIndex, f
 
     return accumulated / max(sampleCount, 1);
 }
+
+float ShadowCascadeSplitValue(uint cascadeIndex)
+{
+    if (cascadeIndex == 0u)
+    {
+        return CascadeSplits.x;
+    }
+    if (cascadeIndex == 1u)
+    {
+        return CascadeSplits.y;
+    }
+    if (cascadeIndex == 2u)
+    {
+        return CascadeSplits.z;
+    }
+    return CascadeSplits.w;
+}
+
+float ShadowCascadeTransitionBlend(float viewDepthPositive, uint cascadeIndex)
+{
+    if (ShadowMapCascadeCount <= 1u || cascadeIndex + 1u >= ShadowMapCascadeCount)
+    {
+        return 0.0f;
+    }
+
+    const float cascadeEnd = ShadowCascadeSplitValue(cascadeIndex);
+    const float cascadeStart = cascadeIndex == 0u ? 0.0f : ShadowCascadeSplitValue(cascadeIndex - 1u);
+    const float cascadeDepthSpan = max(cascadeEnd - cascadeStart, 1.0f);
+    const float transitionDepthSpan = max(cascadeDepthSpan * 0.14f, 1.0f);
+    const float transitionStart = cascadeEnd - transitionDepthSpan;
+    return saturate((viewDepthPositive - transitionStart) / transitionDepthSpan);
+}
