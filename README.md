@@ -1,140 +1,131 @@
-# Mini engine
+# Mini Engine With Games
 
-Изначально проект назывался`PingPong` и он уже давно перестал быть только Pong-игрой. Сейчас это небольшой игровой движок на `C++20` и `DirectX 11`, внутри которого есть общее `Core`, единая точка входа, общие сервисы приложения и несколько отдельных мини-игр/демо, работающих поверх одной базы.
+Small C++20/DirectX 11 game engine playground with a shared core and multiple playable mini-games/demos running on top of one application runtime.
 
-Проект удобно воспринимать так:
-
-- `Core` отвечает за окно, цикл приложения, ввод, рендер, аудио, ресурсы, UI и базовые игровые системы.
-- `Game/*` содержит независимые игры и технодемо, которые подключаются через общий интерфейс `IGame`.
-- `main.cpp` выбирает, что именно запускать в текущей сборке.
+Russian version: **[README_RU.md](README_RU.md)**
 
 ---
 
-## Содержание
+## Table of Contents
 
-- [Что сейчас умеет проект](#что-сейчас-умеет-проект)
-- [Архитектура](#архитектура)
-- [Как это работает](#как-это-работает)
-- [Мини-игры и демо](#мини-игры-и-демо)
-- [Launch](#launch)
-- [Installation third-party libraries](#installation-third-party-libraries)
-- [Скриншоты](#скриншоты)
-- [Структура проекта](#структура-проекта)
-
----
-
-## Что сейчас умеет проект
-
-- Запускает разные игры через единое приложение и общий интерфейс `IGame`.
-- Имеет 2D- и 3D-рендеринг на `DirectX 11`.
-- Даёт общие сервисы через `AppContext`, чтобы игры работали поверх одного ядра.
-- Поддерживает UI-элементы, аудио, загрузку моделей и ассетов.
-- Содержит базовую ECS-подобную сцену для 3D-режимов: сущности, компоненты и системы.
-
-Если коротко: это уже не "один Pong", а песочница/движок, где можно собирать отдельные игровые режимы на общей инфраструктуре.
+- [Overview](#overview)
+- [Current Features](#current-features)
+- [Project Architecture](#project-architecture)
+- [Games and Demos](#games-and-demos)
+- [Controls](#controls)
+- [Build Requirements](#build-requirements)
+- [Build and Run](#build-and-run)
+- [Project Structure](#project-structure)
 
 ---
 
-## Архитектура
+## Overview
+
+The repository started as a Pong project (`PingPong`) and evolved into a compact game engine framework:
+
+- `Core` provides platform/window, app loop, input, rendering, audio, assets, UI, math, and gameplay systems.
+- `Game/*` contains independent game modules implementing one interface (`IGame`).
+- `main.cpp` selects which module is launched at runtime.
+
+The executable target is still named `PingPong`, but it now hosts multiple game modes.
+
+---
+
+## Current Features
+
+The engine is intentionally compact, but already covers a full playable game loop stack:
+
+- **Application Runtime**
+  - Unified game lifecycle through `IGame` (`Initialize`, `Update`, `Render`, `Shutdown`)
+  - Shared runtime context (`AppContext`) used by all game modules
+  - One executable, multiple game modules selected at compile-time in `main.cpp`
+
+- **Rendering**
+  - 2D + 3D rendering on DirectX 11
+  - Forward and deferred render modes
+  - Multi-pass frame pipeline (`Core/Graphics/Rendering/Pipeline`)
+  - Directional + point light support, shadow mapping, and debug visualizations
+  - GBuffer debug mode and shadow cascade debug mode
+  - GPU particles (integrated into Katamari flow)
+
+- **Gameplay Foundation**
+  - Lightweight ECS-style scene flow (`Scene`, entities, components, systems)
+  - Built-in transform, velocity, collision, and render update systems
+  - 2D and 3D collision helpers
+  - Reusable camera logic (FPS, orbit, follow camera styles)
+
+- **Tooling and Content Runtime**
+  - Asset loading for models and textures (Assimp path)
+  - Runtime shader files copied into build output automatically
+  - Built-in UI widgets and debug overlays
+  - Audio integration via DirectXTK Audio
+
+---
+
+## Project Architecture
 
 ### `Core/App`
 
-Слой приложения:
+Application bootstrap and frame loop:
 
-- `Application` создаёт окно, графику, ввод, аудио, ресурсы и запускает главный цикл.
-- `IGame` задаёт единый контракт для любой игры: `Initialize`, `Update`, `Render`, `Shutdown`.
-- `AppContext` собирает доступ к сервисам платформы, ввода, графики, UI, аудио и ассетов в одном объекте.
+- `Application` owns startup/shutdown, timing, update loop, and render loop
+- `IGame` defines the contract every game module must implement
+- `AppContext` exposes platform/window/input/graphics/audio/assets/UI services
+- `ApplicationDefaults.h` keeps default window sizing (`1280x720`)
 
-Именно поэтому `Pong`, `SolarSystem`, `Katamari` и `LightingTest` можно запускать через одну и ту же оболочку.
+Responsibility: this layer is the "host shell" that keeps game modules decoupled from low-level initialization.
 
 ### `Core/Graphics`
 
-Графическое ядро проекта:
+Rendering stack and rendering pipeline:
 
-- `GraphicsDevice` поднимает `Direct3D 11`.
-- `ShapeRenderer2D` рисует 2D-примитивы и используется UI/оверлеями.
-- `PrimitiveRenderer3D` и `ModelRenderer` нужны для 3D-объектов и моделей.
-- `FrameRenderer` и пайплайн в `Core/Graphics/Rendering/Pipeline` управляют проходами рендера.
-- В проекте уже есть задел под forward/deferred rendering, освещение и тени.
+- `GraphicsDevice` initializes and owns D3D11 resources and frame targets
+- `ShapeRenderer2D` handles 2D primitives and UI rendering helpers
+- `PrimitiveRenderer3D` handles debug/simple 3D primitives
+- `ModelRenderer` renders imported model assets with material/light data
+- `FrameRenderer` orchestrates frame execution and render mode behavior
+- Render passes live in `Core/Graphics/Rendering/Pipeline/Passes`
+  - Deferred path includes geometry, lighting, and composite passes
+  - Additional passes exist for shadows, particles, overlays, and UI
 
-### `Core/Input`, `Core/Audio`, `Core/Assets`
-
-- `InputSystem` и `RawInputHandler` обрабатывают клавиатуру и мышь.
-- `AudioSystem` работает через `DirectXTK Audio` и даёт one-shot/loop/instances для звука.
-- `AssetCache` и `AssetPathResolver` отвечают за загрузку моделей, текстур и других ассетов.
+Responsibility: this is the rendering subsystem plus frame orchestration logic.
 
 ### `Core/Gameplay`
 
-Это базовый 3D gameplay-слой для игр, которым мало просто "нарисовать объект":
+Gameplay foundation for 3D scenes:
 
-- `Scene` хранит сущности, компоненты и список систем.
-- Компоненты включают `TransformComponent`, `ModelComponent`, `VelocityComponent`, `SphereColliderComponent`, `BoxColliderComponent`, `TagComponent`, `AttachmentComponent`.
-- Системы вроде `TransformSystem`, `VelocityIntegrationSystem`, `CollisionSystem`, `RenderSystem` обновляют сцену каждый кадр.
+- `Scene` implements entity/component/system orchestration
+- Components include transform/model/material/velocity/collider/tag/attachment data
+- Systems include transform propagation, velocity integration, collision, and rendering
+- Additional game-specific systems can be plugged in per module
 
-По сути это лёгкая ECS-архитектура под текущие задачи проекта.
+Responsibility: reusable gameplay runtime for features that should not be rewritten per game.
 
----
+### Other Core Modules
 
-## Как это работает
-
-### 1. Выбор игры
-
-В [main.cpp](/Users/syper_olao/Desktop/program/programs/Python/PingPong/main.cpp) через `enum class DemoType` выбирается, какая игра будет создана:
-
-- `Pong`
-- `SolarSystem`
-- `Katamari`
-- `LightingTest`
-
-Дальше создаётся соответствующий класс игры, реализующий `IGame`.
-
-### 2. Запуск приложения
-
-`Application`:
-
-- создаёт окно;
-- инициализирует графику, ввод, UI, аудио и ассеты;
-- собирает всё это в `AppContext`;
-- вызывает у выбранной игры `Initialize()`;
-- запускает цикл `Update()` + `Render()`.
-
-### 3. Работа кадра
-
-Каждый кадр схема примерно такая:
-
-1. приложение обновляет таймер и ввод;
-2. активная игра получает `Update(context, deltaTime)`;
-3. игра обновляет свою логику;
-4. приложение и игра рисуют кадр;
-5. цикл повторяется до закрытия окна.
-
-За счёт этого новые мини-игры можно добавлять без переписывания всего приложения.
+- `Core/Input` - keyboard/mouse state and raw input deltas
+- `Core/Audio` - sound loading, one-shots, looped sounds, runtime control
+- `Core/Assets` - path resolving and cached asset loading
+- `Core/UI` - bitmap font drawing and custom UI widgets
+- `Core/Physics` - shared collision/math structures and queries
+- `Core/Math` - transforms and helper math utilities
 
 ---
 
-## Мини-игры и демо
+## Games and Demos
 
-### Pong
+### Pong (`Game/Pong`)
 
-Классическая 2D-игра, с которой проект когда-то начинался, но теперь она стала одной из игр внутри движка.
+Classic 2D Pong mode with menu flow and match logic:
 
-Что есть:
-
-- главное меню и экран настроек;
-- режим `Player vs Player`;
-- режим `Player vs Bot`;
-- выбор сложности;
-- матчевые правила;
-- HUD, звук, музыка и экран завершения матча.
-
-Основные файлы:
-
-- `Game/Pong/PongGame.*`
-- `Game/Pong/PongScene.*`
-- `Game/Pong/UI/*`
-- `Game/Pong/Systems/*`
-- `Game/Pong/Entities/*`
-
+- Why it exists:
+  - Baseline "arcade game" module using shared app/runtime APIs
+  - Fast validation target for input, UI, audio, and 2D rendering changes
+- What it provides:
+  - Player vs Player / Player vs Bot
+  - Difficulty and match-rule flow
+  - Main menu, in-game HUD, and game-over screens
+  - Sound effects + looping music
 #### Screenshots
 The main menu
 ![img.png](Images/img4.png)
@@ -142,86 +133,67 @@ The main menu
 Gameplay
 ![img.png](Images/img3.png)
 
+### SolarSystem (`Game/SolarSystem`)
 
-### SolarSystem
+Interactive 3D solar system sandbox:
 
-Небольшое 3D-демо солнечной системы с орбитами, камерой и интерактивной панелью параметров.
-
-Что есть:
-
-- `FPS`-камера и `Orbit`-камера;
-- переключение режима камеры;
-- отрисовка орбит и небесных тел;
-- UI-панель с настройкой скорости вращения, скорости орбит, радиусов и эксцентриситета;
-- фоновый космический рендер и аудио для движения.
-
-Управление в текущей версии:
-
-- `F1` - FPS camera
-- `F2` - Orbit camera
-- `P` - переключение режима проекции
-- `Tab` - показать/скрыть панель настроек
-- `WASD`, стрелки, `RMB` - перемещение и обзор
-
+- Why it exists:
+  - 3D simulation-style testbed for cameras, UI controls, and scene updates
+  - Demonstrates non-combat/non-arcade interaction patterns
+- What it provides:
+  - Orbit and FPS camera modes
+  - Orbital body rendering and orbit visualization
+  - Live tuning panel for rotation/orbit parameters
+  - Movement-driven engine audio feedback
 #### Screenshots
 ![img.png](Images/img5.png)
+### Katamari (`Game/Katamari`)
 
-### Katamari
+3D rolling-ball mini-game with ECS systems and rendering experiments:
 
-3D-мини-игра с катящимся шаром, подбором объектов и камерой сопровождения.
+- Why it exists:
+  - Main advanced 3D gameplay sandbox in this repository
+  - Stress-tests ECS flow, collisions, rendering modes, and debug passes
+- What it provides:
+  - Roll, absorb, and grow gameplay loop
+  - Follow camera with smoothing
+  - Deferred rendering workflow integration
+  - Particle spawn/settings UI
+  - Collision debug draw, shadow cascade debug, GBuffer debug
 
-Что есть:
+Screenshots:
 
-- сцена на базе `Core/Gameplay/Scene`;
-- набор систем для движения, столкновений, поглощения объектов и визуального роста шара;
-- follow-camera;
-- HUD со статистикой;
-- перезапуск уровня и debug-режим для коллизий.
+![Katamari gameplay](Images/img7.png)
+![Katamari particles UI](Images/img8.png)
+![Katamari shadow cascade debug](Images/img11.png)
+![Katamari GBuffer debug](Images/img9.png)
 
-Управление в текущей версии:
+### LightingTest (`Game/LightingTest`)
 
-- `WASD` - движение
-- `Space` - прыжок
-- `R` - рестарт уровня
-- `F3` - debug draw коллизий
-- `RMB` - управление камерой
-![img.png](Images/img7.png)
-Спавн партиклов идет на кнопку Render: Deffered 
-![img.png](Images/img8.png)
-При нажатии F4 идет дебаг shadow cascade
-![img.png](Images/img11.png)
-При нажатии F5 идет дебаг GBuffer
-![img.png](Images/img9.png)
+Compact technical scene used for model/material/lighting/camera validation.
 
-### LightingTest
-
-Компактное техническое 3D-демо для проверки моделей, материалов, освещения и камеры.
-
-Подходит как полигон для:
-
-- проверки базового 3D-рендера;
-- отладки света и материалов;
-- быстрой валидации камеры и сцены без сложной игровой логики.
-
-Управление:
-
-- `WASD` - движение камеры
-- стрелки - поворот
-- `RMB` - обзор мышью
+- Why it exists:
+  - Lightweight visual lab for rendering checks without full gameplay complexity
+- What it provides:
+  - Focused environment for lighting/material/camera sanity checks
 
 ---
 
-## Launch
+## Controls
 
-Сейчас проект собирается как одно приложение, а конкретная игра выбирается в [main.cpp](/Users/syper_olao/Desktop/program/programs/Python/PingPong/main.cpp).
+### Global
 
-Чтобы переключить мини-игру, поменяй значение у `demo`:
+- `Esc` - exit application (supported in active game logic)
+
+### Demo Selection
+
+Switch the active game in `main.cpp`:
 
 ```cpp
 constexpr auto demo = DemoType::Katamari;
 ```
 
-Доступные варианты:
+Available options:
 
 ```cpp
 DemoType::Pong
@@ -230,80 +202,162 @@ DemoType::Katamari
 DemoType::LightingTest
 ```
 
-После этого можно собирать и запускать проект через `CLion`/`CMake`.
+### SolarSystem
+
+- `F1` - FPS camera
+- `F2` - Orbit camera
+- `P` - projection mode toggle
+- `Tab` - settings panel
+- `W`, `A`, `S`, `D` - movement / zoom (depending on camera mode)
+- Arrow keys - look/orbit adjustments
+- `RMB` - mouse look/orbit rotation
+
+### Katamari
+
+- `W`, `A`, `S`, `D` - movement
+- `Space` - jump
+- `R` - level reset
+- `F3` - collision debug draw
+- `F4` - shadow cascade debug
+- `F5` - GBuffer debug visualization
+- `RMB` - camera control
 
 ---
 
-## Installation third-party libraries
-Install vcpkg in your pc
-```bash
+## Build Requirements
+
+Current setup is Windows-focused:
+
+- Windows 10/11
+- CMake 3.21+
+- C++20 compiler (Visual Studio/MSVC recommended)
+- [vcpkg](https://github.com/microsoft/vcpkg)
+
+Dependencies (from `CMakeLists.txt`):
+
+- `directxtk`
+- `assimp`
+
+System libraries:
+
+- `d3d11`, `dxgi`, `d3dcompiler`, `dxguid`, `user32`, `gdi32`
+
+---
+
+## Build and Run
+
+This project is expected to be built in **Debug** during active development.
+
+### A) vcpkg Setup (first time)
+
+1. Clone and bootstrap `vcpkg`:
+
+```powershell
 git clone https://github.com/microsoft/vcpkg.git C:\dev\vcpkg
 cd C:\dev\vcpkg
 .\bootstrap-vcpkg.bat
 ```
-Next you should open your project folder in administration console
-```bash
-cd <PATH_TO_THE_PROJECT>\PingPong
-set "VCPKG_ROOT=C:\dev\vcpkg"
-set "PATH=%VCPKG_ROOT%;%PATH%"
 
+2. Optional but recommended environment variables for the current terminal session:
+
+```powershell
+$env:VCPKG_ROOT="C:\dev\vcpkg"
+$env:Path="$env:VCPKG_ROOT;$env:Path"
 vcpkg version
 ```
-for windows
-```bash
-set "VCPKG_ROOT=C:\dev\vcpkg"
-set "PATH=%VCPKG_ROOT%;%PATH%"
+
+3. Install required ports:
+
+```powershell
+vcpkg install directxtk:x64-windows assimp:x64-windows
 ```
 
-```bash
-vcpkg new --application
-vcpkg add port directxmath
-vcpkg add port directxtk
+### B) Configure the project with CMake + vcpkg toolchain
+
+From repository root:
+
+```powershell
+cmake -S . -B cmake-build-debug `
+  -G "Visual Studio 17 2022" `
+  -A x64 `
+  -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake `
+  -DVCPKG_TARGET_TRIPLET=x64-windows
 ```
 
-Then add to Clion this settings
-``-DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows``
+Notes:
 
-![img.png](Images/img.png)
+- `-DCMAKE_TOOLCHAIN_FILE=.../vcpkg.cmake` is required for `find_package(directxtk)` and `find_package(assimp)` to resolve correctly.
+- `x64-windows` must match installed triplets.
 
-and switch to Visual Studio in toolchain
+### C) Build (Debug)
 
-![img.png](Images/img2.png)
+```powershell
+cmake --build cmake-build-debug --config Debug
+```
+
+Expected binary:
+
+- `cmake-build-debug/PingPong.exe`
+
+### D) Run
+
+```powershell
+.\cmake-build-debug\PingPong.exe
+```
+
+### E) Select which game runs
+
+`main.cpp` selects the active module:
+
+```cpp
+constexpr auto demo = DemoType::Katamari;
+```
+
+Available options:
+
+```cpp
+DemoType::Pong
+DemoType::SolarSystem
+DemoType::Katamari
+DemoType::LightingTest
+```
+
+### F) What CMake copies for runtime
+
+`CMakeLists.txt` copies runtime data into the build folder:
+
+- `Core/Shaders`
+- `Game/Pong/Assets`
+- `Game/SolarSystem/Assets`
+- `Game/Katamari/Assets` (if the folder exists)
+
+If assets/shaders seem outdated, rebuild the target to trigger copy/sync post-build steps.
 
 ---
 
-## Структура проекта
+## Project Structure
 
 ```text
-PingPong/
-├── Core/          # Общее ядро движка
-│   ├── App/       # Приложение, цикл, AppContext, IGame
-│   ├── Graphics/  # DX11, 2D/3D рендер, пайплайн, камеры
-│   ├── Gameplay/  # Scene, компоненты, системы, коллизии
-│   ├── Input/     # Клавиатура, мышь, raw input
-│   ├── Audio/     # Звук и музыкальные лупы
-│   ├── Assets/    # Кэш и резолв ассетов
-│   └── UI/        # Шрифты, кнопки, switcher, widgets
-├── Game/
-│   ├── Pong/         # 2D Pong
-│   ├── SolarSystem/  # 3D solar system demo
-│   ├── Katamari/     # 3D rolling-ball mini game
-│   └── LightingTest/ # Техническое демо освещения
-├── Images/        # Скриншоты для README
-├── main.cpp       # Выбор активной игры
-└── CMakeLists.txt # Сборка проекта
+Mini-Engine-With-Games/
+├── Core/                                  # Shared engine runtime
+│   ├── App/                               # App lifecycle, IGame contract, AppContext
+│   ├── Platform/                          # Native window integration
+│   ├── Input/                             # Keyboard/mouse/raw input
+│   ├── Graphics/                          # Device, renderers, cameras, shaders, frame pipeline
+│   │   └── Rendering/Pipeline/Passes/     # Frame pass implementations
+│   ├── Gameplay/                          # Scene ECS-style data + systems
+│   ├── Physics/                           # Collision/math primitives and queries
+│   ├── Math/                              # Transform and shared math helpers
+│   ├── Assets/                            # Asset resolving/loading/cache
+│   ├── Audio/                             # Audio runtime
+│   ├── UI/                                # UI framework and widgets
+│   └── Shaders/                           # Runtime shader source files
+├── Game/                                  # Game-specific modules
+│   ├── Pong/                              # 2D arcade gameplay module
+│   ├── SolarSystem/                       # 3D simulation-style demo module
+│   ├── Katamari/                          # 3D gameplay + debug/render stress module
+│   └── LightingTest/                      # Rendering validation scene
+├── Images/                                # README screenshots
+├── main.cpp                               # Active game selection
+└── CMakeLists.txt                         # Build configuration and runtime copy rules
 ```
-
-
----
-
-## Итог
-
-Если совсем кратко, проект устроен так:
-
-- `Core` даёт общий фундамент;
-- каждая игра живёт в своём модуле внутри `Game`;
-- все режимы используют единый жизненный цикл через `IGame`;
-- новые мини-игры можно добавлять в существующий каркас без полной переделки проекта.
-
-Именно поэтому репозиторий уже логичнее воспринимать не как "ещё один Pong", а как собственный компактный игровой framework с набором игровых прототипов.
