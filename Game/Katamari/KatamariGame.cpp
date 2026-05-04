@@ -233,7 +233,6 @@ void KatamariGame::ConfigureParticleEmitter(AppContext &context)
 
     CurrentParticleEmitterDesc = CreateKatamariParticleEmitterDesc(GameConfig);
     CurrentParticleEmitterDesc.Enabled = false;
-    CurrentParticleEmitterDesc.DepthCollisionEnabled = false;
     context.Graphics.Render->GetGpuParticleSystem().SetEmitterDesc(CurrentParticleEmitterDesc);
 }
 
@@ -252,7 +251,6 @@ void KatamariGame::InitializeParticleUi(AppContext &context)
     {
         CurrentParticleEmitterDesc = CreateKatamariParticleEmitterDesc(GameConfig);
         CurrentParticleEmitterDesc.Enabled = false;
-        CurrentParticleEmitterDesc.DepthCollisionEnabled = false;
     }
 
     ParticleSettingsPanel.Initialize(CurrentParticleEmitterDesc, GameConfig.PlayfieldHalfExtent);
@@ -341,7 +339,6 @@ void KatamariGame::UpdateParticleUi(AppContext &context)
             GpuParticleSystem &particleSystem = context.Graphics.Render->GetGpuParticleSystem();
             GpuParticleEmitterDesc desc = particleSystem.GetEmitterDesc();
             desc.Enabled = !desc.Enabled;
-            desc.DepthCollisionEnabled = false;
             ParticleSettingsPanel.ApplyToEmitterDesc(desc, GameConfig.PlayfieldHalfExtent);
             particleSystem.SetEmitterDesc(desc);
             CurrentParticleEmitterDesc = desc;
