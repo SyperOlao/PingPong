@@ -218,6 +218,7 @@ void KatamariGame::ConfigureParticleEmitter(AppContext &context)
 
     CurrentParticleEmitterDesc = CreateKatamariParticleEmitterDesc(GameConfig);
     CurrentParticleEmitterDesc.Enabled = false;
+    CurrentParticleEmitterDesc.DepthCollisionEnabled = false;
     context.Graphics.Render->GetGpuParticleSystem().SetEmitterDesc(CurrentParticleEmitterDesc);
 }
 
@@ -236,6 +237,7 @@ void KatamariGame::InitializeParticleUi(AppContext &context)
     {
         CurrentParticleEmitterDesc = CreateKatamariParticleEmitterDesc(GameConfig);
         CurrentParticleEmitterDesc.Enabled = false;
+        CurrentParticleEmitterDesc.DepthCollisionEnabled = false;
     }
 
     ParticleSettingsPanel.Initialize(CurrentParticleEmitterDesc, GameConfig.PlayfieldHalfExtent);
@@ -255,29 +257,46 @@ void KatamariGame::UpdateParticleUi(AppContext &context)
         return;
     }
 
-    constexpr float buttonWidth = 250.0f;
+    constexpr float buttonWidth = 420.0f;
     constexpr float buttonHeight = 48.0f;
+    constexpr float buttonGap = 20.0f;
     constexpr float panelWidth = 390.0f;
     const float windowWidth = static_cast<float>(window->GetWidth());
     const float windowHeight = static_cast<float>(window->GetHeight());
-    const bool fitsBesideRenderButton = windowWidth >= (buttonWidth * 2.0f + 60.0f);
-    const float buttonX = fitsBesideRenderButton ? 290.0f : 20.0f;
-    const float buttonY = windowHeight - (fitsBesideRenderButton ? 68.0f : 124.0f);
+    constexpr float leftMargin = 20.0f;
+    constexpr float rightMargin = 20.0f;
+    constexpr float renderButtonWidth = 360.0f;
+    const float renderButtonY = windowHeight - 68.0f;
+    const float buttonRowWidth = buttonWidth * 2.0f + buttonGap;
+    const float minimumWidthForSingleRow =
+        leftMargin + renderButtonWidth + buttonGap + buttonRowWidth + rightMargin;
+    const bool placeButtonsInRow = windowWidth >= minimumWidthForSingleRow;
+    const float buttonY = placeButtonsInRow ? renderButtonY : renderButtonY - (buttonHeight + buttonGap);
+    const float spawnButtonXUnclamped = placeButtonsInRow
+        ? windowWidth - rightMargin - buttonRowWidth
+        : windowWidth - rightMargin - buttonWidth;
+    const float spawnButtonX = (std::max)(leftMargin, spawnButtonXUnclamped);
+    const float settingsButtonX = placeButtonsInRow ? spawnButtonX + buttonWidth + buttonGap : spawnButtonX;
+    const float settingsButtonY = placeButtonsInRow ? buttonY : renderButtonY;
     const float panelX = (std::min)(
-        buttonX,
+        settingsButtonX,
         (std::max)(20.0f, windowWidth - panelWidth - 20.0f)
     );
-    ParticleSpawnButton.Bounds = RectF{buttonX, buttonY, buttonWidth, buttonHeight};
+    ParticleSpawnButton.Bounds = RectF{spawnButtonX, buttonY, buttonWidth, buttonHeight};
+    ParticleSettingsButton.Bounds = RectF{settingsButtonX, settingsButtonY, buttonWidth, buttonHeight};
 
     constexpr float panelHeightEstimate = 600.0f;
-    const float panelY = (std::max)(16.0f, buttonY - panelHeightEstimate - 16.0f);
+    const float panelY = (std::max)(16.0f, settingsButtonY - panelHeightEstimate - 16.0f);
     ParticleSettingsPanel.SetBounds(RectF{panelX, panelY, panelWidth, 580.0f});
 
     if (context.Graphics.Render != nullptr)
     {
         CurrentParticleEmitterDesc = context.Graphics.Render->GetGpuParticleSystem().GetEmitterDesc();
     }
-    ParticleSpawnButton.Label = CurrentParticleEmitterDesc.Enabled ? "PARTICLES: ON" : "SPAWN PARTICLES";
+    ParticleSpawnButton.Label = CurrentParticleEmitterDesc.Enabled
+        ? "SPAWN PARTICLES: ON"
+        : "SPAWN PARTICLES: OFF";
+    ParticleSettingsButton.Label = "SETTINGS";
 
     const POINT cursorPoint = GetMouseClientPosition(window->GetHandle());
     const bool isLeftMouseDown = RawInputHandler::Instance().IsLeftMouseDown();
@@ -294,6 +313,11 @@ void KatamariGame::UpdateParticleUi(AppContext &context)
         mouse.Y,
         mouse.LeftPressed
     );
+    const bool clickedSettingsButton = ParticleSettingsButton.HandleMouseClick(
+        mouse.X,
+        mouse.Y,
+        mouse.LeftPressed
+    );
 
     if (clickedParticleButton)
     {
@@ -301,14 +325,16 @@ void KatamariGame::UpdateParticleUi(AppContext &context)
         {
             GpuParticleSystem &particleSystem = context.Graphics.Render->GetGpuParticleSystem();
             GpuParticleEmitterDesc desc = particleSystem.GetEmitterDesc();
-            desc.Enabled = true;
+            desc.Enabled = !desc.Enabled;
+            desc.DepthCollisionEnabled = false;
             ParticleSettingsPanel.ApplyToEmitterDesc(desc, GameConfig.PlayfieldHalfExtent);
             particleSystem.SetEmitterDesc(desc);
             CurrentParticleEmitterDesc = desc;
         }
-
+    }
+    else if (clickedSettingsButton)
+    {
         ParticleSettingsPanel.Toggle();
-        ParticleSpawnButton.Label = "PARTICLES: ON";
     }
     else if (ParticleSettingsPanel.Update(mouse) == KatamariParticleUiAction::SliderMoved)
     {
@@ -326,7 +352,11 @@ void KatamariGame::RenderParticleUi(AppContext &context)
     }
 
     POINT cursorPoint = GetMouseClientPosition(context.Platform.MainWindow->GetHandle());
-    const bool isHovered = ParticleSpawnButton.IsHovered(
+    const bool isSpawnHovered = ParticleSpawnButton.IsHovered(
+        static_cast<float>(cursorPoint.x),
+        static_cast<float>(cursorPoint.y)
+    );
+    const bool isSettingsHovered = ParticleSettingsButton.IsHovered(
         static_cast<float>(cursorPoint.x),
         static_cast<float>(cursorPoint.y)
     );
@@ -339,7 +369,13 @@ void KatamariGame::RenderParticleUi(AppContext &context)
         context.GetShapeRenderer2D(),
         *context.Ui.Font,
         buttonStyle,
-        isHovered || ParticleSettingsPanel.IsOpen()
+        isSpawnHovered
+    );
+    ParticleSettingsButton.Draw(
+        context.GetShapeRenderer2D(),
+        *context.Ui.Font,
+        buttonStyle,
+        isSettingsHovered || ParticleSettingsPanel.IsOpen()
     );
 }
 

@@ -2,10 +2,72 @@
 
 #include "Core/App/AppContext.h"
 #include "Core/Graphics/Color.h"
+#include "Core/Graphics/Rendering/ShapeRenderer2D.h"
 #include "Core/UI/BitmapFont.h"
+#include "Core/Platform/Window.h"
 #include "Game/Katamari/Data/KatamariWorldContext.h"
 
+#include <array>
 #include <format>
+
+static void DrawGBufferDebugLabels(AppContext &Context)
+{
+    if (Context.Ui.Font == nullptr || Context.Platform.MainWindow == nullptr)
+    {
+        return;
+    }
+
+    const int WindowWidth = Context.Platform.MainWindow->GetWidth();
+    const int WindowHeight = Context.Platform.MainWindow->GetHeight();
+    if (WindowWidth <= 0 || WindowHeight <= 0)
+    {
+        return;
+    }
+
+    const std::array<const char *, 6> LabelTexts =
+    {
+        "ALBEDO / AMBIENT",
+        "NORMAL / RECEIVE LIGHTING",
+        "SPECULAR / POWER",
+        "EMISSIVE",
+        "SCENE DEPTH",
+        "UNUSED"
+    };
+
+    constexpr float LabelScale = 0.42f;
+    constexpr float LabelPaddingX = 8.0f;
+    constexpr float LabelPaddingY = 5.0f;
+    const float TileWidth = static_cast<float>(WindowWidth) / 3.0f;
+    const float TileHeight = static_cast<float>(WindowHeight) / 2.0f;
+    const Color LabelTextColor(0.96f, 0.98f, 1.0f, 1.0f);
+    const Color LabelBackgroundColor(0.02f, 0.025f, 0.035f, 0.82f);
+
+    for (std::size_t LabelIndex = 0u; LabelIndex < LabelTexts.size(); ++LabelIndex)
+    {
+        const std::size_t Column = LabelIndex % 3u;
+        const std::size_t Row = LabelIndex / 3u;
+        const float LabelX = static_cast<float>(Column) * TileWidth + 14.0f;
+        const float LabelY = Row == 0u ? TileHeight - 32.0f : TileHeight + 14.0f;
+        const float LabelWidth = BitmapFont::MeasureTextWidth(LabelTexts[LabelIndex], LabelScale) + LabelPaddingX * 2.0f;
+        const float LabelHeight = BitmapFont::MeasureTextHeight(LabelScale) + LabelPaddingY * 2.0f;
+
+        Context.GetShapeRenderer2D().DrawFilledRect(
+            LabelX - LabelPaddingX,
+            LabelY - LabelPaddingY,
+            LabelWidth,
+            LabelHeight,
+            LabelBackgroundColor
+        );
+        BitmapFont::DrawString(
+            Context.GetShapeRenderer2D(),
+            LabelX,
+            LabelY,
+            LabelTexts[LabelIndex],
+            LabelTextColor,
+            LabelScale
+        );
+    }
+}
 
 void KatamariHud::Draw(
     AppContext &context,
@@ -19,6 +81,11 @@ void KatamariHud::Draw(
     if (context.Ui.Font == nullptr)
     {
         return;
+    }
+
+    if (gBufferDebugVisualizationEnabled)
+    {
+        DrawGBufferDebugLabels(context);
     }
 
     constexpr float hudScale = 0.52f;

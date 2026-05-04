@@ -157,7 +157,7 @@ void Application::UpdateGlobalRenderModeButton() {
     m_globalRenderModeButton.Bounds = RectF{
         20.0f,
         static_cast<float>(windowHeight) - 68.0f,
-        250.0f,
+        360.0f,
         48.0f
     };
 

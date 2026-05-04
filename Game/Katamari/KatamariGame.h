@@ -72,6 +72,7 @@ private:
     std::shared_ptr<ModelAsset> StaticCubeModel{};
     std::shared_ptr<ModelAsset> StaticTriangularPrismModel{};
     Button ParticleSpawnButton{};
+    Button ParticleSettingsButton{};
     KatamariParticleSettingsPanel ParticleSettingsPanel{};
     GpuParticleEmitterDesc CurrentParticleEmitterDesc{};
     SceneLightingDescriptor3D KatamariLighting{};
