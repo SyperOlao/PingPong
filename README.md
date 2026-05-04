@@ -9,9 +9,9 @@ Russian version: **[README_RU.md](README_RU.md)**
 ## Table of Contents
 
 - [Overview](#overview)
+- [Games and Demos](#games-and-demos)
 - [Current Features](#current-features)
 - [Project Architecture](#project-architecture)
-- [Games and Demos](#games-and-demos)
 - [Controls](#controls)
 - [Build Requirements](#build-requirements)
 - [Build and Run](#build-and-run)
@@ -30,88 +30,6 @@ The repository started as a Pong project (`PingPong`) and evolved into a compact
 The executable target is still named `PingPong`, but it now hosts multiple game modes.
 
 ---
-
-## Current Features
-
-The engine is intentionally compact, but already covers a full playable game loop stack:
-
-- **Application Runtime**
-  - Unified game lifecycle through `IGame` (`Initialize`, `Update`, `Render`, `Shutdown`)
-  - Shared runtime context (`AppContext`) used by all game modules
-  - One executable, multiple game modules selected at compile-time in `main.cpp`
-
-- **Rendering**
-  - 2D + 3D rendering on DirectX 11
-  - Forward and deferred render modes
-  - Multi-pass frame pipeline (`Core/Graphics/Rendering/Pipeline`)
-  - Directional + point light support, shadow mapping, and debug visualizations
-  - GBuffer debug mode and shadow cascade debug mode
-  - GPU particles (integrated into Katamari flow)
-
-- **Gameplay Foundation**
-  - Lightweight ECS-style scene flow (`Scene`, entities, components, systems)
-  - Built-in transform, velocity, collision, and render update systems
-  - 2D and 3D collision helpers
-  - Reusable camera logic (FPS, orbit, follow camera styles)
-
-- **Tooling and Content Runtime**
-  - Asset loading for models and textures (Assimp path)
-  - Runtime shader files copied into build output automatically
-  - Built-in UI widgets and debug overlays
-  - Audio integration via DirectXTK Audio
-
----
-
-## Project Architecture
-
-### `Core/App`
-
-Application bootstrap and frame loop:
-
-- `Application` owns startup/shutdown, timing, update loop, and render loop
-- `IGame` defines the contract every game module must implement
-- `AppContext` exposes platform/window/input/graphics/audio/assets/UI services
-- `ApplicationDefaults.h` keeps default window sizing (`1280x720`)
-
-Responsibility: this layer is the "host shell" that keeps game modules decoupled from low-level initialization.
-
-### `Core/Graphics`
-
-Rendering stack and rendering pipeline:
-
-- `GraphicsDevice` initializes and owns D3D11 resources and frame targets
-- `ShapeRenderer2D` handles 2D primitives and UI rendering helpers
-- `PrimitiveRenderer3D` handles debug/simple 3D primitives
-- `ModelRenderer` renders imported model assets with material/light data
-- `FrameRenderer` orchestrates frame execution and render mode behavior
-- Render passes live in `Core/Graphics/Rendering/Pipeline/Passes`
-  - Deferred path includes geometry, lighting, and composite passes
-  - Additional passes exist for shadows, particles, overlays, and UI
-
-Responsibility: this is the rendering subsystem plus frame orchestration logic.
-
-### `Core/Gameplay`
-
-Gameplay foundation for 3D scenes:
-
-- `Scene` implements entity/component/system orchestration
-- Components include transform/model/material/velocity/collider/tag/attachment data
-- Systems include transform propagation, velocity integration, collision, and rendering
-- Additional game-specific systems can be plugged in per module
-
-Responsibility: reusable gameplay runtime for features that should not be rewritten per game.
-
-### Other Core Modules
-
-- `Core/Input` - keyboard/mouse state and raw input deltas
-- `Core/Audio` - sound loading, one-shots, looped sounds, runtime control
-- `Core/Assets` - path resolving and cached asset loading
-- `Core/UI` - bitmap font drawing and custom UI widgets
-- `Core/Physics` - shared collision/math structures and queries
-- `Core/Math` - transforms and helper math utilities
-
----
-
 ## Games and Demos
 
 ### Pong (`Game/Pong`)
@@ -223,6 +141,87 @@ DemoType::LightingTest
 - `F4` - shadow cascade debug
 - `F5` - GBuffer debug visualization
 - `RMB` - camera control
+
+---
+
+## Current Features
+
+The engine is intentionally compact, but already covers a full playable game loop stack:
+
+- **Application Runtime**
+  - Unified game lifecycle through `IGame` (`Initialize`, `Update`, `Render`, `Shutdown`)
+  - Shared runtime context (`AppContext`) used by all game modules
+  - One executable, multiple game modules selected at compile-time in `main.cpp`
+
+- **Rendering**
+  - 2D + 3D rendering on DirectX 11
+  - Forward and deferred render modes
+  - Multi-pass frame pipeline (`Core/Graphics/Rendering/Pipeline`)
+  - Directional + point light support, shadow mapping, and debug visualizations
+  - GBuffer debug mode and shadow cascade debug mode
+  - GPU particles (integrated into Katamari flow)
+
+- **Gameplay Foundation**
+  - Lightweight ECS-style scene flow (`Scene`, entities, components, systems)
+  - Built-in transform, velocity, collision, and render update systems
+  - 2D and 3D collision helpers
+  - Reusable camera logic (FPS, orbit, follow camera styles)
+
+- **Tooling and Content Runtime**
+  - Asset loading for models and textures (Assimp path)
+  - Runtime shader files copied into build output automatically
+  - Built-in UI widgets and debug overlays
+  - Audio integration via DirectXTK Audio
+
+---
+
+## Project Architecture
+
+### `Core/App`
+
+Application bootstrap and frame loop:
+
+- `Application` owns startup/shutdown, timing, update loop, and render loop
+- `IGame` defines the contract every game module must implement
+- `AppContext` exposes platform/window/input/graphics/audio/assets/UI services
+- `ApplicationDefaults.h` keeps default window sizing (`1280x720`)
+
+Responsibility: this layer is the "host shell" that keeps game modules decoupled from low-level initialization.
+
+### `Core/Graphics`
+
+Rendering stack and rendering pipeline:
+
+- `GraphicsDevice` initializes and owns D3D11 resources and frame targets
+- `ShapeRenderer2D` handles 2D primitives and UI rendering helpers
+- `PrimitiveRenderer3D` handles debug/simple 3D primitives
+- `ModelRenderer` renders imported model assets with material/light data
+- `FrameRenderer` orchestrates frame execution and render mode behavior
+- Render passes live in `Core/Graphics/Rendering/Pipeline/Passes`
+  - Deferred path includes geometry, lighting, and composite passes
+  - Additional passes exist for shadows, particles, overlays, and UI
+
+Responsibility: this is the rendering subsystem plus frame orchestration logic.
+
+### `Core/Gameplay`
+
+Gameplay foundation for 3D scenes:
+
+- `Scene` implements entity/component/system orchestration
+- Components include transform/model/material/velocity/collider/tag/attachment data
+- Systems include transform propagation, velocity integration, collision, and rendering
+- Additional game-specific systems can be plugged in per module
+
+Responsibility: reusable gameplay runtime for features that should not be rewritten per game.
+
+### Other Core Modules
+
+- `Core/Input` - keyboard/mouse state and raw input deltas
+- `Core/Audio` - sound loading, one-shots, looped sounds, runtime control
+- `Core/Assets` - path resolving and cached asset loading
+- `Core/UI` - bitmap font drawing and custom UI widgets
+- `Core/Physics` - shared collision/math structures and queries
+- `Core/Math` - transforms and helper math utilities
 
 ---
 
