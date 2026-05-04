@@ -11,7 +11,8 @@ void KatamariHud::Draw(
     AppContext &context,
     KatamariWorldContext const &world,
     int const displayFps,
-    float const deltaTimeSeconds
+    float const deltaTimeSeconds,
+    const bool gBufferDebugVisualizationEnabled
 )
 {
     if (context.Ui.Font == nullptr)
@@ -73,6 +74,16 @@ void KatamariHud::Draw(
         rowY,
         world.DebugDrawCollision ? "Collision debug: ON (F3)" : "Collision debug: OFF (F3)",
         world.DebugDrawCollision ? Color(0.45f, 1.0f, 0.55f, 1.0f) : mutedColor,
+        helpScale
+    );
+    rowY += 16.0f;
+
+    BitmapFont::DrawString(
+        context.GetShapeRenderer2D(),
+        columnX,
+        rowY,
+        gBufferDebugVisualizationEnabled ? "GBuffer textures: ON (F5)" : "GBuffer textures: OFF (F5)",
+        gBufferDebugVisualizationEnabled ? Color(0.45f, 1.0f, 0.55f, 1.0f) : mutedColor,
         helpScale
     );
     rowY += 16.0f;

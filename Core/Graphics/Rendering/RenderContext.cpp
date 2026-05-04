@@ -12,6 +12,7 @@
 #include "Core/Graphics/Rendering/Pipeline/FramePassRenderContext.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/DeferredCompositeRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/DeferredGeometryRenderPass.h"
+#include "Core/Graphics/Rendering/Pipeline/Passes/GBufferDebugRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/DeferredLightingRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/DebugOverlayRenderPass.h"
 #include "Core/Graphics/Rendering/Pipeline/Passes/GameRenderPass.h"
@@ -185,9 +186,9 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
     const float inverseAtlasWidth =
         1.0f / static_cast<float>(m_directionalShadowResources.GetShadowAtlasSizePixels());
 
-    constexpr float kConstantDepthBias = 0.0f;
-    constexpr float kSlopeScaledDepthBias = 0.0f;
-    constexpr float kNormalOffsetWorldUnits = 0.0f;
+    constexpr float kConstantDepthBias = 0.0008f;
+    constexpr float kSlopeScaledDepthBias = 0.0015f;
+    constexpr float kNormalOffsetWorldUnits = 0.03f;
     constexpr float kPcfRadiusTexels = 2.0f;
 
     ShadowSamplingGpuConstants samplingCpu{};
@@ -481,6 +482,7 @@ void RenderContext::BuildDefaultDeferredRenderPipeline()
     m_frameRenderPipeline.AddPass(std::make_unique<DeferredCompositeRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<ParticlesRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DebugOverlayRenderPass>());
+    m_frameRenderPipeline.AddPass(std::make_unique<GBufferDebugRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<UserInterfaceRenderPass>());
     m_frameRenderPipeline.Initialize(*m_graphics, m_frameRenderResources);
 }
@@ -530,6 +532,16 @@ void RenderContext::SetGameRenderCallbackForUserInterfacePassEnabled(const bool 
 bool RenderContext::ShouldExecuteGameRenderCallbackDuringUserInterfacePass() const noexcept
 {
     return m_executeGameRenderCallbackDuringUserInterfacePass;
+}
+
+void RenderContext::SetGBufferDebugVisualizationEnabled(const bool enabled) noexcept
+{
+    m_gBufferDebugVisualizationEnabled = enabled;
+}
+
+bool RenderContext::IsGBufferDebugVisualizationEnabled() const noexcept
+{
+    return m_gBufferDebugVisualizationEnabled;
 }
 
 void RenderContext::SetFrameGameplaySceneAndCamera(

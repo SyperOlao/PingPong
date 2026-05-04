@@ -226,7 +226,12 @@ void KatamariGame::UpdateDebugInput(AppContext &context)
 
     if (keyboard.WasVirtualKeyPressed(VK_F5))
     {
-        SceneInstance.SetDirectionalShadowMappingEnabled(!SceneInstance.GetDirectionalShadowMappingEnabled());
+        if (context.Graphics.Render != nullptr)
+        {
+            context.Graphics.Render->SetGBufferDebugVisualizationEnabled(
+                !context.Graphics.Render->IsGBufferDebugVisualizationEnabled()
+            );
+        }
     }
 }
 
@@ -327,7 +332,8 @@ void KatamariGame::Render(AppContext &context)
             context,
             WorldContext,
             DisplayFps,
-            LastDeltaTime
+            LastDeltaTime,
+            context.Graphics.Render != nullptr && context.Graphics.Render->IsGBufferDebugVisualizationEnabled()
         );
         return;
     }

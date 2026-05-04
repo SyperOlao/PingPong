@@ -5,6 +5,7 @@
 
 struct DirectionalLight3D final
 {
+    // Direction convention: light ray direction (from light to scene).
     DirectX::SimpleMath::Vector3 Direction{};
     DirectX::SimpleMath::Color LightColor{1.0f, 1.0f, 1.0f, 1.0f};
     float Intensity{1.0f};

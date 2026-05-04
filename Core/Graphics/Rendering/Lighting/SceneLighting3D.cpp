@@ -71,11 +71,10 @@ void FillLightsGpuConstants(
 
         Vector3 propagation = directionalLight.Direction;
         propagation.Normalize();
-        const Vector3 towardLight = propagation * -1.0f;
 
         LightGpu &lightGpu = lightsGpuConstants.Lights[writeIndex];
         lightGpu.Position = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-        StoreVector3(towardLight, lightGpu.Direction);
+        StoreVector3(propagation, lightGpu.Direction);
         StoreColorRgbIntensity(directionalLight.LightColor, directionalLight.Intensity, lightGpu.Color);
 
         lightGpu.Parameters.x = static_cast<float>(LightKindGpu::Directional);

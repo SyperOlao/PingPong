@@ -133,7 +133,7 @@ void EvaluateLight(
 
     if (abs(kind - kDirectionalKind) < 0.01f)
     {
-        lightVector = normalize(light.Direction.xyz);
+        lightVector = normalize(-light.Direction.xyz);
     }
     else if (abs(kind - kPointKind) < 0.01f)
     {
@@ -184,7 +184,7 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal, flo
         return 1.0f;
     }
 
-    const float3 towardLight = normalize(Lights[ShadowedDirectionalLightGpuIndex].Direction.xyz);
+    const float3 towardLight = normalize(-Lights[ShadowedDirectionalLightGpuIndex].Direction.xyz);
     const float3 biasedWorldPosition = worldPosition + worldNormal * DepthBiasAndPcfKernel.z;
     const uint cascadeIndexPrimary = SelectShadowCascadeIndex(viewDepthPositive);
 
@@ -315,15 +315,8 @@ float4 PSMain(VSOutput input) : SV_TARGET
         specularAccumulation += specularContribution * shadowFactor;
     }
 
-    const float shadowVisibilityForDirectLighting =
-        ShadowEnabled != 0u ? lerp(0.32f, 1.0f, directionalShadow) : 1.0f;
-    const float shadowVisibilityForAmbient =
-        ShadowEnabled != 0u ? lerp(0.75f, 1.0f, directionalShadow) : 1.0f;
-    const float3 ambientTerm = albedo * ambientFactor * shadowVisibilityForAmbient;
-    const float3 litColor =
-        ambientTerm
-        + emissive
-        + diffuseAccumulation * albedo * shadowVisibilityForDirectLighting
-        + specularAccumulation * shadowVisibilityForDirectLighting;
+    const float3 ambientTerm = albedo * ambientFactor;
+    const float3 litColor = ambientTerm + emissive + diffuseAccumulation * albedo + specularAccumulation;
+    // Shadow debug: temporarily return float4(directionalShadow.xxx, 1.0f) from here.
     return float4(litColor, 1.0f);
 }

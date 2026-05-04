@@ -11,7 +11,8 @@ public:
         AppContext &context,
         KatamariWorldContext const &world,
         int displayFps,
-        float deltaTimeSeconds
+        float deltaTimeSeconds,
+        bool gBufferDebugVisualizationEnabled
     );
 };
 

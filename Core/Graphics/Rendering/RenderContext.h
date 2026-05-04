@@ -121,6 +121,8 @@ public:
     [[nodiscard]] bool ShouldBindMainRenderTargetsForDraw() const noexcept;
     void SetGameRenderCallbackForUserInterfacePassEnabled(bool enabled) noexcept;
     [[nodiscard]] bool ShouldExecuteGameRenderCallbackDuringUserInterfacePass() const noexcept;
+    void SetGBufferDebugVisualizationEnabled(bool enabled) noexcept;
+    [[nodiscard]] bool IsGBufferDebugVisualizationEnabled() const noexcept;
 
     void ExecuteFramePipeline(
         Camera *activeCamera,
@@ -146,6 +148,7 @@ private:
     GpuParticleSystem m_gpuParticleSystem{};
     RenderMode m_renderMode{RenderMode::Forward};
     bool m_executeGameRenderCallbackDuringUserInterfacePass{false};
+    bool m_gBufferDebugVisualizationEnabled{false};
     bool m_directionalShadowPassCompletedThisFrame{false};
     Scene *m_frameGameplaySceneForPipeline{nullptr};
     Camera *m_frameActiveCameraForPipeline{nullptr};

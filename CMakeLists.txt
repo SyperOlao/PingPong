@@ -100,6 +100,8 @@ add_executable(PingPong
         Core/Graphics/Rendering/Pipeline/Passes/DeferredLightingRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/DeferredCompositeRenderPass.h
         Core/Graphics/Rendering/Pipeline/Passes/DeferredCompositeRenderPass.cpp
+        Core/Graphics/Rendering/Pipeline/Passes/GBufferDebugRenderPass.h
+        Core/Graphics/Rendering/Pipeline/Passes/GBufferDebugRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/ParticlesRenderPass.h
         Core/Graphics/Rendering/Pipeline/Passes/ParticlesRenderPass.cpp
         Core/Graphics/Rendering/Pipeline/Passes/DebugOverlayRenderPass.h
@@ -346,6 +348,7 @@ set(CORE_SHADER_SOURCES
         Core/Shaders/DeferredGeometry3D.hlsl
         Core/Shaders/DeferredLighting3D.hlsl
         Core/Shaders/DeferredComposite3D.hlsl
+        Core/Shaders/GBufferDebugComposite3D.hlsl
         Core/Shaders/GpuParticlesUpdateCS.hlsl
         Core/Shaders/GpuParticlesBitonicSortCS.hlsl
         Core/Shaders/GpuParticlesDraw3D.hlsl

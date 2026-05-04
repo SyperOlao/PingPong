@@ -12,6 +12,7 @@ enum class RenderPassKind : std::uint8_t
     ForwardTransparent,
     DeferredGeometry,
     DeferredLighting,
+    GBufferDebug,
     PostProcess,
     Particles,
     UserInterface,

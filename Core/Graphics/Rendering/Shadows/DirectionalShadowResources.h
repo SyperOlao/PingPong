@@ -73,8 +73,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_shadowSamplingConstantBuffer{};
     std::uint32_t m_shadowAtlasSizePixels{2048u};
     std::uint32_t m_cascadeCount{4u};
-    float m_cascadeSplitLambda{0.72f};
-    float m_effectiveShadowFarClamp{185.0f};
+    float m_cascadeSplitLambda{0.65f};
+    float m_effectiveShadowFarClamp{160.0f};
     float m_orthographicWidth{140.0f};
     float m_orthographicHeight{140.0f};
     float m_lightEyeDistanceFromFocus{90.0f};
