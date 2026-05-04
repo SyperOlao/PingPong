@@ -40,6 +40,8 @@ struct KatamariWorldContext final
     int TotalPickups{0};
     FollowCamera *FollowCameraForMovement{nullptr};
     KatamariGameConfig const *Config{nullptr};
+    DirectX::SimpleMath::Matrix BallMovementMatrix{DirectX::SimpleMath::Matrix::Identity};
+    bool IsBallMovementMatrixValid{false};
     std::unordered_map<EntityId, KatamariPickupRecord> Pickups{};
     std::vector<KatamariStaticObstacleRecord> StaticObstacles{};
     bool DebugDrawCollision{false};

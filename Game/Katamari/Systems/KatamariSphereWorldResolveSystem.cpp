@@ -156,6 +156,10 @@ void KatamariSphereWorldResolveSystem::Update(Scene &scene, AppContext &, float)
     if (transform->Local.Position.y < GameplayWorld->BallRadius)
     {
         transform->Local.Position.y = GameplayWorld->BallRadius;
+        if (velocity != nullptr && velocity->LinearVelocity.y < 0.0f)
+        {
+            velocity->LinearVelocity.y = 0.0f;
+        }
     }
 
     transform->WorldMatrix = transform->Local.GetWorldMatrix();

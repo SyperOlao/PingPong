@@ -16,6 +16,21 @@ namespace
 {
 constexpr float GroundedHeightEpsilon = 0.02f;
 constexpr float MinimumHorizontalSpeedForRolling = 1.0e-3f;
+
+Vector3 GetMovementMatrixRightDirection(Matrix const &movementMatrix) noexcept
+{
+    return Vector3(movementMatrix._11, movementMatrix._12, movementMatrix._13);
+}
+
+Vector3 GetMovementMatrixForwardDirection(Matrix const &movementMatrix) noexcept
+{
+    return Vector3(movementMatrix._31, movementMatrix._32, movementMatrix._33);
+}
+
+Vector3 ResolveRollAxisFromMovementDirection(Vector3 const &movementDirection) noexcept
+{
+    return SpatialMath::SafeNormalizeVector3(Vector3::UnitY.Cross(movementDirection), Vector3::Zero);
+}
 }
 
 KatamariBallRollSystem::KatamariBallRollSystem(KatamariWorldContext *const gameplayWorld) noexcept
@@ -56,8 +71,25 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float delt
         return;
     }
 
-    const Vector3 movementDirection = planarVelocity / planarSpeed;
-    const Vector3 rollAxis = SpatialMath::SafeNormalizeVector3(movementDirection.Cross(Vector3::UnitY), Vector3::Zero);
+    Vector3 movementDirection = planarVelocity / planarSpeed;
+    float rollSpeed = planarSpeed;
+    if (GameplayWorld->IsBallMovementMatrixValid)
+    {
+        const Vector3 matrixForwardDirection = GetMovementMatrixForwardDirection(GameplayWorld->BallMovementMatrix);
+        const Vector3 matrixRightDirection = GetMovementMatrixRightDirection(GameplayWorld->BallMovementMatrix);
+
+        const float forwardSpeed = planarVelocity.Dot(matrixForwardDirection);
+        const float rightSpeed = planarVelocity.Dot(matrixRightDirection);
+        Vector3 projectedVelocity = matrixForwardDirection * forwardSpeed + matrixRightDirection * rightSpeed;
+        if (projectedVelocity.LengthSquared() > 1.0e-8f)
+        {
+            rollSpeed = projectedVelocity.Length();
+            projectedVelocity.Normalize();
+            movementDirection = projectedVelocity;
+        }
+    }
+
+    const Vector3 rollAxis = ResolveRollAxisFromMovementDirection(movementDirection);
     if (rollAxis.LengthSquared() <= 1.0e-8f)
     {
         transform->WorldMatrix = transform->Local.GetWorldMatrix();
@@ -66,7 +98,7 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float delt
 
     const float radius = (std::max)(GameplayWorld->BallRadius, 0.01f);
     const float visualScale = GameplayWorld->Config->BallVisualRollSpeedMultiplier;
-    const float angularDisplacement = (planarSpeed * deltaTime / radius) * visualScale;
+    const float angularDisplacement = (rollSpeed * deltaTime / radius) * visualScale;
     if (angularDisplacement <= 1.0e-6f)
     {
         transform->WorldMatrix = transform->Local.GetWorldMatrix();
@@ -75,7 +107,7 @@ void KatamariBallRollSystem::Update(Scene &scene, AppContext &, const float delt
 
     const Matrix currentRotation = Matrix::CreateFromQuaternion(RollOrientation);
     const Matrix deltaRotation = Matrix::CreateFromAxisAngle(rollAxis, angularDisplacement);
-    RollOrientation = Quaternion::CreateFromRotationMatrix(deltaRotation * currentRotation);
+    RollOrientation = Quaternion::CreateFromRotationMatrix(currentRotation * deltaRotation);
     RollOrientation.Normalize();
 
     transform->Local.RotationQuaternion = RollOrientation;
