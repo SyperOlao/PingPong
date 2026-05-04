@@ -52,6 +52,13 @@ public:
 
     void ResizeDeferredResources();
 
+    void SetDirectionalShadowSamplingParameters(
+        float constantDepthBias,
+        float slopeScaledDepthBias,
+        float normalOffsetWorldUnits,
+        float pcfRadiusTexels
+    ) noexcept;
+
     void PrepareDirectionalShadowPass(Scene &scene, Camera &camera);
 
     void InvalidateDirectionalShadowPass();

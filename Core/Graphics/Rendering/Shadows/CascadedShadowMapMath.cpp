@@ -14,9 +14,8 @@ using DirectX::SimpleMath::Vector4;
 namespace
 {
 constexpr float kMinimumOrthographicExtent{1.0e-2f};
-constexpr float kFrustumCornerMarginXY{1.25f};
+constexpr float kFrustumCornerMarginXY{0.75f};
 constexpr float kFrustumCornerMarginZ{4.0f};
-constexpr float kCascadeRadiusQuantizationStep{1.0f / 16.0f};
 
 [[nodiscard]] Vector3 TransformWorldFromViewRow(
     const Vector3 &viewSpacePosition,
@@ -146,39 +145,48 @@ Matrix BuildDirectionalCascadeLightViewProjection(
         kLightEyeDistanceFromFocus
     );
 
+    float minimumX = 1.0e30f;
+    float minimumY = 1.0e30f;
     float minimumZ = 1.0e30f;
+    float maximumX = -1.0e30f;
+    float maximumY = -1.0e30f;
     float maximumZ = -1.0e30f;
 
     for (const Vector3 &worldCorner : cornersWorldSpace)
     {
         const Vector3 lightSpace = TransformLightSpaceRow(worldCorner, lightViewWorld);
+        minimumX = (std::min)(minimumX, lightSpace.x);
+        minimumY = (std::min)(minimumY, lightSpace.y);
         minimumZ = (std::min)(minimumZ, lightSpace.z);
+        maximumX = (std::max)(maximumX, lightSpace.x);
+        maximumY = (std::max)(maximumY, lightSpace.y);
         maximumZ = (std::max)(maximumZ, lightSpace.z);
     }
 
+    minimumX -= kFrustumCornerMarginXY;
+    minimumY -= kFrustumCornerMarginXY;
+    maximumX += kFrustumCornerMarginXY;
+    maximumY += kFrustumCornerMarginXY;
     minimumZ -= kFrustumCornerMarginZ + lightSpaceDepthPadding;
     maximumZ += kFrustumCornerMarginZ + lightSpaceDepthPadding;
 
-    float cascadeRadius = kMinimumOrthographicExtent;
-    for (const Vector3 &worldCorner : cornersWorldSpace)
-    {
-        cascadeRadius = (std::max)(cascadeRadius, (worldCorner - frustumCenterWorld).Length());
-    }
-    cascadeRadius += kFrustumCornerMarginXY;
-    cascadeRadius = std::ceil(cascadeRadius / kCascadeRadiusQuantizationStep) * kCascadeRadiusQuantizationStep;
-
     const float resolution = static_cast<float>((std::max)(cascadeResolutionPixels, 1u));
-    const float orthographicExtent = cascadeRadius * 2.0f;
-    const float unitsPerTexel = orthographicExtent / resolution;
+    const float width = (std::max)(maximumX - minimumX, kMinimumOrthographicExtent);
+    const float height = (std::max)(maximumY - minimumY, kMinimumOrthographicExtent);
+    const float unitsPerTexelX = width / resolution;
+    const float unitsPerTexelY = height / resolution;
 
-    const Vector3 lightSpaceCenter = TransformLightSpaceRow(frustumCenterWorld, lightViewWorld);
-    const float snappedCenterX = std::floor(lightSpaceCenter.x / unitsPerTexel) * unitsPerTexel;
-    const float snappedCenterY = std::floor(lightSpaceCenter.y / unitsPerTexel) * unitsPerTexel;
+    const float centerX = (minimumX + maximumX) * 0.5f;
+    const float centerY = (minimumY + maximumY) * 0.5f;
+    const float halfWidth = width * 0.5f;
+    const float halfHeight = height * 0.5f;
+    const float snappedCenterX = std::floor(centerX / unitsPerTexelX) * unitsPerTexelX;
+    const float snappedCenterY = std::floor(centerY / unitsPerTexelY) * unitsPerTexelY;
 
-    const float minimumX = snappedCenterX - cascadeRadius;
-    const float maximumX = snappedCenterX + cascadeRadius;
-    const float minimumY = snappedCenterY - cascadeRadius;
-    const float maximumY = snappedCenterY + cascadeRadius;
+    minimumX = snappedCenterX - halfWidth;
+    maximumX = snappedCenterX + halfWidth;
+    minimumY = snappedCenterY - halfHeight;
+    maximumY = snappedCenterY + halfHeight;
 
     const Matrix orthographicProjection = Matrix::CreateOrthographicOffCenter(
         minimumX,

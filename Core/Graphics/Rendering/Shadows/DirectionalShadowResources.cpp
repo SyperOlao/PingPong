@@ -40,6 +40,19 @@ void DirectionalShadowResources::Resize(GraphicsDevice &graphicsDevice)
     m_shadowMap.Resize(device, m_shadowAtlasSizePixels, m_shadowAtlasSizePixels);
 }
 
+void DirectionalShadowResources::SetShadowSamplingParameters(
+    const float constantDepthBias,
+    const float slopeScaledDepthBias,
+    const float normalOffsetWorldUnits,
+    const float pcfRadiusTexels
+) noexcept
+{
+    m_constantDepthBias = constantDepthBias;
+    m_slopeScaledDepthBias = slopeScaledDepthBias;
+    m_normalOffsetWorldUnits = normalOffsetWorldUnits;
+    m_pcfRadiusTexels = pcfRadiusTexels;
+}
+
 void DirectionalShadowResources::UploadShadowCascadeConstants(
     ID3D11DeviceContext *const deviceContext,
     const ShadowCascadeConstantsGpu &constants
@@ -160,6 +173,26 @@ float DirectionalShadowResources::GetCascadeSplitLambda() const noexcept
 float DirectionalShadowResources::GetEffectiveShadowFarClamp() const noexcept
 {
     return m_effectiveShadowFarClamp;
+}
+
+float DirectionalShadowResources::GetConstantDepthBias() const noexcept
+{
+    return m_constantDepthBias;
+}
+
+float DirectionalShadowResources::GetSlopeScaledDepthBias() const noexcept
+{
+    return m_slopeScaledDepthBias;
+}
+
+float DirectionalShadowResources::GetNormalOffsetWorldUnits() const noexcept
+{
+    return m_normalOffsetWorldUnits;
+}
+
+float DirectionalShadowResources::GetPcfRadiusTexels() const noexcept
+{
+    return m_pcfRadiusTexels;
 }
 
 void DirectionalShadowResources::CreateConstantBuffers(ID3D11Device *const device)

@@ -93,7 +93,7 @@ GpuParticleEmitterDesc CreateKatamariParticleEmitterDesc(const KatamariGameConfi
     const float halfExtent = config.PlayfieldHalfExtent;
 
     GpuParticleEmitterDesc particles{};
-    particles.Enabled = true;
+    particles.Enabled = false;
     particles.SpawnRateParticlesPerSecond = config.ParticleSpawnRateParticlesPerSecond;
     particles.SpawnVolumeCenter = Vector3(0.0f, config.ParticleSpawnVolumeCenterHeight, 0.0f);
     particles.SpawnVolumeHalfExtents = Vector3(

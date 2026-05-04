@@ -276,6 +276,8 @@ add_executable(PingPong
         Game/Katamari/Data/KatamariPickupCatalog.h
         Game/Katamari/UI/KatamariHud.cpp
         Game/Katamari/UI/KatamariHud.h
+        Game/Katamari/UI/KatamariParticleSettingsPanel.cpp
+        Game/Katamari/UI/KatamariParticleSettingsPanel.h
         Game/Katamari/Data/KatamariPickupCatalog.cpp
 
         Game/LightingTest/LightingTestGame.cpp

@@ -18,8 +18,14 @@ Matrix ShadowProjection::BuildDirectionalLightView(
 
     const float FocusDistance = (std::max)(EyeDistanceFromFocus, 1.0e-4f);
     const Vector3 EyePosition = FocusPoint - NormalizedLightDirection * FocusDistance;
+    Vector3 safeWorldUp = WorldUp;
+    safeWorldUp.Normalize();
+    if (std::abs(safeWorldUp.Dot(NormalizedLightDirection)) > 0.98f)
+    {
+        safeWorldUp = Vector3::UnitZ;
+    }
 
-    return Matrix::CreateLookAt(EyePosition, FocusPoint, WorldUp);
+    return Matrix::CreateLookAt(EyePosition, FocusPoint, safeWorldUp);
 }
 
 Matrix ShadowProjection::BuildOrthographicProjectionForShadows(
