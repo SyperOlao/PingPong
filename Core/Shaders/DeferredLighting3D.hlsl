@@ -193,15 +193,14 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal, flo
     const float3 ndcPrimary = lightClipPrimary.xyz * inverseWPrimary;
     const float2 shadowUvLocalPrimary = float2(ndcPrimary.x * 0.5f + 0.5f, -ndcPrimary.y * 0.5f + 0.5f);
 
-    if (ndcPrimary.z < 0.0f || ndcPrimary.z > 1.0f
-        || shadowUvLocalPrimary.x < 0.0f || shadowUvLocalPrimary.x > 1.0f
+    if (shadowUvLocalPrimary.x < 0.0f || shadowUvLocalPrimary.x > 1.0f
         || shadowUvLocalPrimary.y < 0.0f || shadowUvLocalPrimary.y > 1.0f)
     {
         return 1.0f;
     }
 
     const int pcfRadius = clamp((int)DepthBiasAndPcfKernel.w, 1, 4);
-    const float depthReferencePrimary = ComputeShadowDepthReference(saturate(ndcPrimary.z), worldNormal, towardLight);
+    const float depthReferencePrimary = ComputeShadowDepthReference(ndcPrimary.z, worldNormal, towardLight);
     const float shadowPrimary = SampleShadowPcfClampedToCascade(
         shadowUvLocalPrimary,
         cascadeIndexPrimary,
@@ -221,14 +220,13 @@ float DirectionalShadowAttenuation(float3 worldPosition, float3 worldNormal, flo
     const float3 ndcSecondary = lightClipSecondary.xyz * inverseWSecondary;
     const float2 shadowUvLocalSecondary = float2(ndcSecondary.x * 0.5f + 0.5f, -ndcSecondary.y * 0.5f + 0.5f);
 
-    if (ndcSecondary.z < 0.0f || ndcSecondary.z > 1.0f
-        || shadowUvLocalSecondary.x < 0.0f || shadowUvLocalSecondary.x > 1.0f
+    if (shadowUvLocalSecondary.x < 0.0f || shadowUvLocalSecondary.x > 1.0f
         || shadowUvLocalSecondary.y < 0.0f || shadowUvLocalSecondary.y > 1.0f)
     {
         return shadowPrimary;
     }
 
-    const float depthReferenceSecondary = ComputeShadowDepthReference(saturate(ndcSecondary.z), worldNormal, towardLight);
+    const float depthReferenceSecondary = ComputeShadowDepthReference(ndcSecondary.z, worldNormal, towardLight);
     const float shadowSecondary = SampleShadowPcfClampedToCascade(
         shadowUvLocalSecondary,
         cascadeIndexSecondary,

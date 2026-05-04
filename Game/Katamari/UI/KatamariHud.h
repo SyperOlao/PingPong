@@ -12,7 +12,8 @@ public:
         KatamariWorldContext const &world,
         int displayFps,
         float deltaTimeSeconds,
-        bool gBufferDebugVisualizationEnabled
+        bool gBufferDebugVisualizationEnabled,
+        bool shadowCascadeDebugVisualizationEnabled
     );
 };
 

@@ -12,7 +12,8 @@ void KatamariHud::Draw(
     KatamariWorldContext const &world,
     int const displayFps,
     float const deltaTimeSeconds,
-    const bool gBufferDebugVisualizationEnabled
+    const bool gBufferDebugVisualizationEnabled,
+    const bool shadowCascadeDebugVisualizationEnabled
 )
 {
     if (context.Ui.Font == nullptr)
@@ -84,6 +85,18 @@ void KatamariHud::Draw(
         rowY,
         gBufferDebugVisualizationEnabled ? "GBuffer textures: ON (F5)" : "GBuffer textures: OFF (F5)",
         gBufferDebugVisualizationEnabled ? Color(0.45f, 1.0f, 0.55f, 1.0f) : mutedColor,
+        helpScale
+    );
+    rowY += 16.0f;
+
+    BitmapFont::DrawString(
+        context.GetShapeRenderer2D(),
+        columnX,
+        rowY,
+        shadowCascadeDebugVisualizationEnabled
+            ? "Cascade shadow debug: ON (F4)"
+            : "Cascade shadow debug: OFF (F4)",
+        shadowCascadeDebugVisualizationEnabled ? Color(0.45f, 1.0f, 0.55f, 1.0f) : mutedColor,
         helpScale
     );
     rowY += 16.0f;

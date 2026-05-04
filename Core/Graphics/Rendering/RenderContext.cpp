@@ -81,7 +81,7 @@ void RenderContext::PrepareDirectionalShadowPass(Scene &scene, Camera &camera)
         return;
     }
 
-    if (!scene.GetForwardLightingEnabled() || !scene.GetDirectionalShadowMappingEnabled())
+    if (!scene.GetDirectionalShadowMappingEnabled())
     {
         InvalidateDirectionalShadowPass();
         return;

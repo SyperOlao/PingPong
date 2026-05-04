@@ -520,7 +520,8 @@ void KatamariGame::Render(AppContext &context)
             WorldContext,
             DisplayFps,
             LastDeltaTime,
-            context.Graphics.Render != nullptr && context.Graphics.Render->IsGBufferDebugVisualizationEnabled()
+            context.Graphics.Render != nullptr && context.Graphics.Render->IsGBufferDebugVisualizationEnabled(),
+            SceneInstance.GetShadowCascadeDebugVisualizationEnabled()
         );
         RenderParticleUi(context);
         return;
