@@ -188,13 +188,16 @@ Matrix BuildDirectionalCascadeLightViewProjection(
     minimumY = snappedCenterY - halfHeight;
     maximumY = snappedCenterY + halfHeight;
 
+    const float NearPlaneDistance = (std::max)(-maximumZ, 1.0e-3f);
+    const float FarPlaneDistance = (std::max)(-minimumZ, NearPlaneDistance + kMinimumOrthographicExtent);
+
     const Matrix orthographicProjection = Matrix::CreateOrthographicOffCenter(
         minimumX,
         maximumX,
         minimumY,
         maximumY,
-        minimumZ,
-        maximumZ
+        NearPlaneDistance,
+        FarPlaneDistance
     );
 
     return lightViewWorld * orthographicProjection;

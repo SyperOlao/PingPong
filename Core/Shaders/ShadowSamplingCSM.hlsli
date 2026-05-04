@@ -41,20 +41,11 @@ float2 ClampShadowAtlasUvToCascadeTile(float2 shadowUvAtlas, uint cascadeIndex)
     return clamp(shadowUvAtlas, tileMin, tileMax);
 }
 
-float ComputeShadowDepthReference(float lightClipDepthZ, float3 worldNormal, float3 towardLight)
+float ComputeShadowDepthReference(float LightClipZOverW, float3 WorldNormal, float3 TowardLight)
 {
-    float depthNormalized = lightClipDepthZ;
-    if (depthNormalized < -0.001f)
-    {
-        depthNormalized = saturate(depthNormalized * 0.5f + 0.5f);
-    }
-    else
-    {
-        depthNormalized = saturate(depthNormalized);
-    }
-
-    const float slopeTerm = saturate(1.0f - dot(worldNormal, towardLight));
-    return saturate(depthNormalized - DepthBiasAndPcfKernel.x - DepthBiasAndPcfKernel.y * slopeTerm);
+    const float DepthNormalized = saturate(LightClipZOverW);
+    const float SlopeTerm = saturate(1.0f - dot(WorldNormal, TowardLight));
+    return saturate(DepthNormalized - DepthBiasAndPcfKernel.x - DepthBiasAndPcfKernel.y * SlopeTerm);
 }
 
 float SampleShadowPcfClampedToCascade(float2 shadowUvLocal, uint cascadeIndex, float depthReference, int pcfRadius)
