@@ -185,7 +185,13 @@ Gameplay
 - `R` - рестарт уровня
 - `F3` - debug draw коллизий
 - `RMB` - управление камерой
-![img.png](Images/img6.png)
+![img.png](Images/img7.png)
+Спавн партиклов идет на кнопку Render: Deffered 
+![img.png](Images/img8.png)
+При нажатии F4 идет дебаг shadow cascade
+![img.png](Images/img11.png)
+При нажатии F5 идет дебаг GBuffer
+![img.png](Images/img9.png)
 
 ### LightingTest
 
