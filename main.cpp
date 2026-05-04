@@ -22,7 +22,7 @@ int main()
     {
         HINSTANCE__ *const hInstance = GetModuleHandleW(nullptr);
 
-        constexpr auto demo = DemoType::Katamari;
+        constexpr auto demo = DemoType::LightingTest;
 
         std::unique_ptr<IGame> game;
 

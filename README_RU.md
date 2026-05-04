@@ -186,9 +186,9 @@ Gameplay
 - `RMB` - управление камерой
 
 #### Скриншоты
-![Katamari gameplay](Images/img7.png)
-![Katamari particles](Images/img8.png)
-![Katamari shadow cascades debug](Images/img11.png)
+![Katamari gameplay](Images/img12.png)
+![Katamari particles](Images/img13.png)
+![Katamari shadow cascades debug](Images/img14.png)
 ![Katamari GBuffer debug](Images/img9.png)
 
 ### LightingTest

@@ -163,9 +163,9 @@ Interactive 3D solar system sandbox:
 
 Screenshots:
 
-![Katamari gameplay](Images/img7.png)
-![Katamari particles UI](Images/img8.png)
-![Katamari shadow cascade debug](Images/img11.png)
+![Katamari gameplay](Images/img12.png)
+![Katamari particles](Images/img13.png)
+![Katamari shadow cascades debug](Images/img14.png)
 ![Katamari GBuffer debug](Images/img9.png)
 
 ### LightingTest (`Game/LightingTest`)
@@ -177,6 +177,8 @@ Compact technical scene used for model/material/lighting/camera validation.
 - What it provides:
   - Focused environment for lighting/material/camera sanity checks
 
+Screenshot:
+![img.png](Images/img15.png)
 ---
 
 ## Controls
