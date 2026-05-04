@@ -155,6 +155,21 @@ void KatamariGame::Initialize(AppContext &context)
     Initialized = true;
 }
 
+void KatamariGame::OnRenderModeChanged(AppContext &context, RenderMode)
+{
+    if (context.Graphics.Render == nullptr)
+    {
+        return;
+    }
+
+    context.Graphics.Render->SetGameRenderCallbackForUserInterfacePassEnabled(true);
+    context.Graphics.Render->SetFrameGameplaySceneAndCamera(&SceneInstance, &FollowCameraInstance);
+
+    GpuParticleSystem &particleSystem = context.Graphics.Render->GetGpuParticleSystem();
+    CurrentParticleEmitterDesc = particleSystem.GetEmitterDesc();
+    particleSystem.SetEmitterDesc(CurrentParticleEmitterDesc);
+}
+
 void KatamariGame::RegisterSceneSystems(AppContext &context)
 {
     SceneInstance.ClearSystems();
@@ -550,13 +565,6 @@ void KatamariGame::Render(AppContext &context)
 
     if (activeRenderPass == RenderPassKind::UserInterface)
     {
-        const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-        context.GetDebugDraw().Flush(
-            context.GetPrimitiveRenderer3D(),
-            FollowCameraInstance.GetViewMatrix(),
-            FollowCameraInstance.GetProjectionMatrix(aspectRatio)
-        );
-
         UpdateParticleUi(context);
         KatamariHud::Draw(
             context,

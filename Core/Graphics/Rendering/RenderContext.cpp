@@ -480,9 +480,9 @@ void RenderContext::BuildDefaultDeferredRenderPipeline()
     m_frameRenderPipeline.AddPass(std::make_unique<GameRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DeferredLightingRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DeferredCompositeRenderPass>());
+    m_frameRenderPipeline.AddPass(std::make_unique<GBufferDebugRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<ParticlesRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DebugOverlayRenderPass>());
-    m_frameRenderPipeline.AddPass(std::make_unique<GBufferDebugRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<UserInterfaceRenderPass>());
     m_frameRenderPipeline.Initialize(*m_graphics, m_frameRenderResources);
 }

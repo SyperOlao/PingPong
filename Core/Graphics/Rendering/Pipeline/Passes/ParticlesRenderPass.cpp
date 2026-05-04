@@ -40,16 +40,30 @@ void ParticlesRenderPass::Execute(FramePassRenderContext &framePassRenderContext
     GraphicsDevice &graphicsDevice = framePassRenderContext.GetGraphicsDevice();
 
     ID3D11ShaderResourceView *sceneDepthShaderResourceView = nullptr;
-    DeferredFrameResources *const deferredFrameResources =
-        framePassRenderContext.GetFrameRenderResources().GetDeferredFrameResources();
-    if (deferredFrameResources != nullptr && deferredFrameResources->IsCreated())
+    if (renderContext.IsDeferredRenderingEnabled())
     {
-        sceneDepthShaderResourceView =
-            deferredFrameResources->GetGBufferResources().GetSceneDepthTarget().GetShaderResourceView();
+        DeferredFrameResources *const deferredFrameResources =
+            framePassRenderContext.GetFrameRenderResources().GetDeferredFrameResources();
+        if (deferredFrameResources != nullptr && deferredFrameResources->IsCreated())
+        {
+            sceneDepthShaderResourceView =
+                deferredFrameResources->GetGBufferResources().GetSceneDepthTarget().GetShaderResourceView();
+        }
+    }
+    else
+    {
+        sceneDepthShaderResourceView = graphicsDevice.GetMainDepthShaderResourceView();
     }
 
     renderContext.GetFrameRenderer().EnterPass(RenderPassKind::Particles);
-    graphicsDevice.BindMainRenderTargets();
+    if (renderContext.IsDeferredRenderingEnabled())
+    {
+        graphicsDevice.BindMainRenderTargets();
+    }
+    else
+    {
+        graphicsDevice.BindMainRenderTargetsReadOnlyDepth();
+    }
     graphicsDevice.SetMainViewport();
 
     particleSystem.SimulateAndRender(

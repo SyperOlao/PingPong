@@ -26,6 +26,8 @@ public:
 
     void Render(AppContext &context) override;
 
+    void OnRenderModeChanged(AppContext &context, RenderMode RenderModeValue) override;
+
     void Shutdown(AppContext &context) override;
 
 private:

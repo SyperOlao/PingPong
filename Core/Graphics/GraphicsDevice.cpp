@@ -98,6 +98,17 @@ void GraphicsDevice::BindMainRenderTargets() const
     m_context->OMSetRenderTargets(1, renderTargets, m_mainDepthStencilView.Get());
 }
 
+void GraphicsDevice::BindMainRenderTargetsReadOnlyDepth() const
+{
+    if (m_mainRenderTargetView == nullptr)
+    {
+        throw std::logic_error("GraphicsDevice::BindMainRenderTargetsReadOnlyDepth called before render target creation.");
+    }
+
+    ID3D11RenderTargetView *const renderTargets[] = {m_mainRenderTargetView.Get()};
+    m_context->OMSetRenderTargets(1, renderTargets, m_mainReadOnlyDepthStencilView.Get());
+}
+
 void GraphicsDevice::BindSingleRenderTarget(ID3D11RenderTargetView *const renderTargetView) const
 {
     if (renderTargetView == nullptr)
@@ -158,7 +169,7 @@ void GraphicsDevice::ClearMainDepthStencil(const float depthClearValue, const ui
 
     m_context->ClearDepthStencilView(
         m_mainDepthStencilView.Get(),
-        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        D3D11_CLEAR_DEPTH,
         depthClearValue,
         stencilClear
     );
@@ -218,7 +229,7 @@ void GraphicsDevice::ClearDepthStencilView(
 
     m_context->ClearDepthStencilView(
         depthStencilView,
-        D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+        D3D11_CLEAR_DEPTH,
         depthClearValue,
         stencilClear
     );
@@ -280,6 +291,16 @@ ID3D11RenderTargetView *GraphicsDevice::GetMainRenderTargetView() const noexcept
 ID3D11DepthStencilView *GraphicsDevice::GetMainDepthStencilView() const noexcept
 {
     return m_mainDepthStencilView.Get();
+}
+
+ID3D11DepthStencilView *GraphicsDevice::GetMainReadOnlyDepthStencilView() const noexcept
+{
+    return m_mainReadOnlyDepthStencilView.Get();
+}
+
+ID3D11ShaderResourceView *GraphicsDevice::GetMainDepthShaderResourceView() const noexcept
+{
+    return m_mainDepthShaderResourceView.Get();
 }
 
 void GraphicsDevice::CreateDeviceAndSwapChain()
@@ -390,20 +411,54 @@ void GraphicsDevice::CreateDepthStencil()
     depthDesc.Height = static_cast<UINT>(m_height);
     depthDesc.MipLevels = 1;
     depthDesc.ArraySize = 1;
-    depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthDesc.Format = DXGI_FORMAT_R32_TYPELESS;
     depthDesc.SampleDesc.Count = 1;
     depthDesc.SampleDesc.Quality = 0;
     depthDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
     D3d11Helpers::ThrowIfFailed(
         m_device->CreateTexture2D(&depthDesc, nullptr, m_mainDepthTexture.GetAddressOf()),
         "GraphicsDevice failed to create depth texture."
     );
 
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
+    depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depthStencilViewDesc.Texture2D.MipSlice = 0u;
+
     D3d11Helpers::ThrowIfFailed(
-        m_device->CreateDepthStencilView(m_mainDepthTexture.Get(), nullptr, m_mainDepthStencilView.GetAddressOf()),
+        m_device->CreateDepthStencilView(
+            m_mainDepthTexture.Get(),
+            &depthStencilViewDesc,
+            m_mainDepthStencilView.GetAddressOf()
+        ),
         "GraphicsDevice failed to create depth stencil view."
+    );
+
+    depthStencilViewDesc.Flags = D3D11_DSV_READ_ONLY_DEPTH;
+    D3d11Helpers::ThrowIfFailed(
+        m_device->CreateDepthStencilView(
+            m_mainDepthTexture.Get(),
+            &depthStencilViewDesc,
+            m_mainReadOnlyDepthStencilView.GetAddressOf()
+        ),
+        "GraphicsDevice failed to create read-only depth stencil view."
+    );
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc{};
+    shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    shaderResourceViewDesc.Texture2D.MostDetailedMip = 0u;
+    shaderResourceViewDesc.Texture2D.MipLevels = 1u;
+
+    D3d11Helpers::ThrowIfFailed(
+        m_device->CreateShaderResourceView(
+            m_mainDepthTexture.Get(),
+            &shaderResourceViewDesc,
+            m_mainDepthShaderResourceView.GetAddressOf()
+        ),
+        "GraphicsDevice failed to create depth shader resource view."
     );
 }
 
@@ -414,6 +469,8 @@ void GraphicsDevice::ReleaseRenderTarget() noexcept
 
 void GraphicsDevice::ReleaseDepthStencil() noexcept
 {
+    m_mainDepthShaderResourceView.Reset();
+    m_mainReadOnlyDepthStencilView.Reset();
     m_mainDepthStencilView.Reset();
     m_mainDepthTexture.Reset();
 }

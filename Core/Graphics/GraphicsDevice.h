@@ -32,6 +32,8 @@ public:
 
     void BindMainRenderTargets() const;
 
+    void BindMainRenderTargetsReadOnlyDepth() const;
+
     void BindSingleRenderTarget(ID3D11RenderTargetView *renderTargetView) const;
 
     void BindRenderTargetsAndDepth(
@@ -72,6 +74,10 @@ public:
 
     [[nodiscard]] ID3D11DepthStencilView *GetMainDepthStencilView() const noexcept;
 
+    [[nodiscard]] ID3D11DepthStencilView *GetMainReadOnlyDepthStencilView() const noexcept;
+
+    [[nodiscard]] ID3D11ShaderResourceView *GetMainDepthShaderResourceView() const noexcept;
+
 private:
     void CreateDeviceAndSwapChain();
 
@@ -105,6 +111,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Texture2D> m_mainDepthTexture;
 
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_mainDepthStencilView;
+
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_mainReadOnlyDepthStencilView;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_mainDepthShaderResourceView;
 
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_mainPassDepthStencilState;
 };

@@ -58,7 +58,7 @@ void DeferredCompositeRenderPass::Execute(FramePassRenderContext &framePassRende
     }
 
     GraphicsDevice &graphicsDevice = framePassRenderContext.GetGraphicsDevice();
-    graphicsDevice.BindMainRenderTargets();
+    graphicsDevice.BindSingleRenderTarget(graphicsDevice.GetMainRenderTargetView());
     graphicsDevice.SetMainViewport();
 
     ID3D11DeviceContext *const deviceContext = graphicsDevice.GetImmediateContext();

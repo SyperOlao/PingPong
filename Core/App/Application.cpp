@@ -181,7 +181,12 @@ void Application::UpdateGlobalRenderModeButton() {
         static_cast<float>(cursorPoint.y),
         wasLeftPressed
     )) {
+        const RenderMode PreviousRenderMode = m_context.GetRenderMode();
         m_context.ToggleRenderMode();
+        const RenderMode CurrentRenderMode = m_context.GetRenderMode();
+        if (CurrentRenderMode != PreviousRenderMode) {
+            m_game->OnRenderModeChanged(m_context, CurrentRenderMode);
+        }
     }
 }
 

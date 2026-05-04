@@ -5,7 +5,10 @@
 #ifndef PINGPONG_IGAME_H
 #define PINGPONG_IGAME_H
 
+#include <cstdint>
+
 struct AppContext;
+enum class RenderMode : std::uint8_t;
 
 class IGame {
 public:
@@ -16,6 +19,9 @@ public:
     virtual void Update(AppContext &context, float deltaTime) = 0;
 
     virtual void Render(AppContext &context) = 0;
+
+    virtual void OnRenderModeChanged(AppContext &, RenderMode) {
+    }
 
     virtual void Shutdown(AppContext &context) {
     }

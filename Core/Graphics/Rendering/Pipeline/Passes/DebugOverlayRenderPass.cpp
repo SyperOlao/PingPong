@@ -30,9 +30,11 @@ void DebugOverlayRenderPass::Execute(FramePassRenderContext &framePassRenderCont
     const DirectX::SimpleMath::Matrix viewMatrix = camera->GetViewMatrix();
     const DirectX::SimpleMath::Matrix projectionMatrix = camera->GetProjectionMatrix(aspectRatio);
 
+    framePassRenderContext.GetRenderContext().GetFrameRenderer().EnterPass(RenderPassKind::DebugOverlay);
     framePassRenderContext.GetRenderContext().GetDebugDraw().Flush(
         framePassRenderContext.GetRenderContext().GetPrimitiveRenderer3D(),
         viewMatrix,
         projectionMatrix
     );
+    framePassRenderContext.GetRenderContext().GetFrameRenderer().LeavePass();
 }

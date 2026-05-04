@@ -72,7 +72,7 @@ void GBufferDebugRenderPass::Execute(FramePassRenderContext &framePassRenderCont
         return;
     }
 
-    graphicsDevice.BindMainRenderTargets();
+    graphicsDevice.BindSingleRenderTarget(graphicsDevice.GetMainRenderTargetView());
     graphicsDevice.SetMainViewport();
     graphicsDevice.ClearMainColor(Color(0.015f, 0.018f, 0.024f, 1.0f));
     framePassRenderContext.GetRenderContext().GetFrameRenderer().EnterPass(RenderPassKind::GBufferDebug);
