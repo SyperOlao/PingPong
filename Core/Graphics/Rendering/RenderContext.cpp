@@ -461,6 +461,7 @@ void RenderContext::BuildDefaultForwardRenderPipeline()
     m_frameRenderPipeline.AddPass(std::make_unique<ShadowDepthRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<MainGeometryBindRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<GameRenderPass>());
+    m_frameRenderPipeline.AddPass(std::make_unique<GBufferDebugRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<ParticlesRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<DebugOverlayRenderPass>());
     m_frameRenderPipeline.AddPass(std::make_unique<UserInterfaceRenderPass>());

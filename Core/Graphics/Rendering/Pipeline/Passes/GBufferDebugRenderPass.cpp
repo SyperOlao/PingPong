@@ -72,12 +72,27 @@ void GBufferDebugRenderPass::Execute(FramePassRenderContext &framePassRenderCont
         return;
     }
 
+    GBufferResources &gBuffer = deferredFrameResources->GetGBufferResources();
+    RenderContext &renderContext = framePassRenderContext.GetRenderContext();
+    if (!renderContext.IsDeferredRenderingEnabled())
+    {
+        renderContext.GetFrameRenderer().BindDeferredGeometryPass(gBuffer);
+        gBuffer.ClearGeometryPassTargets(
+            graphicsDevice,
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
+            Color(0.5f, 0.5f, 1.0f, 1.0f),
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
+            Color(0.0f, 0.0f, 0.0f, 1.0f),
+            1.0f
+        );
+        framePassRenderContext.ExecuteGameRenderCallback();
+    }
+
     graphicsDevice.BindSingleRenderTarget(graphicsDevice.GetMainRenderTargetView());
     graphicsDevice.SetMainViewport();
     graphicsDevice.ClearMainColor(Color(0.015f, 0.018f, 0.024f, 1.0f));
-    framePassRenderContext.GetRenderContext().GetFrameRenderer().EnterPass(RenderPassKind::GBufferDebug);
+    renderContext.GetFrameRenderer().EnterPass(RenderPassKind::GBufferDebug);
 
-    GBufferResources &gBuffer = deferredFrameResources->GetGBufferResources();
     ID3D11ShaderResourceView *const shaderResourceViews[] =
     {
         gBuffer.GetAlbedoOcclusionTarget().GetShaderResourceView(),
