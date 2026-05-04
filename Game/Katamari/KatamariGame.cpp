@@ -550,6 +550,13 @@ void KatamariGame::Render(AppContext &context)
 
     if (activeRenderPass == RenderPassKind::UserInterface)
     {
+        const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        context.GetDebugDraw().Flush(
+            context.GetPrimitiveRenderer3D(),
+            FollowCameraInstance.GetViewMatrix(),
+            FollowCameraInstance.GetProjectionMatrix(aspectRatio)
+        );
+
         UpdateParticleUi(context);
         KatamariHud::Draw(
             context,
