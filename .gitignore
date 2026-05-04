@@ -3,3 +3,7 @@ cmake-build-debug/
 cmake-build-release/
 build/
 .claude/
+
+# Large screen captures: do not commit to Git (bloats clone, hurts GitHub). Compress, use Releases, or Git LFS.
+Images/game_play.gif
+Images/solar_game_play.gif

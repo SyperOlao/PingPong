@@ -19,6 +19,10 @@ Russian version: **[README_RU.md](README_RU.md)**
 
 ---
 
+**Preview (static):** large motion captures are kept out of Git to keep the repo small. Use the Katamari screenshots below, or attach a short compressed clip to a **GitHub Release** for this repository.
+
+![Katamari gameplay still](Images/img7.png)
+
 ## Overview
 
 The repository started as a Pong project (`PingPong`) and evolved into a compact game engine framework:
@@ -44,6 +48,9 @@ Classic 2D Pong mode with menu flow and match logic:
   - Difficulty and match-rule flow
   - Main menu, in-game HUD, and game-over screens
   - Sound effects + looping music
+#### Game play 
+![pong_game_play.gif](Images/pong_game_play.gif)
+
 #### Screenshots
 The main menu
 ![img.png](Images/img4.png)
@@ -63,8 +70,12 @@ Interactive 3D solar system sandbox:
   - Orbital body rendering and orbit visualization
   - Live tuning panel for rotation/orbit parameters
   - Movement-driven engine audio feedback
-#### Screenshots
-![img.png](Images/img5.png)
+#### Game play
+
+Still frame (avoid ~20MB+ GIFs in the repo; compress locally or host on Releases):
+
+![Solar system still](Images/img5.png)
+
 ### Katamari (`Game/Katamari`)
 
 3D rolling-ball mini-game with ECS systems and rendering experiments:
@@ -361,4 +372,22 @@ Mini-Engine-With-Games/
 ├── Images/                                # README screenshots
 ├── main.cpp                               # Active game selection
 └── CMakeLists.txt                         # Build configuration and runtime copy rules
+```
+
+---
+
+## Media files and Git
+
+GIFs grow huge quickly (full-screen, long duration, high FPS). This repo **ignores** `Images/game_play.gif` and `Images/solar_game_play.gif` so they are not committed. Keep small assets in Git (for example `pong_game_play.gif` is fine).
+
+**Practical options:**
+
+1. **Compress before committing** (stay roughly under a few MB for README): lower resolution, fewer colors, shorter loop, ~10–15 FPS. Tools: [ezgif.com](https://ezgif.com/optimize), ScreenToGif export settings, or `ffmpeg` (scale + fps + palette).
+2. **MP4 in a Release** instead of GIF: much smaller for the same quality; link it from the README.
+3. **Git LFS** only if you really need large binaries in Git: install [Git LFS](https://git-lfs.com/), then `git lfs track "*.gif"` before adding. Note GitHub LFS storage and bandwidth quotas.
+
+Example `ffmpeg` idea (adjust width and fps to taste):
+
+```bash
+ffmpeg -i game_play.gif -vf "fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" game_play_small.gif
 ```
