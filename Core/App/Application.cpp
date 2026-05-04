@@ -121,6 +121,18 @@ int Application::Run() {
 }
 
 void Application::Update(const float deltaTime) {
+    m_window.SyncClientDimensions();
+    const int clientWidth = m_window.GetWidth();
+    const int clientHeight = m_window.GetHeight();
+    if (clientWidth > 0 && clientHeight > 0)
+    {
+        if (clientWidth != m_graphics.GetWidth() || clientHeight != m_graphics.GetHeight())
+        {
+            m_graphics.Resize(clientWidth, clientHeight);
+            m_renderContext.ResizeDeferredResources();
+        }
+    }
+
     m_renderContext.GetDebugDraw().Clear();
     m_input.Update();
     m_audio.Update();

@@ -22,6 +22,23 @@ void Window::Initialize(HINSTANCE__ *const hInstance, const int width, const int
     CreateAppWindow(title);
 }
 
+void Window::SyncClientDimensions() noexcept
+{
+    if (m_hWnd == nullptr)
+    {
+        return;
+    }
+
+    RECT clientRectangle{};
+    if (GetClientRect(m_hWnd, &clientRectangle) == 0)
+    {
+        return;
+    }
+
+    m_width = static_cast<int>(clientRectangle.right - clientRectangle.left);
+    m_height = static_cast<int>(clientRectangle.bottom - clientRectangle.top);
+}
+
 
 void Window::RegisterWindowClass() const {
     WNDCLASSEXW wc{};

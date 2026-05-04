@@ -20,6 +20,8 @@ public:
 
     void Initialize(HINSTANCE hInstance, int width, int height, std::wstring_view title);
 
+    void SyncClientDimensions() noexcept;
+
     [[nodiscard]] static bool ProcessMessages();
     [[nodiscard]] HWND GetHandle() const noexcept;
     [[nodiscard]] int GetWidth() const noexcept;
