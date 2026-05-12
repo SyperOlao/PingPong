@@ -205,13 +205,6 @@ void MainMenuGame::Update(AppContext &context, float) {
 
     auto &input = *context.Input.System;
 
-    if (input.GetKeyboard().WasKeyPressed(Key::Escape)) {
-        if (context.GameHost != nullptr) {
-            context.GameHost->RequestQuitApplication();
-        }
-        return;
-    }
-
     const int previousIndex = m_selectedMenuIndex;
 
     if (WasMenuUpPressed(input)) {
