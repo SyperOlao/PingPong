@@ -1,9 +1,37 @@
 # Mini Engine With Games
 
-Small C++20/DirectX 11 game engine playground with a shared core and multiple playable mini-games/demos running on top of one application runtime.
+<p align="center">
+  <a href="https://github.com/SyperOlao/Mini-Engine-With-Games/actions/workflows/windows-build.yml">
+    <img src="https://github.com/SyperOlao/Mini-Engine-With-Games/actions/workflows/windows-build.yml/badge.svg" alt="Windows Build">
+  </a>
+  <img src="https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus&logoColor=white" alt="C++20">
+  <img src="https://img.shields.io/badge/DirectX-11-0078D4?logo=windows&logoColor=white" alt="DirectX 11">
+  <img src="https://img.shields.io/badge/CMake-3.21%2B-064F8C?logo=cmake&logoColor=white" alt="CMake">
+  <img src="https://img.shields.io/badge/dependencies-vcpkg-2C5BB4" alt="vcpkg">
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4?logo=windows&logoColor=white" alt="Windows">
+  <a href="https://github.com/SyperOlao/Mini-Engine-With-Games/releases">
+    <img src="https://img.shields.io/github/v/release/SyperOlao/Mini-Engine-With-Games?include_prereleases&label=release" alt="Latest Release">
+  </a>
+  <a href="https://github.com/SyperOlao/Mini-Engine-With-Games/stargazers">
+    <img src="https://img.shields.io/github/stars/SyperOlao/Mini-Engine-With-Games?style=social" alt="GitHub Stars">
+  </a>
+</p>
 
-Russian version: **[README_RU.md](README_RU.md)**
+A compact educational **C++20 / DirectX 11 mini-engine** with playable demos, ECS-style gameplay systems, forward/deferred rendering, shadows, GPU particles, audio, UI, and debug visualization tools.
 
+It is built as a student-friendly graphics/game-dev playground: one shared `Core`, multiple independent `Game/*` modules, and a single runtime based on the `IGame` interface.
+
+> Not a commercial engine. This is a readable, buildable learning project for C++ game architecture, DirectX 11 rendering, and small gameplay systems.
+
+**Russian version:** [README_RU.md](README_RU.md)  
+**Download:** [Latest Windows release](https://github.com/SyperOlao/Mini-Engine-With-Games/releases/latest)  
+**Build from source:** see [Build and Run](#build-and-run)
+
+---
+
+## Preview
+
+![Katamari gameplay still](Images/img7.png)
 ---
 
 ## Table of Contents
