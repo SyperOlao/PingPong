@@ -31,7 +31,7 @@ It is built as a student-friendly graphics/game-dev playground: one shared `Core
 
 ## Preview
 
-![Katamari gameplay still](Images/img7.png)
+![demo2.gif](Images/demo2.gif)
 ---
 
 ## Table of Contents
@@ -63,9 +63,6 @@ It demonstrates:
 The goal is not to compete with real engines. The goal is to keep the codebase small enough to read and modify.
 
 ---
-**Preview (static):** large motion captures are kept out of Git to keep the repo small. Use the Katamari screenshots below, or attach a short compressed clip to a **GitHub Release** for this repository.
-
-![Katamari gameplay still](Images/img7.png)
 ## Quick Start
 
 ### Option A: Download prebuilt Windows binary
@@ -131,13 +128,6 @@ Classic 2D Pong mode with menu flow and match logic:
   - Sound effects + looping music
 #### Game play 
 ![pong_game_play.gif](Images/pong_game_play.gif)
-
-#### Screenshots
-The main menu
-![img.png](Images/img4.png)
-
-Gameplay
-![img.png](Images/img3.png)
 
 ### SolarSystem (`Game/SolarSystem`)
 
