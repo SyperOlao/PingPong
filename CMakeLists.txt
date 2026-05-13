@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(PingPong LANGUAGES CXX)
+project(MiniEngineDemo LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(PingPong
+add_executable(MiniEngineDemo
         main.cpp
 
         Core/App/Application.cpp
@@ -301,7 +301,7 @@ add_executable(PingPong
 
 find_package(directxtk CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-target_include_directories(PingPong PRIVATE
+target_include_directories(MiniEngineDemo PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends
@@ -319,7 +319,7 @@ set(
         ThirdParty/imguizmo/src/ImGuizmo.cpp
 )
 
-target_sources(PingPong PRIVATE ${IMGUI_ENGINE_SOURCES})
+target_sources(MiniEngineDemo PRIVATE ${IMGUI_ENGINE_SOURCES})
 
 add_library(SolarSystemGame STATIC
         Game/SolarSystem/SolarSystemGame.cpp
@@ -334,7 +334,7 @@ target_link_libraries(SolarSystemGame PRIVATE
         Microsoft::DirectXTK
 )
 
-target_link_libraries(PingPong PRIVATE
+target_link_libraries(MiniEngineDemo PRIVATE
         Microsoft::DirectXTK
         assimp::assimp
         d3d11
@@ -355,7 +355,7 @@ file(COPY
 )
 
 add_custom_command(
-        TARGET PingPong POST_BUILD
+        TARGET MiniEngineDemo POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/Core/Shaders"
         "${CMAKE_BINARY_DIR}/Core/Shaders"
@@ -364,7 +364,7 @@ add_custom_command(
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/Game/Katamari/Assets")
     add_custom_command(
-            TARGET PingPong POST_BUILD
+            TARGET MiniEngineDemo POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/Game/Katamari/Assets"
             "${CMAKE_BINARY_DIR}/Game/Katamari/Assets"
@@ -390,6 +390,6 @@ set(CORE_SHADER_SOURCES
         Core/Shaders/Shape2D.hlsl
 )
 
-target_sources(PingPong PRIVATE ${CORE_SHADER_SOURCES})
+target_sources(MiniEngineDemo PRIVATE ${CORE_SHADER_SOURCES})
 set_source_files_properties(${CORE_SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY TRUE)
 source_group("Core/Shaders" FILES ${CORE_SHADER_SOURCES})

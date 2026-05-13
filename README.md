@@ -85,7 +85,7 @@ cmake -S . -B build `
   -DVCPKG_TARGET_TRIPLET=x64-windows
 
 cmake --build build --config Debug
-.\build\Debug\PingPong.exe
+.\build\Debug\MiniEngineDemo.exe
 ```
 
 ## Feature Highlights
@@ -103,13 +103,13 @@ cmake --build build --config Debug
 
 ## Overview
 
-The repository started as a Pong project (`PingPong`) and evolved into a compact game engine framework:
+The repository started as a simple Pong-style game and evolved into a compact game engine framework:
 
 - `Core` provides platform/window, app loop, input, rendering, audio, assets, UI, math, and gameplay systems.
 - `Game/*` contains independent game modules implementing one interface (`IGame`).
 - `main.cpp` selects which module is launched at runtime.
 
-The executable target is still named `PingPong`, but it now hosts multiple game modes.
+The main executable is `MiniEngineDemo.exe` and hosts multiple game modes (including Pong as one module).
 
 ---
 ## Games and Demos
@@ -380,12 +380,12 @@ cmake --build cmake-build-debug --config Debug
 
 Expected binary:
 
-- `cmake-build-debug/PingPong.exe`
+- `cmake-build-debug/MiniEngineDemo.exe`
 
 ### D) Run
 
 ```powershell
-.\cmake-build-debug\PingPong.exe
+.\cmake-build-debug\MiniEngineDemo.exe
 ```
 
 ### E) Select which game runs

@@ -57,7 +57,7 @@ namespace
             return {};
         }
 
-        return std::filesystem::path(modulePathWide).parent_path() / L"PingPong_LastError.txt";
+        return std::filesystem::path(modulePathWide).parent_path() / L"MiniEngineDemo_LastError.txt";
     }
 
     [[nodiscard]] std::filesystem::path FallbackLogPathInTemp()
@@ -66,10 +66,10 @@ namespace
         const DWORD tempLength = GetTempPathW(static_cast<DWORD>(std::size(tempWide)), tempWide);
         if (tempLength == 0u || tempLength >= std::size(tempWide))
         {
-            return std::filesystem::path(L"PingPong_LastError.txt");
+            return std::filesystem::path(L"MiniEngineDemo_LastError.txt");
         }
 
-        return std::filesystem::path(tempWide) / L"PingPong_LastError.txt";
+        return std::filesystem::path(tempWide) / L"MiniEngineDemo_LastError.txt";
     }
 }
 
@@ -85,7 +85,7 @@ void FatalErrorReport::Report(const std::string &message)
         logPath = FallbackLogPathInTemp();
         if (!TryWriteLogFile(logPath, body))
         {
-            logPath = std::filesystem::path(L"PingPong_LastError.txt");
+            logPath = std::filesystem::path(L"MiniEngineDemo_LastError.txt");
             TryWriteLogFile(logPath, body);
         }
     }
