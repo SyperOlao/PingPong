@@ -5,6 +5,8 @@ build/
 .claude/
 cmake-build-*/
 vcpkg_installed/
+build-agent/
+build-vs/
 # Large screen captures: do not commit to Git (bloats clone, hurts GitHub). Compress, use Releases, or Git LFS.
 Images/game_play.gif
 Images/solar_game_play.gif
